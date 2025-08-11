@@ -4,5 +4,5 @@
   "plugins_dir": "plugins",
   "report_interval": 60,
   "log_level": "INFO",
-  "agent_area": "GZ"
+  "agent_area": "guangzhou"
 }

@@ -225,11 +225,11 @@ class DialerAgent:
         """
         try:
             server_url = self.config.get("server_url", "http://localhost:5000")
-            # 获取agent区域信息
-            agent_area = self.config.get("agent_area", "default_area")
+            # 获取agent信息
+            agent_id = self.config.get("agent_id", "default_agent")
             
-            # 在请求中添加区域参数
-            response = requests.get(f"{server_url}/api/v1/tasks?enabled=true&area={agent_area}")
+            # 在请求中添加agent_id参数，只获取分配给当前agent的任务
+            response = requests.get(f"{server_url}/api/v1/tasks?enabled=true&agent_id={agent_id}")
             
             if response.status_code == 200:
                 data = response.json()
@@ -320,7 +320,8 @@ class DialerAgent:
             # 获取本地时间并格式化为ISO格式
             local_time = datetime.fromtimestamp(time.time()).isoformat()
             
-            # 获取agent区域信息
+            # 获取agent信息
+            agent_id = self.config.get("agent_id", "default_agent")
             agent_area = self.config.get("agent_area", "default_area")
             
             response = requests.post(
@@ -333,6 +334,7 @@ class DialerAgent:
                     "message": result.get("message", ""),
                     "details": result.get("result", {}),
                     "created_at": local_time,  # 使用本地时间
+                    "agent_id": agent_id,      # 添加agent_id信息
                     "agent_area": agent_area   # 添加区域信息
                 }
             )

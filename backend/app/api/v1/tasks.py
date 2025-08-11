@@ -3,6 +3,7 @@ from . import bp
 from app import db
 from app.models.task import Task
 from app.models.result import Result
+from app.models.node import Node
 import json
 import re
 
@@ -17,6 +18,7 @@ def get_tasks():
         enabled = request.args.get('enabled', type=lambda x: x.lower() == 'true')
         task_type = request.args.get('type', type=str)
         keyword = request.args.get('keyword', type=str)
+        agent_id = request.args.get('agent_id', type=str)
         
         # 构建查询
         query = Task.query
@@ -35,6 +37,15 @@ def get_tasks():
                 db.or_(
                     Task.name.like(search),
                     Task.target.like(search)
+                )
+            )
+            
+        if agent_id:
+            # 筛选指定agent_id的任务
+            query = query.filter(
+                db.or_(
+                    Task.agent_ids.like(f'%{agent_id}%'),
+                    Task.agent_ids.is_(None)
                 )
             )
         
@@ -83,6 +94,10 @@ def create_task():
                     'message': 'TCP任务的目标地址格式不正确，应为 host:port'
                 }), 400
         
+        # 处理agent_ids
+        agent_ids = data.get('agent_ids', [])
+        agent_ids_json = json.dumps(agent_ids) if agent_ids else None
+        
         # 创建新任务
         task = Task(
             name=data.get('name'),
@@ -90,7 +105,8 @@ def create_task():
             target=data.get('target'),
             interval=data.get('interval', 60),
             enabled=data.get('enabled', True),
-            config=data.get('config')  # 直接存储config字符串
+            config=data.get('config'),  # 直接存储config字符串
+            agent_ids=agent_ids_json
         )
         
         # 保存到数据库
@@ -161,6 +177,10 @@ def update_task(task_id):
                     'message': 'TCP任务的目标地址格式不正确，应为 host:port'
                 }), 400
         
+        # 处理agent_ids
+        agent_ids = data.get('agent_ids', [])
+        agent_ids_json = json.dumps(agent_ids) if agent_ids else None
+        
         # 更新任务字段
         task.name = data.get('name', task.name)
         task.type = data.get('type', task.type)
@@ -168,6 +188,7 @@ def update_task(task_id):
         task.interval = data.get('interval', task.interval)
         task.enabled = data.get('enabled', task.enabled)
         task.config = data.get('config', task.config)
+        task.agent_ids = agent_ids_json
         
         # 提交更改
         db.session.commit()

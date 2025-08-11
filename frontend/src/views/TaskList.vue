@@ -63,13 +63,14 @@
     <!-- 详情模态框 -->
     <a-modal
       v-model:visible="detailModalVisible"
-      title="任务详情"
-      width="900px"
+      :title="'任务详情 - ' + (selectedTask?.task?.name || '')"
+      width="90%"
       @cancel="handleDetailModalCancel"
       :footer="null"
+      :destroyOnClose="true"
     >
       <div v-if="selectedTask">
-        <a-descriptions bordered size="small" :column="1">
+        <a-descriptions bordered size="small" :column="{ xs: 1, sm: 1, md: 2, lg: 3 }">
           <a-descriptions-item label="任务名称">
             {{ selectedTask.task.name }}
           </a-descriptions-item>
@@ -79,9 +80,75 @@
           <a-descriptions-item label="任务类型">
             {{ selectedTask.task.type }}
           </a-descriptions-item>
+          <a-descriptions-item label="执行次数">
+            {{ selectedTask.count }}
+          </a-descriptions-item>
+          <a-descriptions-item label="平均响应时间">
+            <span v-if="selectedTask.avgResponseTime">{{ selectedTask.avgResponseTime.toFixed(2) }} ms</span>
+            <span v-else>-</span>
+          </a-descriptions-item>
+          <a-descriptions-item label="最新状态">
+            <a-tag v-if="selectedTask.latestStatus === 'success'" color="green">成功</a-tag>
+            <a-tag v-else-if="selectedTask.latestStatus === 'failed'" color="red">失败</a-tag>
+            <a-tag v-else-if="selectedTask.latestStatus === 'timeout'" color="orange">超时</a-tag>
+            <a-tag v-else>{{ selectedTask.latestStatus }}</a-tag>
+          </a-descriptions-item>
         </a-descriptions>
         
-        <!-- 根据任务类型显示不同的图表 -->
+        <a-row :gutter="16" style="margin-top: 20px;">
+          <!-- 左侧地图区域 -->
+          <a-col :span="14">
+            <a-card class="map-container">
+              <EnhancedChinaMap 
+                ref="chinaMapRef"
+                :mapData="mapData"
+                :level="mapLevel"
+                :selectedCode="selectedMapCode"
+                @region-click="handleRegionClick"
+                @level-change="handleLevelChange"
+                height="500px"
+              />
+            </a-card>
+          </a-col>
+          
+          <!-- 右侧拨测点列表 -->
+          <a-col :span="10">
+            <a-card title="拨测点详情列表" class="probe-list-container">
+              <a-table 
+                :dataSource="selectedTask.results" 
+                :columns="detailColumns"
+                :pagination="{ pageSize: 5 }"
+                :rowKey="(record) => record.id"
+                :scroll="{ y: 300 }"
+                :rowClassName="getRowClassName"
+              >
+                <template #bodyCell="{ column, record }">
+                  <template v-if="column.dataIndex === 'location'">
+                    {{ record.location }}
+                  </template>
+                  <template v-if="column.dataIndex === 'time'">
+                    {{ formatDate(record.created_at) }}
+                  </template>
+                  <template v-if="column.dataIndex === 'responseTime'">
+                    <span v-if="record.response_time">{{ record.response_time }} ms</span>
+                    <span v-else>-</span>
+                  </template>
+                  <template v-if="column.dataIndex === 'status'">
+                    <a-tag v-if="record.status === 'success'" color="green">成功</a-tag>
+                    <a-tag v-else-if="record.status === 'failed'" color="red">失败</a-tag>
+                    <a-tag v-else-if="record.status === 'timeout'" color="orange">超时</a-tag>
+                    <a-tag v-else>{{ record.status }}</a-tag>
+                  </template>
+                  <template v-if="column.dataIndex === 'actions'">
+                    <a-button type="link" @click="showProbeDetail(record)">查看详情</a-button>
+                  </template>
+                </template>
+              </a-table>
+            </a-card>
+          </a-col>
+        </a-row>
+        
+        <!-- 原有的图表展示区域 -->
         <div v-if="selectedTask.task.type === 'ping'">
           <div id="latency-chart" style="width: 100%; height: 400px; margin-top: 20px;"></div>
         </div>
@@ -95,17 +162,90 @@
         </div>
       </div>
     </a-modal>
+    
+    <!-- 拨测点详情弹窗 -->
+    <a-modal
+      v-model:visible="probeDetailVisible"
+      title="拨测点详情"
+      width="800px"
+      @cancel="handleProbeDetailCancel"
+      :footer="null"
+    >
+      <div v-if="selectedProbe">
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-descriptions bordered :column="1" size="small">
+              <a-descriptions-item label="时间">
+                {{ formatDate(selectedProbe.created_at) }}
+              </a-descriptions-item>
+              <a-descriptions-item label="响应时间">
+                <span v-if="selectedProbe.response_time">{{ selectedProbe.response_time }} ms</span>
+                <span v-else>-</span>
+              </a-descriptions-item>
+              <a-descriptions-item label="状态">
+                <a-tag v-if="selectedProbe.status === 'success'" color="green">成功</a-tag>
+                <a-tag v-else-if="selectedProbe.status === 'failed'" color="red">失败</a-tag>
+                <a-tag v-else-if="selectedProbe.status === 'timeout'" color="orange">超时</a-tag>
+                <a-tag v-else>{{ selectedProbe.status }}</a-tag>
+              </a-descriptions-item>
+            </a-descriptions>
+          </a-col>
+          <a-col :span="12">
+            <div ref="probeDetailChart" style="width: 100%; height: 200px;"></div>
+          </a-col>
+        </a-row>
+        
+        <!-- 历史记录表格 -->
+        <a-card title="历史记录" style="margin-top: 20px;">
+          <a-table 
+            :dataSource="probeDetails[selectedProbe.agent_area] || []" 
+            :columns="probeDetailColumns"
+            :pagination="{ pageSize: 5 }"
+            :rowKey="(record) => record.id"
+          >
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.dataIndex === 'time'">
+                {{ formatDate(record.created_at) }}
+              </template>
+              <template v-if="column.dataIndex === 'responseTime'">
+                <span v-if="record.response_time">{{ record.response_time }} ms</span>
+                <span v-else>-</span>
+              </template>
+              <template v-if="column.dataIndex === 'status'">
+                <a-tag v-if="record.status === 'success'" color="green">成功</a-tag>
+                <a-tag v-else-if="record.status === 'failed'" color="red">失败</a-tag>
+                <a-tag v-else-if="record.status === 'timeout'" color="orange">超时</a-tag>
+                <a-tag v-else>{{ record.status }}</a-tag>
+              </template>
+            </template>
+          </a-table>
+        </a-card>
+        
+        <a-descriptions title="详细信息" bordered :column="1" size="small" style="margin-top: 16px;">
+          <a-descriptions-item label="原始数据">
+            <pre style="max-height: 200px; overflow: auto;">{{ formatDetails(selectedProbe.details) }}</pre>
+          </a-descriptions-item>
+        </a-descriptions>
+      </div>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
 import * as echarts from 'echarts'
+import EnhancedChinaMap from '@/components/EnhancedChinaMap.vue'
+import pinyinToChinese from '@/utils/pinyinToChinese.js'
+import { getTaskResults } from '@/api/task'
 
 // 定义变量
+const route = useRoute()
 const detailModalVisible = ref(false)
+const probeDetailVisible = ref(false)
 const selectedTask = ref(null)
+const selectedProbe = ref(null)
 const aggregatedResults = ref([])
 const loading = ref(false)
 const pagination = ref({
@@ -117,6 +257,14 @@ const searchParams = ref({
   keyword: '',
   status: ''
 })
+const chinaMapRef = ref(null)
+const probeDetailChart = ref(null)
+const probeDetails = ref({}) // 存储每个拨测点的详细数据
+
+// 地图相关数据
+const mapData = ref([])
+const mapLevel = ref('country')
+const selectedMapCode = ref('')
 
 // 表格列定义
 const columns = [
@@ -160,34 +308,126 @@ const columns = [
   }
 ]
 
+// 详情表格列定义
+const detailColumns = [
+  {
+    title: '位置',
+    dataIndex: 'location'
+  },
+  {
+    title: '时间',
+    dataIndex: 'time'
+  },
+  {
+    title: '响应时间',
+    dataIndex: 'responseTime',
+    sorter: (a, b) => (a.response_time || 0) - (b.response_time || 0)
+  },
+  {
+    title: '状态',
+    dataIndex: 'status'
+  },
+  {
+    title: '操作',
+    dataIndex: 'actions'
+  }
+]
+
+// 拨测点详情表格列定义
+const probeDetailColumns = [
+  {
+    title: '时间',
+    dataIndex: 'time'
+  },
+  {
+    title: '响应时间',
+    dataIndex: 'responseTime'
+  },
+  {
+    title: '状态',
+    dataIndex: 'status'
+  }
+]
+
+// 格式化时间
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return date.toLocaleString('zh-CN')
+}
+
+// 格式化详情信息
+const formatDetails = (details) => {
+  if (typeof details === 'string') {
+    try {
+      return JSON.stringify(JSON.parse(details), null, 2)
+    } catch (e) {
+      return details
+    }
+  } else {
+    return JSON.stringify(details, null, 2)
+  }
+}
+
+// 获取行类名
+const getRowClassName = (record, index) => {
+  if (record.status === 'failed') {
+    return 'table-row-error'
+  } else if (record.status === 'timeout') {
+    return 'table-row-warning'
+  }
+  return ''
+}
+
 // 获取结果列表并聚合
 const fetchResults = async () => {
   loading.value = true
   try {
-    // 获取所有结果数据
-    let url = `http://localhost:5000/api/v1/results?page=${pagination.value.current}&size=1000`
+    // 使用 useRoute() 获取当前任务的ID
+    const taskId = route.params.id
     
-    if (searchParams.value.status) {
-      url += `&status=${searchParams.value.status}`
+    // 通过 /api/v1/results?task_id=${taskId} 接口获取真实的拨测结果数据
+    const params = {
+      task_id: taskId,
+      page: pagination.value.current,
+      size: pagination.value.pageSize
     }
     
-    const response = await fetch(url)
-    const data = await response.json()
+    const response = await getTaskResults(params)
     
-    if (data.code === 0) {
-      // 按任务名称聚合结果
-      const aggregated = aggregateResults(data.data.list)
+    if (response.code === 0) {
+      // 只显示每个拨测点的最新记录
+      const groupedResults = {}
+      response.data.list.forEach(item => {
+        const agentArea = item.agent_area
+        if (!groupedResults[agentArea] || new Date(item.created_at) > new Date(groupedResults[agentArea].created_at)) {
+          // 将 agent_area 字段（如 "guangzhou"）转换为中文地区名称（如 "广州市"）
+          const locationName = pinyinToChinese[item.agent_area] || item.agent_area || '未知地区'
+          
+          groupedResults[agentArea] = {
+            ...item,
+            location: locationName
+          }
+        }
+      })
       
-      // 分页处理
+      // 转换为数组并进行分页处理
+      const allResults = Object.values(groupedResults)
+      pagination.value.total = allResults.length
+      
+      // 手动分页
       const start = (pagination.value.current - 1) * pagination.value.pageSize
       const end = start + pagination.value.pageSize
-      aggregatedResults.value = aggregated.slice(start, end)
-      pagination.value.total = aggregated.length
+      aggregatedResults.value = allResults.slice(start, end)
     } else {
-      message.error(data.message || '获取结果列表失败')
+      message.error(response.message || '获取结果列表失败')
     }
   } catch (error) {
-    message.error('获取结果列表失败: ' + error.message)
+    console.error('获取结果列表失败:', error)
+    if (error instanceof SyntaxError) {
+      message.error('获取结果列表失败: 服务器响应格式错误')
+    } else {
+      message.error('获取结果列表失败: ' + (error.message || '网络错误'))
+    }
   } finally {
     loading.value = false
   }
@@ -253,14 +493,209 @@ const showDetails = (record) => {
   selectedTask.value = record
   detailModalVisible.value = true
   
-  // 等待DOM更新后渲染图表
-  setTimeout(() => {
+  // 重置地图状态
+  mapLevel.value = 'country'
+  selectedMapCode.value = ''
+  mapData.value = generateMapData(record.results)
+  
+  // 等待DOM更新后渲染图表和地图
+  nextTick(() => {
     if (record.task.type === 'ping') {
       renderLatencyChart(record.results)
     } else if (record.task.type === 'tcp') {
       renderTcpCharts(record.results)
     }
-  }, 100)
+  })
+}
+
+// 生成地图数据
+const generateMapData = (results) => {
+  // 模拟数据，实际应该根据结果中的位置信息生成
+  return [
+    { name: '北京', value: 10 },
+    { name: '天津', value: 5 },
+    { name: '上海', value: 8 },
+    { name: '重庆', value: 3 },
+    { name: '河北', value: 12 },
+    { name: '河南', value: 9 },
+    { name: '云南', value: 4 },
+    { name: '辽宁', value: 7 },
+    { name: '黑龙江', value: 6 },
+    { name: '湖南', value: 11 },
+    { name: '安徽', value: 8 },
+    { name: '山东', value: 15 },
+    { name: '新疆', value: 2 },
+    { name: '江苏', value: 13 },
+    { name: '浙江', value: 14 },
+    { name: '江西', value: 9 },
+    { name: '湖北', value: 11 },
+    { name: '广西', value: 7 },
+    { name: '甘肃', value: 4 },
+    { name: '山西', value: 8 },
+    { name: '内蒙古', value: 5 },
+    { name: '陕西', value: 9 },
+    { name: '吉林', value: 6 },
+    { name: '福建', value: 10 },
+    { name: '贵州', value: 5 },
+    { name: '广东', value: 18 },
+    { name: '青海', value: 2 },
+    { name: '西藏', value: 1 },
+    { name: '四川', value: 12 },
+    { name: '宁夏', value: 3 },
+    { name: '海南', value: 4 },
+    { name: '台湾', value: 5 },
+    { name: '香港', value: 6 },
+    { name: '澳门', value: 3 }
+  ]
+}
+
+// 处理地图区域点击
+const handleRegionClick = (regionInfo) => {
+  console.log('点击了区域:', regionInfo)
+  // 可以根据点击的区域筛选右侧表格数据
+}
+
+// 处理地图层级变化
+const handleLevelChange = (levelInfo) => {
+  mapLevel.value = levelInfo.level
+  selectedMapCode.value = levelInfo.code
+  console.log('地图层级变化:', levelInfo)
+}
+
+// 显示拨测点详情
+const showProbeDetail = async (record) => {
+  selectedProbe.value = record
+  probeDetailVisible.value = true
+  
+  // 获取该拨测点的所有记录
+  try {
+    const taskId = route.params.id
+    const response = await fetch(`http://localhost:5000/api/v1/results?task_id=${taskId}&agent_area=${record.agent_area}&page=1&size=1000&sort=created_at&order=desc`)
+    const result = await response.json()
+    
+    if (result.code === 0) {
+      probeDetails.value[record.agent_area] = result.data.list.map(item => {
+        // 获取地区中文名称
+        const locationName = pinyinToChinese[item.agent_area] || item.agent_area || '未知地区'
+        
+        return {
+          ...item,
+          location: locationName
+        }
+      })
+    }
+  } catch (error) {
+    console.error('获取拨测点详细数据失败:', error)
+  }
+  
+  // 等待DOM更新后渲染图表
+  nextTick(() => {
+    renderProbeDetailChart(record)
+  })
+}
+
+// 渲染拨测点详情图表
+const renderProbeDetailChart = (record) => {
+  if (!probeDetailChart.value) return
+  
+  const chart = echarts.init(probeDetailChart.value)
+  
+  let option = {}
+  
+  try {
+    const details = typeof record.details === 'string' 
+      ? JSON.parse(record.details) 
+      : record.details
+    
+    if (selectedTask.value.task.type === 'ping' && details) {
+      option = {
+        title: {
+          text: 'Ping详情',
+          textStyle: {
+            fontSize: 14
+          }
+        },
+        tooltip: {},
+        radar: {
+          indicator: [
+            { name: '最小延迟\n(ms)', max: 100 },
+            { name: '平均延迟\n(ms)', max: 100 },
+            { name: '最大延迟\n(ms)', max: 100 },
+            { name: '丢包率\n(%)', max: 100 }
+          ]
+        },
+        series: [{
+          type: 'radar',
+          data: [
+            {
+              value: [
+                details.rtt_min || 0,
+                details.rtt_avg || 0,
+                details.rtt_max || 0,
+                details.packet_loss || 0
+              ],
+              name: '性能指标'
+            }
+          ]
+        }]
+      }
+    } else if (selectedTask.value.task.type === 'tcp' && details) {
+      option = {
+        title: {
+          text: 'TCP详情',
+          textStyle: {
+            fontSize: 14
+          }
+        },
+        tooltip: {
+          trigger: 'axis'
+        },
+        xAxis: {
+          type: 'category',
+          data: ['连接状态', '响应时间']
+        },
+        yAxis: {},
+        series: [{
+          type: 'bar',
+          data: [
+            {
+              value: details.connected ? 1 : 0,
+              itemStyle: {
+                color: details.connected ? '#52c41a' : '#ff4d4f'
+              }
+            },
+            {
+              value: details.execution_time ? (details.execution_time * 1000).toFixed(2) : 0
+            }
+          ]
+        }]
+      }
+    } else {
+      option = {
+        title: {
+          text: '无图表数据',
+          left: 'center',
+          top: 'center'
+        }
+      }
+    }
+  } catch (e) {
+    option = {
+      title: {
+        text: '数据解析失败',
+        left: 'center',
+        top: 'center'
+      }
+    }
+  }
+  
+  chart.setOption(option)
+}
+
+// 处理拨测点详情弹窗关闭
+const handleProbeDetailCancel = () => {
+  probeDetailVisible.value = false
+  selectedProbe.value = null
 }
 
 // 渲染延迟图表（时间序列）
@@ -549,6 +984,8 @@ const handleTableChange = (pager) => {
 const handleDetailModalCancel = () => {
   detailModalVisible.value = false
   selectedTask.value = null
+  mapLevel.value = 'country'
+  selectedMapCode.value = ''
 }
 
 // 组件挂载时获取数据
@@ -556,3 +993,18 @@ onMounted(() => {
   fetchResults()
 })
 </script>
+
+<style scoped>
+.map-container,
+.probe-list-container {
+  height: 100%;
+}
+
+.table-row-error {
+  background-color: #fff2f0;
+}
+
+.table-row-warning {
+  background-color: #fffbe6;
+}
+</style>

@@ -31,7 +31,7 @@
     </a-card>
     
     <!-- 任务模态框组件 -->
-    <TaskModal
+    <EnhancedTaskModal
       :visible="modalVisible"
       :editing-task="editingTask"
       :confirm-loading="confirmLoading"
@@ -48,7 +48,7 @@ import { message } from 'ant-design-vue'
 import { PlusOutlined } from '@ant-design/icons-vue'
 import TaskFilter from '../../components/TaskFilter.vue'
 import TaskTable from '../../components/TaskTable.vue'
-import TaskModal from '../../components/TaskModal.vue'
+import EnhancedTaskModal from '../../components/EnhancedTaskModal.vue'
 
 // 数据相关
 const tasks = ref([])
