@@ -1,7 +1,7 @@
 """add nodes table
 
 Revision ID: 0002
-Revises: 0001
+Revises: 144610be5f76
 Create Date: 2025-07-30 10:10:00.000000
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '0002'
-down_revision = '0001'
+down_revision = '144610be5f76'
 branch_labels = None
 depends_on = None
 

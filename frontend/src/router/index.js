@@ -11,7 +11,7 @@ const routes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/probe-config/node', // 添加默认重定向
+    redirect: '/probe-config/node',
     children: [
       {
         path: '/probe-config/node',
@@ -26,7 +26,13 @@ const routes = [
       {
         path: '/task-management/list',
         name: 'TaskList',
-        component: () => import('../views/TaskList.vue')
+        component: () => import('../views/task-detail/TaskDetail.vue')
+      },
+      {
+        path: '/task-management/detail/:id',
+        name: 'TaskDetail',
+        component: () => import('../views/task-detail/TaskDetail.vue'),
+        props: true
       },
       {
         path: '/system/user',
@@ -43,10 +49,9 @@ const router = createRouter({
 })
 
 // 添加路由守卫
-const whiteList = ['/login'] // 不重定向白名单
+const whiteList = ['/login']
 
 router.beforeEach((to, from, next) => {
-  // 检查是否已登录
   const token = localStorage.getItem('access_token')
   
   if (whiteList.indexOf(to.path) !== -1) {

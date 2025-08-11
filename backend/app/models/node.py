@@ -23,6 +23,8 @@ class Node(db.Model):
         self.hostname = hostname
         self.status = status
         self.last_heartbeat = last_heartbeat
+        self.created_at = datetime.now()
+        self.updated_at = datetime.now()
     
     def to_dict(self):
         """将节点对象转换为字典"""

@@ -1,247 +1,15 @@
-<template>
-  <div>
-    <a-card title="任务结果列表">
-      <!-- 搜索栏 -->
-      <a-row :gutter="16" style="margin-bottom: 16px;">
-        <a-col :span="6">
-          <a-input-search 
-            v-model:value="searchParams.keyword" 
-            placeholder="搜索任务名称" 
-            enter-button 
-            @search="handleSearch" 
-          />
-        </a-col>
-        <a-col :span="6">
-          <a-select 
-            v-model:value="searchParams.status" 
-            placeholder="选择状态" 
-            style="width: 100%" 
-            allow-clear
-            @change="handleStatusChange"
-          >
-            <a-select-option value="success">成功</a-select-option>
-            <a-select-option value="failed">失败</a-select-option>
-            <a-select-option value="timeout">超时</a-select-option>
-          </a-select>
-        </a-col>
-      </a-row>
-      
-      <a-table
-        :dataSource="aggregatedResults"
-        :columns="columns"
-        :loading="loading"
-        :pagination="pagination"
-        @change="handleTableChange"
-        :rowKey="(record) => record.task.id"
-      >
-        <template #bodyCell="{ column, record }">
-          <template v-if="column.dataIndex === 'status'">
-            <!-- 显示任务的最新状态 -->
-            <a-tag v-if="record.latestStatus === 'success'" color="green">成功</a-tag>
-            <a-tag v-else-if="record.latestStatus === 'failed'" color="red">失败</a-tag>
-            <a-tag v-else-if="record.latestStatus === 'timeout'" color="orange">超时</a-tag>
-            <a-tag v-else>{{ record.latestStatus }}</a-tag>
-          </template>
-          
-          <template v-else-if="column.dataIndex === 'response_time'">
-            <!-- 显示平均响应时间 -->
-            <span v-if="record.avgResponseTime">{{ record.avgResponseTime.toFixed(2) }} ms</span>
-            <span v-else>-</span>
-          </template>
-          
-          <template v-else-if="column.dataIndex === 'count'">
-            {{ record.count }}
-          </template>
-          
-          <template v-else-if="column.dataIndex === 'details'">
-            <a-button type="link" size="small" @click="showDetails(record)">查看详情</a-button>
-          </template>
-        </template>
-      </a-table>
-    </a-card>
-    
-    <!-- 详情模态框 -->
-    <a-modal
-      v-model:visible="detailModalVisible"
-      :title="'任务详情 - ' + (selectedTask?.task?.name || '')"
-      width="90%"
-      @cancel="handleDetailModalCancel"
-      :footer="null"
-      :destroyOnClose="true"
-    >
-      <div v-if="selectedTask">
-        <a-descriptions bordered size="small" :column="{ xs: 1, sm: 1, md: 2, lg: 3 }">
-          <a-descriptions-item label="任务名称">
-            {{ selectedTask.task.name }}
-          </a-descriptions-item>
-          <a-descriptions-item label="任务目标">
-            {{ selectedTask.task.target }}
-          </a-descriptions-item>
-          <a-descriptions-item label="任务类型">
-            {{ selectedTask.task.type }}
-          </a-descriptions-item>
-          <a-descriptions-item label="执行次数">
-            {{ selectedTask.count }}
-          </a-descriptions-item>
-          <a-descriptions-item label="平均响应时间">
-            <span v-if="selectedTask.avgResponseTime">{{ selectedTask.avgResponseTime.toFixed(2) }} ms</span>
-            <span v-else>-</span>
-          </a-descriptions-item>
-          <a-descriptions-item label="最新状态">
-            <a-tag v-if="selectedTask.latestStatus === 'success'" color="green">成功</a-tag>
-            <a-tag v-else-if="selectedTask.latestStatus === 'failed'" color="red">失败</a-tag>
-            <a-tag v-else-if="selectedTask.latestStatus === 'timeout'" color="orange">超时</a-tag>
-            <a-tag v-else>{{ selectedTask.latestStatus }}</a-tag>
-          </a-descriptions-item>
-        </a-descriptions>
-        
-        <a-row :gutter="16" style="margin-top: 20px;">
-          <!-- 左侧地图区域 -->
-          <a-col :span="14">
-            <a-card class="map-container">
-              <EnhancedChinaMap 
-                ref="chinaMapRef"
-                :mapData="mapData"
-                :level="mapLevel"
-                :selectedCode="selectedMapCode"
-                @region-click="handleRegionClick"
-                @level-change="handleLevelChange"
-                height="500px"
-              />
-            </a-card>
-          </a-col>
-          
-          <!-- 右侧拨测点列表 -->
-          <a-col :span="10">
-            <a-card title="拨测点详情列表" class="probe-list-container">
-              <a-table 
-                :dataSource="selectedTask.results" 
-                :columns="detailColumns"
-                :pagination="{ pageSize: 5 }"
-                :rowKey="(record) => record.id"
-                :scroll="{ y: 300 }"
-                :rowClassName="getRowClassName"
-              >
-                <template #bodyCell="{ column, record }">
-                  <template v-if="column.dataIndex === 'location'">
-                    {{ record.location }}
-                  </template>
-                  <template v-if="column.dataIndex === 'time'">
-                    {{ formatDate(record.created_at) }}
-                  </template>
-                  <template v-if="column.dataIndex === 'responseTime'">
-                    <span v-if="record.response_time">{{ record.response_time }} ms</span>
-                    <span v-else>-</span>
-                  </template>
-                  <template v-if="column.dataIndex === 'status'">
-                    <a-tag v-if="record.status === 'success'" color="green">成功</a-tag>
-                    <a-tag v-else-if="record.status === 'failed'" color="red">失败</a-tag>
-                    <a-tag v-else-if="record.status === 'timeout'" color="orange">超时</a-tag>
-                    <a-tag v-else>{{ record.status }}</a-tag>
-                  </template>
-                  <template v-if="column.dataIndex === 'actions'">
-                    <a-button type="link" @click="showProbeDetail(record)">查看详情</a-button>
-                  </template>
-                </template>
-              </a-table>
-            </a-card>
-          </a-col>
-        </a-row>
-        
-        <!-- 原有的图表展示区域 -->
-        <div v-if="selectedTask.task.type === 'ping'">
-          <div id="latency-chart" style="width: 100%; height: 400px; margin-top: 20px;"></div>
-        </div>
-        <div v-else-if="selectedTask.task.type === 'tcp'">
-          <div id="tcp-connected-chart" style="width: 100%; height: 300px; margin-top: 20px;"></div>
-          <div id="tcp-response-time-chart" style="width: 100%; height: 300px; margin-top: 20px;"></div>
-          <div id="tcp-status-chart" style="width: 100%; height: 300px; margin-top: 20px;"></div>
-        </div>
-        <div v-else>
-          <a-empty description="暂不支持该类型任务的图表展示" />
-        </div>
-      </div>
-    </a-modal>
-    
-    <!-- 拨测点详情弹窗 -->
-    <a-modal
-      v-model:visible="probeDetailVisible"
-      title="拨测点详情"
-      width="800px"
-      @cancel="handleProbeDetailCancel"
-      :footer="null"
-    >
-      <div v-if="selectedProbe">
-        <a-row :gutter="16">
-          <a-col :span="12">
-            <a-descriptions bordered :column="1" size="small">
-              <a-descriptions-item label="时间">
-                {{ formatDate(selectedProbe.created_at) }}
-              </a-descriptions-item>
-              <a-descriptions-item label="响应时间">
-                <span v-if="selectedProbe.response_time">{{ selectedProbe.response_time }} ms</span>
-                <span v-else>-</span>
-              </a-descriptions-item>
-              <a-descriptions-item label="状态">
-                <a-tag v-if="selectedProbe.status === 'success'" color="green">成功</a-tag>
-                <a-tag v-else-if="selectedProbe.status === 'failed'" color="red">失败</a-tag>
-                <a-tag v-else-if="selectedProbe.status === 'timeout'" color="orange">超时</a-tag>
-                <a-tag v-else>{{ selectedProbe.status }}</a-tag>
-              </a-descriptions-item>
-            </a-descriptions>
-          </a-col>
-          <a-col :span="12">
-            <div ref="probeDetailChart" style="width: 100%; height: 200px;"></div>
-          </a-col>
-        </a-row>
-        
-        <!-- 历史记录表格 -->
-        <a-card title="历史记录" style="margin-top: 20px;">
-          <a-table 
-            :dataSource="probeDetails[selectedProbe.agent_area] || []" 
-            :columns="probeDetailColumns"
-            :pagination="{ pageSize: 5 }"
-            :rowKey="(record) => record.id"
-          >
-            <template #bodyCell="{ column, record }">
-              <template v-if="column.dataIndex === 'time'">
-                {{ formatDate(record.created_at) }}
-              </template>
-              <template v-if="column.dataIndex === 'responseTime'">
-                <span v-if="record.response_time">{{ record.response_time }} ms</span>
-                <span v-else>-</span>
-              </template>
-              <template v-if="column.dataIndex === 'status'">
-                <a-tag v-if="record.status === 'success'" color="green">成功</a-tag>
-                <a-tag v-else-if="record.status === 'failed'" color="red">失败</a-tag>
-                <a-tag v-else-if="record.status === 'timeout'" color="orange">超时</a-tag>
-                <a-tag v-else>{{ record.status }}</a-tag>
-              </template>
-            </template>
-          </a-table>
-        </a-card>
-        
-        <a-descriptions title="详细信息" bordered :column="1" size="small" style="margin-top: 16px;">
-          <a-descriptions-item label="原始数据">
-            <pre style="max-height: 200px; overflow: auto;">{{ formatDetails(selectedProbe.details) }}</pre>
-          </a-descriptions-item>
-        </a-descriptions>
-      </div>
-    </a-modal>
-  </div>
-</template>
-
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import * as echarts from 'echarts'
-import EnhancedChinaMap from '@/components/EnhancedChinaMap.vue'
-import pinyinToChinese from '@/utils/pinyinToChinese.js'
 import { getTaskResults } from '@/api/task'
+import EnhancedChinaMap from '@/components/EnhancedChinaMap/EnhancedChinaMap.vue'
+import pinyinToChinese from '@/utils/pinyinToChinese.js'
 
 // 定义变量
 const route = useRoute()
+const router = useRouter()
 const detailModalVisible = ref(false)
 const probeDetailVisible = ref(false)
 const selectedTask = ref(null)
@@ -411,7 +179,16 @@ const fetchResults = async () => {
       })
       
       // 转换为数组并进行分页处理
-      const allResults = Object.values(groupedResults)
+      const allResults = Object.values(groupedResults).map(item => ({
+        ...item,
+        // 添加聚合字段
+        task: item.task || { id: 0, name: '', target: '', type: '' },
+        status: item.status || '',
+        count: 1, // 每个agent_area只有一条记录
+        avgResponseTime: item.response_time || 0,
+        latestCreatedAt: formatDate(item.created_at)
+      }))
+      
       pagination.value.total = allResults.length
       
       // 手动分页
@@ -510,43 +287,24 @@ const showDetails = (record) => {
 
 // 生成地图数据
 const generateMapData = (results) => {
-  // 模拟数据，实际应该根据结果中的位置信息生成
-  return [
-    { name: '北京', value: 10 },
-    { name: '天津', value: 5 },
-    { name: '上海', value: 8 },
-    { name: '重庆', value: 3 },
-    { name: '河北', value: 12 },
-    { name: '河南', value: 9 },
-    { name: '云南', value: 4 },
-    { name: '辽宁', value: 7 },
-    { name: '黑龙江', value: 6 },
-    { name: '湖南', value: 11 },
-    { name: '安徽', value: 8 },
-    { name: '山东', value: 15 },
-    { name: '新疆', value: 2 },
-    { name: '江苏', value: 13 },
-    { name: '浙江', value: 14 },
-    { name: '江西', value: 9 },
-    { name: '湖北', value: 11 },
-    { name: '广西', value: 7 },
-    { name: '甘肃', value: 4 },
-    { name: '山西', value: 8 },
-    { name: '内蒙古', value: 5 },
-    { name: '陕西', value: 9 },
-    { name: '吉林', value: 6 },
-    { name: '福建', value: 10 },
-    { name: '贵州', value: 5 },
-    { name: '广东', value: 18 },
-    { name: '青海', value: 2 },
-    { name: '西藏', value: 1 },
-    { name: '四川', value: 12 },
-    { name: '宁夏', value: 3 },
-    { name: '海南', value: 4 },
-    { name: '台湾', value: 5 },
-    { name: '香港', value: 6 },
-    { name: '澳门', value: 3 }
-  ]
+  const locationMap = {}
+  
+  results.forEach(result => {
+    // 使用agent_area作为位置标识
+    const location = result.agent_area || '未知地区'
+    // 将拼音转换为中文
+    const locationName = pinyinToChinese[location] || location
+    
+    if (!locationMap[locationName]) {
+      locationMap[locationName] = {
+        name: locationName,
+        value: 0
+      }
+    }
+    locationMap[locationName].value += 1
+  })
+  
+  return Object.values(locationMap)
 }
 
 // 处理地图区域点击
@@ -570,8 +328,16 @@ const showProbeDetail = async (record) => {
   // 获取该拨测点的所有记录
   try {
     const taskId = route.params.id
-    const response = await fetch(`http://localhost:5000/api/v1/results?task_id=${taskId}&agent_area=${record.agent_area}&page=1&size=1000&sort=created_at&order=desc`)
-    const result = await response.json()
+    const params = {
+      task_id: taskId,
+      agent_area: record.agent_area,
+      page: 1,
+      size: 1000,
+      sort: 'created_at',
+      order: 'desc'
+    }
+    
+    const result = await getTaskResults(params)
     
     if (result.code === 0) {
       probeDetails.value[record.agent_area] = result.data.list.map(item => {
@@ -994,17 +760,235 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.map-container,
-.probe-list-container {
-  height: 100%;
-}
-
-.table-row-error {
-  background-color: #fff2f0;
-}
-
-.table-row-warning {
-  background-color: #fffbe6;
-}
-</style>
+<template>
+  <div>
+    <a-card title="任务结果列表">
+      <!-- 搜索栏 -->
+      <a-row :gutter="16" style="margin-bottom: 16px;">
+        <a-col :span="6">
+          <a-input-search 
+            v-model:value="searchParams.keyword" 
+            placeholder="搜索任务名称" 
+            enter-button 
+            @search="handleSearch" 
+          />
+        </a-col>
+        <a-col :span="6">
+          <a-select 
+            v-model:value="searchParams.status" 
+            placeholder="选择状态" 
+            style="width: 100%" 
+            allow-clear
+            @change="handleStatusChange"
+          >
+            <a-select-option value="success">成功</a-select-option>
+            <a-select-option value="failed">失败</a-select-option>
+            <a-select-option value="timeout">超时</a-select-option>
+          </a-select>
+        </a-col>
+      </a-row>
+      
+      <a-table
+        :dataSource="aggregatedResults"
+        :columns="columns"
+        :loading="loading"
+        :pagination="pagination"
+        @change="handleTableChange"
+        :rowKey="(record) => record.id"
+      >
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'status'">
+            <!-- 显示任务的最新状态 -->
+            <a-tag v-if="record.status === 'success'" color="green">成功</a-tag>
+            <a-tag v-else-if="record.status === 'failed'" color="red">失败</a-tag>
+            <a-tag v-else-if="record.status === 'timeout'" color="orange">超时</a-tag>
+            <a-tag v-else>{{ record.status }}</a-tag>
+          </template>
+          
+          <template v-else-if="column.dataIndex === 'response_time'">
+            <!-- 显示平均响应时间 -->
+            <span v-if="record.avgResponseTime">{{ record.avgResponseTime.toFixed(2) }} ms</span>
+            <span v-else>-</span>
+          </template>
+          
+          <template v-else-if="column.dataIndex === 'count'">
+            {{ record.count }}
+          </template>
+          
+          <template v-else-if="column.dataIndex === 'details'">
+            <a-button type="link" size="small" @click="showDetails(record)">查看详情</a-button>
+          </template>
+        </template>
+      </a-table>
+    </a-card>
+    
+    <!-- 详情模态框 -->
+    <a-modal
+      v-model:visible="detailModalVisible"
+      :title="'任务详情 - ' + (selectedTask?.task?.name || '')"
+      width="90%"
+      @cancel="handleDetailModalCancel"
+      :footer="null"
+      :destroyOnClose="true"
+    >
+      <div v-if="selectedTask">
+        <a-descriptions bordered size="small" :column="{ xs: 1, sm: 1, md: 2, lg: 3 }">
+          <a-descriptions-item label="任务名称">
+            {{ selectedTask.task.name }}
+          </a-descriptions-item>
+          <a-descriptions-item label="任务目标">
+            {{ selectedTask.task.target }}
+          </a-descriptions-item>
+          <a-descriptions-item label="任务类型">
+            {{ selectedTask.task.type }}
+          </a-descriptions-item>
+          <a-descriptions-item label="执行次数">
+            {{ selectedTask.count }}
+          </a-descriptions-item>
+          <a-descriptions-item label="平均响应时间">
+            <span v-if="selectedTask.avgResponseTime">{{ selectedTask.avgResponseTime.toFixed(2) }} ms</span>
+            <span v-else>-</span>
+          </a-descriptions-item>
+          <a-descriptions-item label="最新状态">
+            <a-tag v-if="selectedTask.status === 'success'" color="green">成功</a-tag>
+            <a-tag v-else-if="selectedTask.status === 'failed'" color="red">失败</a-tag>
+            <a-tag v-else-if="selectedTask.status === 'timeout'" color="orange">超时</a-tag>
+            <a-tag v-else>{{ selectedTask.status }}</a-tag>
+          </a-descriptions-item>
+        </a-descriptions>
+        
+        <a-row :gutter="16" style="margin-top: 20px;">
+          <!-- 左侧地图区域 -->
+          <a-col :span="14">
+            <a-card class="map-container">
+              <EnhancedChinaMap 
+                ref="chinaMapRef"
+                :mapData="mapData"
+                :level="mapLevel"
+                :selectedCode="selectedMapCode"
+                @region-click="handleRegionClick"
+                @level-change="handleLevelChange"
+                height="500px"
+              />
+            </a-card>
+          </a-col>
+          
+          <!-- 右侧拨测点列表 -->
+          <a-col :span="10">
+            <a-card title="拨测点详情列表" class="probe-list-container">
+              <a-table 
+                :dataSource="selectedTask.results" 
+                :columns="detailColumns"
+                :pagination="{ pageSize: 5 }"
+                :rowKey="(record) => record.id"
+                :scroll="{ y: 300 }"
+                :rowClassName="getRowClassName"
+              >
+                <template #bodyCell="{ column, record }">
+                  <template v-if="column.dataIndex === 'location'">
+                    {{ record.location }}
+                  </template>
+                  <template v-if="column.dataIndex === 'time'">
+                    {{ formatDate(record.created_at) }}
+                  </template>
+                  <template v-if="column.dataIndex === 'responseTime'">
+                    <span v-if="record.response_time">{{ record.response_time }} ms</span>
+                    <span v-else>-</span>
+                  </template>
+                  <template v-if="column.dataIndex === 'status'">
+                    <a-tag v-if="record.status === 'success'" color="green">成功</a-tag>
+                    <a-tag v-else-if="record.status === 'failed'" color="red">失败</a-tag>
+                    <a-tag v-else-if="record.status === 'timeout'" color="orange">超时</a-tag>
+                    <a-tag v-else>{{ record.status }}</a-tag>
+                  </template>
+                  <template v-if="column.dataIndex === 'actions'">
+                    <a-button type="link" @click="showProbeDetail(record)">查看详情</a-button>
+                  </template>
+                </template>
+              </a-table>
+            </a-card>
+          </a-col>
+        </a-row>
+        
+        <!-- 原有的图表展示区域 -->
+        <div v-if="selectedTask.task.type === 'ping'">
+          <div id="latency-chart" style="width: 100%; height: 400px; margin-top: 20px;"></div>
+        </div>
+        <div v-else-if="selectedTask.task.type === 'tcp'">
+          <div id="tcp-connected-chart" style="width: 100%; height: 300px; margin-top: 20px;"></div>
+          <div id="tcp-response-time-chart" style="width: 100%; height: 300px; margin-top: 20px;"></div>
+          <div id="tcp-status-chart" style="width: 100%; height: 300px; margin-top: 20px;"></div>
+        </div>
+        <div v-else>
+          <a-empty description="暂不支持该类型任务的图表展示" />
+        </div>
+      </div>
+    </a-modal>
+    
+    <!-- 拨测点详情弹窗 -->
+    <a-modal
+      v-model:visible="probeDetailVisible"
+      title="拨测点详情"
+      width="800px"
+      @cancel="handleProbeDetailCancel"
+      :footer="null"
+    >
+      <div v-if="selectedProbe">
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-descriptions bordered :column="1" size="small">
+              <a-descriptions-item label="时间">
+                {{ formatDate(selectedProbe.created_at) }}
+              </a-descriptions-item>
+              <a-descriptions-item label="响应时间">
+                <span v-if="selectedProbe.response_time">{{ selectedProbe.response_time }} ms</span>
+                <span v-else>-</span>
+              </a-descriptions-item>
+              <a-descriptions-item label="状态">
+                <a-tag v-if="selectedProbe.status === 'success'" color="green">成功</a-tag>
+                <a-tag v-else-if="selectedProbe.status === 'failed'" color="red">失败</a-tag>
+                <a-tag v-else-if="selectedProbe.status === 'timeout'" color="orange">超时</a-tag>
+                <a-tag v-else>{{ selectedProbe.status }}</a-tag>
+              </a-descriptions-item>
+            </a-descriptions>
+          </a-col>
+          <a-col :span="12">
+            <div ref="probeDetailChart" style="width: 100%; height: 200px;"></div>
+          </a-col>
+        </a-row>
+        
+        <!-- 历史记录表格 -->
+        <a-card title="历史记录" style="margin-top: 20px;">
+          <a-table 
+            :dataSource="probeDetails[selectedProbe.agent_area] || []" 
+            :columns="probeDetailColumns"
+            :pagination="{ pageSize: 5 }"
+            :rowKey="(record) => record.id"
+          >
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.dataIndex === 'time'">
+                {{ formatDate(record.created_at) }}
+              </template>
+              <template v-if="column.dataIndex === 'responseTime'">
+                <span v-if="record.response_time">{{ record.response_time }} ms</span>
+                <span v-else>-</span>
+              </template>
+              <template v-if="column.dataIndex === 'status'">
+                <a-tag v-if="record.status === 'success'" color="green">成功</a-tag>
+                <a-tag v-else-if="record.status === 'failed'" color="red">失败</a-tag>
+                <a-tag v-else-if="record.status === 'timeout'" color="orange">超时</a-tag>
+                <a-tag v-else>{{ record.status }}</a-tag>
+              </template>
+            </template>
+          </a-table>
+        </a-card>
+        
+        <a-descriptions title="详细信息" bordered :column="1" size="small" style="margin-top: 16px;">
+          <a-descriptions-item label="原始数据">
+            <pre style="max-height: 200px; overflow: auto;">{{ formatDetails(selectedProbe.details) }}</pre>
+          </a-descriptions-item>
+        </a-descriptions>
+      </div>
+    </a-modal>
+  </div>
+</template>

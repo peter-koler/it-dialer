@@ -1,0 +1,5 @@
+cd /Users/peter/Documents/code/boce/it-dialer/backend && sqlite3 app.db "ALTER TABLE tasks ADD COLUMN agent_ids TEXT;"
+
+cd /Users/peter/Documents/code/boce/it-dialer/backend && sqlite3 app.db ".schema tasks"
+
+cd /Users/peter/Documents/code/boce/it-dialer/backend && sqlite3 app.db "ALTER TABLE tasks ADD COLUMN agent_ids TEXT;"

@@ -1,4 +1,5 @@
 from flask import request, jsonify
+import traceback
 from . import bp
 from app import db
 from app.models.node import Node
@@ -27,7 +28,7 @@ def get_nodes():
             search = f"%{keyword}%"
             query = query.filter(
                 db.or_(
-                    Node.name.like(search),
+                    Node.hostname.like(search),
                     Node.agent_id.like(search)
                 )
             )
@@ -53,6 +54,8 @@ def get_nodes():
             'message': 'ok'
         })
     except Exception as e:
+        print(f"Error in get_nodes: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({
             'code': 500,
             'data': {},
@@ -71,16 +74,17 @@ def register_node():
         
         if node:
             # 更新现有节点信息
-            node.name = data.get('hostname', node.name)
+            node.hostname = data.get('hostname', node.hostname)
             node.ip_address = data.get('ip_address', node.ip_address)
             node.agent_area = data.get('agent_area', node.agent_area)
             node.status = 'online'
             node.last_heartbeat = datetime.utcnow()
+            node.updated_at = datetime.utcnow()
         else:
             # 创建新节点
             node = Node(
                 agent_id=data.get('agent_id'),
-                name=data.get('hostname', 'Unknown'),
+                hostname=data.get('hostname', 'Unknown'),
                 ip_address=data.get('ip_address', 'Unknown'),
                 agent_area=data.get('agent_area', 'default_area'),
                 status='online'
@@ -97,6 +101,8 @@ def register_node():
         }), 201
     except Exception as e:
         db.session.rollback()
+        print(f"Error in register_node: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({
             'code': 500,
             'data': {},
@@ -120,11 +126,11 @@ def heartbeat():
                 'message': '节点不存在'
             }), 404
         
-        # 更新节点状态和心跳时间
+        # 更新心跳时间和状态
         node.status = 'online'
         node.last_heartbeat = datetime.utcnow()
+        node.updated_at = datetime.utcnow()
         
-        # 提交更改
         db.session.commit()
         
         return jsonify({
@@ -134,6 +140,8 @@ def heartbeat():
         })
     except Exception as e:
         db.session.rollback()
+        print(f"Error in heartbeat: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({
             'code': 500,
             'data': {},
@@ -141,55 +149,50 @@ def heartbeat():
         }), 500
 
 
-@bp.route('/nodes/status', methods=['PUT'])
-def update_node_status():
-    """更新节点状态"""
+@bp.route('/nodes/<int:id>', methods=['PUT'])
+def update_node(id):
+    """更新节点"""
     try:
+        node = Node.query.get_or_404(id)
         data = request.get_json()
         
-        # 查找节点
-        node = Node.query.get(data.get('id'))
+        # 更新节点信息
+        if 'agent_id' in data:
+            node.agent_id = data['agent_id']
+        if 'agent_area' in data:
+            node.agent_area = data['agent_area']
+        if 'ip_address' in data:
+            node.ip_address = data['ip_address']
+        if 'hostname' in data:
+            node.hostname = data['hostname']
+        if 'status' in data:
+            node.status = data['status']
         
-        if not node:
-            return jsonify({
-                'code': 404,
-                'data': {},
-                'message': '节点不存在'
-            }), 404
+        node.updated_at = datetime.utcnow()
         
-        # 更新节点状态
-        node.status = data.get('status', node.status)
-        
-        # 提交更改
         db.session.commit()
         
         return jsonify({
             'code': 0,
             'data': node.to_dict(),
-            'message': '节点状态更新成功'
+            'message': '节点更新成功'
         })
     except Exception as e:
         db.session.rollback()
+        print(f"Error in update_node: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({
             'code': 500,
             'data': {},
-            'message': f'节点状态更新失败: {str(e)}'
+            'message': f'节点更新失败: {str(e)}'
         }), 500
 
 
-@bp.route('/nodes/<int:node_id>', methods=['DELETE'])
-def delete_node(node_id):
+@bp.route('/nodes/<int:id>', methods=['DELETE'])
+def delete_node(id):
     """删除节点"""
     try:
-        node = Node.query.get(node_id)
-        
-        if not node:
-            return jsonify({
-                'code': 404,
-                'data': {},
-                'message': '节点不存在'
-            }), 404
-        
+        node = Node.query.get_or_404(id)
         db.session.delete(node)
         db.session.commit()
         
@@ -200,8 +203,48 @@ def delete_node(node_id):
         })
     except Exception as e:
         db.session.rollback()
+        print(f"Error in delete_node: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({
             'code': 500,
             'data': {},
             'message': f'节点删除失败: {str(e)}'
+        }), 500
+
+
+@bp.route('/nodes/timeout-check', methods=['POST'])
+def check_timeout_nodes():
+    """检查超时节点"""
+    try:
+        # 获取所有在线节点
+        online_nodes = Node.query.filter_by(status='online').all()
+        
+        # 设置超时时间为5分钟
+        timeout_threshold = datetime.utcnow() - timedelta(minutes=5)
+        
+        timeout_count = 0
+        for node in online_nodes:
+            # 如果最后心跳时间早于超时阈值，则标记为超时
+            if node.last_heartbeat and node.last_heartbeat < timeout_threshold:
+                node.status = 'timeout'
+                node.updated_at = datetime.utcnow()
+                timeout_count += 1
+        
+        db.session.commit()
+        
+        return jsonify({
+            'code': 0,
+            'data': {
+                'timeout_count': timeout_count
+            },
+            'message': f'检查完成，{timeout_count} 个节点超时'
+        })
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error in check_timeout_nodes: {str(e)}")
+        print(traceback.format_exc())
+        return jsonify({
+            'code': 500,
+            'data': {},
+            'message': f'检查超时节点失败: {str(e)}'
         }), 500

@@ -1,4 +1,5 @@
 from flask import request, jsonify
+import traceback
 from . import bp
 from app import db
 from app.models.task import Task
@@ -59,7 +60,15 @@ def get_tasks():
         tasks = pagination.items
         
         # 转换为字典列表
-        tasks_data = [task.to_dict() for task in tasks]
+        tasks_data = []
+        for task in tasks:
+            try:
+                tasks_data.append(task.to_dict())
+            except Exception as e:
+                print(f"Error converting task {task.id} to dict: {str(e)}")
+                print(traceback.format_exc())
+                # 即使单个任务转换失败，也继续处理其他任务
+                continue
         
         return jsonify({
             'code': 0,
@@ -70,6 +79,8 @@ def get_tasks():
             'message': 'ok'
         })
     except Exception as e:
+        print(f"Error in get_tasks: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({
             'code': 500,
             'data': {},
@@ -105,21 +116,22 @@ def create_task():
             target=data.get('target'),
             interval=data.get('interval', 60),
             enabled=data.get('enabled', True),
-            config=data.get('config'),  # 直接存储config字符串
+            config=json.dumps(data.get('config')) if data.get('config') else None,
             agent_ids=agent_ids_json
         )
         
-        # 保存到数据库
         db.session.add(task)
         db.session.commit()
         
         return jsonify({
             'code': 0,
             'data': task.to_dict(),
-            'message': '任务创建成功'
+            'message': 'ok'
         }), 201
     except Exception as e:
         db.session.rollback()
+        print(f"Error in create_task: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({
             'code': 500,
             'data': {},
@@ -127,24 +139,19 @@ def create_task():
         }), 500
 
 
-@bp.route('/tasks/<int:task_id>', methods=['GET'])
-def get_task(task_id):
+@bp.route('/tasks/<int:id>', methods=['GET'])
+def get_task(id):
     """Get a specific task"""
     try:
-        task = Task.query.get(task_id)
-        if not task:
-            return jsonify({
-                'code': 404,
-                'data': {},
-                'message': '任务不存在'
-            }), 404
-        
+        task = Task.query.get_or_404(id)
         return jsonify({
             'code': 0,
             'data': task.to_dict(),
             'message': 'ok'
         })
     except Exception as e:
+        print(f"Error in get_task: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({
             'code': 500,
             'data': {},
@@ -152,18 +159,11 @@ def get_task(task_id):
         }), 500
 
 
-@bp.route('/tasks/<int:task_id>', methods=['PUT'])
-def update_task(task_id):
+@bp.route('/tasks/<int:id>', methods=['PUT'])
+def update_task(id):
     """Update a specific task"""
     try:
-        task = Task.query.get(task_id)
-        if not task:
-            return jsonify({
-                'code': 404,
-                'data': {},
-                'message': '任务不存在'
-            }), 404
-        
+        task = Task.query.get_or_404(id)
         data = request.get_json()
         
         # 验证TCP任务的数据
@@ -177,29 +177,33 @@ def update_task(task_id):
                     'message': 'TCP任务的目标地址格式不正确，应为 host:port'
                 }), 400
         
-        # 处理agent_ids
-        agent_ids = data.get('agent_ids', [])
-        agent_ids_json = json.dumps(agent_ids) if agent_ids else None
-        
-        # 更新任务字段
+        # 更新任务信息
         task.name = data.get('name', task.name)
         task.type = data.get('type', task.type)
         task.target = data.get('target', task.target)
         task.interval = data.get('interval', task.interval)
         task.enabled = data.get('enabled', task.enabled)
-        task.config = data.get('config', task.config)
-        task.agent_ids = agent_ids_json
         
-        # 提交更改
+        if 'config' in data:
+            task.config = json.dumps(data['config']) if data['config'] else None
+            
+        if 'agent_ids' in data:
+            agent_ids = data['agent_ids']
+            task.agent_ids = json.dumps(agent_ids) if agent_ids else None
+        
+        task.updated_at = db.func.now()
+        
         db.session.commit()
         
         return jsonify({
             'code': 0,
             'data': task.to_dict(),
-            'message': '任务更新成功'
+            'message': 'ok'
         })
     except Exception as e:
         db.session.rollback()
+        print(f"Error in update_task: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({
             'code': 500,
             'data': {},
@@ -207,34 +211,71 @@ def update_task(task_id):
         }), 500
 
 
-@bp.route('/tasks/<int:task_id>', methods=['DELETE'])
-def delete_task(task_id):
+@bp.route('/tasks/<int:id>', methods=['DELETE'])
+def delete_task(id):
     """Delete a specific task"""
     try:
-        task = Task.query.get(task_id)
-        if not task:
-            return jsonify({
-                'code': 404,
-                'data': {},
-                'message': '任务不存在'
-            }), 404
-        
-        # 同时删除相关的执行结果
-        Result.query.filter_by(task_id=task_id).delete()
-        
-        # 删除任务
+        task = Task.query.get_or_404(id)
         db.session.delete(task)
         db.session.commit()
         
         return jsonify({
             'code': 0,
             'data': {},
-            'message': '任务删除成功'
+            'message': 'ok'
         })
     except Exception as e:
         db.session.rollback()
+        print(f"Error in delete_task: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({
             'code': 500,
             'data': {},
             'message': f'删除任务失败: {str(e)}'
+        }), 500
+
+
+@bp.route('/tasks/stats', methods=['GET'])
+def get_task_stats():
+    """获取任务统计信息"""
+    try:
+        # 总任务数
+        total_tasks = Task.query.count()
+        
+        # 启用任务数
+        enabled_tasks = Task.query.filter_by(enabled=True).count()
+        
+        # 各类型任务数
+        task_types = db.session.query(
+            Task.type, 
+            db.func.count(Task.id)
+        ).group_by(Task.type).all()
+        
+        # 最近任务结果统计
+        recent_results = db.session.query(
+            Result.status,
+            db.func.count(Result.id)
+        ).filter(
+            Result.created_at >= db.func.datetime('now', '-1 day')
+        ).group_by(Result.status).all()
+        
+        stats = {
+            'total_tasks': total_tasks,
+            'enabled_tasks': enabled_tasks,
+            'task_types': dict(task_types),
+            'recent_results': dict(recent_results)
+        }
+        
+        return jsonify({
+            'code': 0,
+            'data': stats,
+            'message': 'ok'
+        })
+    except Exception as e:
+        print(f"Error in get_task_stats: {str(e)}")
+        print(traceback.format_exc())
+        return jsonify({
+            'code': 500,
+            'data': {},
+            'message': f'获取任务统计失败: {str(e)}'
         }), 500

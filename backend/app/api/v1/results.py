@@ -5,6 +5,7 @@ from app.models.result import Result
 from app.models.task import Task
 import json
 from datetime import datetime
+import traceback
 
 
 @bp.route('/results', methods=['GET'])
@@ -39,8 +40,16 @@ def get_results():
         
         results = pagination.items
         
-        # 转换为字典列表
-        results_data = [result.to_dict() for result in results]
+        # 转换为字典列表，并添加单个转换失败时的日志记录
+        results_data = []
+        for result in results:
+            try:
+                results_data.append(result.to_dict())
+            except Exception as e:
+                print(f"Error converting result {result.id} to dict: {str(e)}")
+                print(traceback.format_exc())
+                # 即使单个结果转换失败，也继续处理其他结果
+                continue
         
         return jsonify({
             'code': 0,
@@ -51,6 +60,8 @@ def get_results():
             'message': 'ok'
         })
     except Exception as e:
+        print(f"Error in get_results: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({
             'code': 500,
             'data': {},
@@ -103,6 +114,8 @@ def create_result():
         }), 201
     except Exception as e:
         db.session.rollback()
+        print(f"Error in create_result: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({
             'code': 500,
             'data': {},
