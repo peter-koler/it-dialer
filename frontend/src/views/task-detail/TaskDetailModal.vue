@@ -68,7 +68,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import EnhancedChinaMap from '@/components/EnhancedChinaMap.vue'
+import EnhancedChinaMap from '@/components/EnhancedChinaMap/EnhancedChinaMap.vue'
 import StatusTag from './StatusTag.vue'
 import ProbeList from './ProbeList.vue'
 import TaskCharts from './TaskCharts.vue'

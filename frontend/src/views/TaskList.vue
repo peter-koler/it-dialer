@@ -2,7 +2,6 @@
 import { ref, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import * as echarts from 'echarts'
 import { getTaskResults } from '@/api/task'
 import EnhancedChinaMap from '@/components/EnhancedChinaMap/EnhancedChinaMap.vue'
 import pinyinToChinese from '@/utils/pinyinToChinese.js'
@@ -266,28 +265,44 @@ const aggregateResults = (results) => {
 }
 
 // 显示详情
-const showDetails = (record) => {
+const showDetails = async (record) => {
   selectedTask.value = record
   detailModalVisible.value = true
   
   // 重置地图状态
   mapLevel.value = 'country'
   selectedMapCode.value = ''
-  mapData.value = generateMapData(record.results)
+  
+  // 生成地图数据
+  const newMapData = generateMapData(record.results)
+  mapData.value = newMapData
+  console.log('Map data set:', newMapData) // 调试用
   
   // 等待DOM更新后渲染图表和地图
-  nextTick(() => {
-    if (record.task.type === 'ping') {
-      renderLatencyChart(record.results)
-    } else if (record.task.type === 'tcp') {
-      renderTcpCharts(record.results)
-    }
-  })
+  await nextTick()
+  console.log('DOM updated, mapData:', mapData.value) // 调试用
+  
+  // 重新初始化地图
+  if (chinaMapRef.value) {
+    await chinaMapRef.value.initMap()
+  }
+  
+  if (record.task.type === 'ping') {
+    renderLatencyChart(record.results)
+  } else if (record.task.type === 'tcp') {
+    renderTcpCharts(record.results)
+  }
 }
 
 // 生成地图数据
 const generateMapData = (results) => {
   const locationMap = {}
+  
+  // 确保results是一个数组
+  if (!Array.isArray(results)) {
+    console.warn('generateMapData: results is not an array', results)
+    return []
+  }
   
   results.forEach(result => {
     // 使用agent_area作为位置标识
@@ -304,7 +319,9 @@ const generateMapData = (results) => {
     locationMap[locationName].value += 1
   })
   
-  return Object.values(locationMap)
+  const mapDataArray = Object.values(locationMap)
+  console.log('Generated map data:', mapDataArray) // 调试用
+  return mapDataArray
 }
 
 // 处理地图区域点击
@@ -863,9 +880,9 @@ onMounted(() => {
             <a-card class="map-container">
               <EnhancedChinaMap 
                 ref="chinaMapRef"
-                :mapData="mapData"
+                :map-data="mapData"
                 :level="mapLevel"
-                :selectedCode="selectedMapCode"
+                :selected-code="selectedMapCode"
                 @region-click="handleRegionClick"
                 @level-change="handleLevelChange"
                 height="500px"
@@ -877,35 +894,13 @@ onMounted(() => {
           <a-col :span="10">
             <a-card title="拨测点详情列表" class="probe-list-container">
               <a-table 
-                :dataSource="selectedTask.results" 
-                :columns="detailColumns"
-                :pagination="{ pageSize: 5 }"
-                :rowKey="(record) => record.id"
-                :scroll="{ y: 300 }"
-                :rowClassName="getRowClassName"
-              >
-                <template #bodyCell="{ column, record }">
-                  <template v-if="column.dataIndex === 'location'">
-                    {{ record.location }}
-                  </template>
-                  <template v-if="column.dataIndex === 'time'">
-                    {{ formatDate(record.created_at) }}
-                  </template>
-                  <template v-if="column.dataIndex === 'responseTime'">
-                    <span v-if="record.response_time">{{ record.response_time }} ms</span>
-                    <span v-else>-</span>
-                  </template>
-                  <template v-if="column.dataIndex === 'status'">
-                    <a-tag v-if="record.status === 'success'" color="green">成功</a-tag>
-                    <a-tag v-else-if="record.status === 'failed'" color="red">失败</a-tag>
-                    <a-tag v-else-if="record.status === 'timeout'" color="orange">超时</a-tag>
-                    <a-tag v-else>{{ record.status }}</a-tag>
-                  </template>
-                  <template v-if="column.dataIndex === 'actions'">
-                    <a-button type="link" @click="showProbeDetail(record)">查看详情</a-button>
-                  </template>
-                </template>
-              </a-table>
+                :columns="probeColumns"
+                :data-source="probeData"
+                :pagination="false"
+                :scroll="{ y: 400 }"
+                size="small"
+                rowKey="id"
+              />
             </a-card>
           </a-col>
         </a-row>

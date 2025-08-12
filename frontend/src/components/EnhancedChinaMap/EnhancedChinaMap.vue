@@ -7,230 +7,9 @@
       <span class="map-title">{{ mapTitle }}</span>
     </div>
     <div ref="mapContainer" :class="['leaflet-map', `level-${currentLevel}`]" :style="{ height }"></div>
-  </div>
-</template>
-
-<script setup>
-import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
-import { getNameByCode, loadMapData } from './mapUtils.js'
-import { getColorForRegion, createOnEachFeature, getProbeCount, highlightFeature, resetHighlight } from './mapStyling.js'
-import { handleRegionClick, handleGoBack } from './mapInteractions.js'
-
-// 定义属性
-const props = defineProps({
-  height: {
-    type: String,
-    default: '500px'
-  },
-  // 地图数据
-  mapData: {
-    type: Array,
-    default: () => []
-  },
-  // 当前层级: 'country', 'province', 'city'
-  level: {
-    type: String,
-    default: 'country'
-  },
-  // 当前选中的区域编码
-  selectedCode: {
-    type: String,
-    default: '100000'
-  },
-  // 是否显示头部
-  showHeader: {
-    type: Boolean,
-    default: true
-  }
-})
-
-// 定义事件
-const emit = defineEmits(['region-click', 'level-change'])
-
-// 响应式数据
-const mapContainer = ref(null)
-const map = ref(null)
-const currentLevel = ref(props.level)
-const currentSelectedCode = ref(props.selectedCode)
-const geoJsonLayer = ref(null)
-
-// 计算属性
-const mapTitle = computed(() => {
-  if (currentLevel.value === 'country') {
-    return '全国拨测点分布图'
-  } else if (currentLevel.value === 'province' && currentSelectedCode.value) {
-    const provinceName = getNameByCode(currentSelectedCode.value)
-    return `${provinceName}拨测点分布图`
-  } else if (currentLevel.value === 'city' && currentSelectedCode.value) {
-    const cityName = getNameByCode(currentSelectedCode.value)
-    return `${cityName}拨测点分布图`
-  }
-  return '拨测点分布图'
-})
-
-// 监听数据变化
-watch(() => props.mapData, () => {
-  updateMap()
-}, { deep: true })
-
-// 监听层级变化
-watch(() => props.level, (newLevel) => {
-  currentLevel.value = newLevel
-  updateMap()
-})
-
-// 监听选中区域变化
-watch(() => props.selectedCode, (newCode) => {
-  currentSelectedCode.value = newCode
-  updateMap()
-})
-
-// 更新地图
-const updateMap = async () => {
-  if (!map.value) return
-
-  let mapType = '100000'
-  if (currentLevel.value === 'province' && currentSelectedCode.value) {
-    mapType = currentSelectedCode.value
-  } else if (currentLevel.value === 'city' && currentSelectedCode.value) {
-    mapType = currentSelectedCode.value
-  }
-
-  // 加载地图数据
-  const geoJson = await loadMapData(mapType)
-  if (!geoJson) return
-
-  // 清除现有图层
-  if (geoJsonLayer.value) {
-    map.value.removeLayer(geoJsonLayer.value)
-  }
-
-  // 创建回调函数
-  const callbacks = {
-    highlightFeature,
-    resetHighlight: (e) => resetHighlight(e, geoJsonLayer),
-    onRegionClick: (e) => handleRegionClick(e, props, currentLevel, currentSelectedCode, emit, updateMap),
-    getProbeCount: (regionName) => getProbeCount(regionName, props.mapData)
-  }
-
-  // 创建新的GeoJSON图层
-  geoJsonLayer.value = L.geoJSON(geoJson, {
-    style: function (feature) {
-      return {
-        fillColor: getColorForRegion(feature.properties.name, props.mapData),
-        weight: 2,
-        opacity: 1,
-        color: 'white',
-        dashArray: '3',
-        fillOpacity: 0.7
-      };
-    },
-    onEachFeature: createOnEachFeature(props.mapData, callbacks)
-  }).addTo(map.value)
-
-  // 调整地图视图以适应GeoJSON边界
-  map.value.fitBounds(geoJsonLayer.value.getBounds())
-}
-
-// 返回上一级
-const goBack = () => {
-  handleGoBack(currentLevel, currentSelectedCode, emit, updateMap)
-}
-
-// 初始化地图
-const initMap = async () => {
-  if (!mapContainer.value) return
-
-  // 创建地图实例
-  map.value = L.map(mapContainer.value).setView([35.8617, 104.1954], 4)
-
-  // 添加基础瓦片图层
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(map.value)
-
-  // 加载初始地图数据
-  await updateMap()
-}
-
-// 组件挂载
-onMounted(async () => {
-  await nextTick()
-  initMap()
-})
-
-// 组件卸载
-onUnmounted(() => {
-  if (map.value) {
-    map.value.remove()
-  }
-})
-
-// 暴露方法给父组件
-defineExpose({
-  goBack,
-  updateMap
-})
-</script>
-
-<style scoped>
-.map-wrapper {
-  width: 100%;
-}
-
-.map-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.back-button {
-  background: none;
-  border: none;
-  color: #1890ff;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 4px 8px;
-}
-
-.back-button:hover {
-  color: #40a9ff;
-}
-
-.map-title {
-  flex: 1;
-  text-align: center;
-  font-weight: bold;
-  font-size: 16px;
-}
-
-.leaflet-map {
-  width: 100%;
-}
-
-.level-country {
-  height: 500px;
-}
-
-.level-province {
-  height: 500px;
-}
-
-.level-city {
-  height: 500px;
-}
-</style>
-<template>
-  <div class="map-wrapper">
-    <div class="map-header" v-if="showHeader">
-      <button v-if="currentLevel !== 'country'" @click="goBack" class="back-button">
-        ← 返回上一级
-      </button>
-      <span class="map-title">{{ mapTitle }}</span>
+    <div v-if="loadError" class="error-message">
+      地图加载失败: {{ loadError }}
     </div>
-    <div ref="mapContainer" :class="['leaflet-map', `level-${currentLevel}`]" :style="{ height }"></div>
   </div>
 </template>
 
@@ -276,86 +55,95 @@ const emit = defineEmits(['region-click', 'level-change'])
 // 响应式数据
 const mapContainer = ref(null)
 const map = ref(null)
-const currentLevel = ref(props.level)
-const currentSelectedCode = ref(props.selectedCode)
 const geoJsonLayer = ref(null)
+const loadError = ref(null)
 
 // 计算属性
+const currentLevel = computed(() => props.level)
+const currentSelectedCode = computed(() => props.selectedCode)
+const mapType = computed(() => {
+  if (currentLevel.value === 'country') return '100000'
+  if (currentLevel.value === 'province') return currentSelectedCode.value
+  if (currentLevel.value === 'city') return currentSelectedCode.value
+  return '100000'
+})
+
 const mapTitle = computed(() => {
-  if (currentLevel.value === 'country') {
-    return '全国拨测点分布图'
-  } else if (currentLevel.value === 'province' && currentSelectedCode.value) {
-    const provinceName = getNameByCode(currentSelectedCode.value)
-    return `${provinceName}拨测点分布图`
-  } else if (currentLevel.value === 'city' && currentSelectedCode.value) {
-    const cityName = getNameByCode(currentSelectedCode.value)
-    return `${cityName}拨测点分布图`
-  }
-  return '拨测点分布图'
-})
-
-// 监听数据变化
-watch(() => props.mapData, () => {
-  updateMap()
-}, { deep: true })
-
-// 监听层级变化
-watch(() => props.level, (newLevel) => {
-  currentLevel.value = newLevel
-  updateMap()
-})
-
-// 监听选中区域变化
-watch(() => props.selectedCode, (newCode) => {
-  currentSelectedCode.value = newCode
-  updateMap()
+  if (currentLevel.value === 'country') return '全国'
+  const name = getNameByCode(currentSelectedCode.value)
+  return name || currentSelectedCode.value
 })
 
 // 更新地图
 const updateMap = async () => {
-  if (!map.value) return
+  try {
+    loadError.value = null
+    console.log(`Updating map for type: ${mapType.value}`) // 调试用
+    
+    // 确保地图实例存在
+    if (!map.value) {
+      await initMap()
+    }
 
-  let mapType = '100000'
-  if (currentLevel.value === 'province' && currentSelectedCode.value) {
-    mapType = currentSelectedCode.value
-  } else if (currentLevel.value === 'city' && currentSelectedCode.value) {
-    mapType = currentSelectedCode.value
+    // 加载地图数据
+    const geoJson = await loadMapData(mapType.value)
+    if (!geoJson) {
+      loadError.value = `无法加载地图数据: ${mapType.value}`
+      console.error(loadError.value)
+      return
+    }
+
+    // 清除现有图层
+    if (geoJsonLayer.value) {
+      map.value.removeLayer(geoJsonLayer.value)
+    }
+
+    // 创建回调函数
+    const callbacks = {
+      highlightFeature,
+      resetHighlight: (e) => resetHighlight(e, geoJsonLayer),
+      onRegionClick: (e) => handleRegionClick(e, props, currentLevel, currentSelectedCode, emit, updateMap),
+      getProbeCount: (regionName) => getProbeCount(regionName, props.mapData)
+    }
+
+    // 创建新的GeoJSON图层
+    geoJsonLayer.value = L.geoJSON(geoJson, {
+      style: function (feature) {
+        return {
+          fillColor: getColorForRegion(feature.properties.name, props.mapData),
+          weight: 2,
+          opacity: 1,
+          color: 'white',
+          dashArray: '3',
+          fillOpacity: 0.7
+        };
+      },
+      onEachFeature: createOnEachFeature(props.mapData, callbacks)
+    }).addTo(map.value)
+
+    // 调整地图视图以适应GeoJSON边界
+    try {
+      const bounds = geoJsonLayer.value.getBounds()
+      if (bounds.isValid()) {
+        // 添加一些padding确保地图不会紧贴边缘
+        map.value.fitBounds(bounds, { padding: [50, 50] })
+      }
+    } catch (boundsError) {
+      console.warn('调整地图视图失败:', boundsError)
+      // 如果获取边界失败，使用默认视图
+      map.value.setView([35.8617, 104.1954], 4)
+    }
+  } catch (error) {
+    loadError.value = error.message
+    console.error('更新地图时出错:', error)
+    // 尝试重置地图视图
+    if (map.value) {
+      map.value.setView([35.8617, 104.1954], 4)
+    }
+  } finally {
+    // 确保在加载完成后移除加载状态
+    // 这里可以添加加载完成的回调或事件
   }
-
-  // 加载地图数据
-  const geoJson = await loadMapData(mapType)
-  if (!geoJson) return
-
-  // 清除现有图层
-  if (geoJsonLayer.value) {
-    map.value.removeLayer(geoJsonLayer.value)
-  }
-
-  // 创建回调函数
-  const callbacks = {
-    highlightFeature,
-    resetHighlight: (e) => resetHighlight(e, geoJsonLayer),
-    onRegionClick: (e) => handleRegionClick(e, props, currentLevel, currentSelectedCode, emit, updateMap),
-    getProbeCount: (regionName) => getProbeCount(regionName, props.mapData)
-  }
-
-  // 创建新的GeoJSON图层
-  geoJsonLayer.value = L.geoJSON(geoJson, {
-    style: function (feature) {
-      return {
-        fillColor: getColorForRegion(feature.properties.name, props.mapData),
-        weight: 2,
-        opacity: 1,
-        color: 'white',
-        dashArray: '3',
-        fillOpacity: 0.7
-      };
-    },
-    onEachFeature: createOnEachFeature(props.mapData, callbacks)
-  }).addTo(map.value)
-
-  // 调整地图视图以适应GeoJSON边界
-  map.value.fitBounds(geoJsonLayer.value.getBounds())
 }
 
 // 返回上一级
@@ -365,27 +153,71 @@ const goBack = () => {
 
 // 初始化地图
 const initMap = async () => {
-  if (!mapContainer.value) return
+  try {
+    console.log('Initializing map...') // 调试用
+    
+    // 确保容器已挂载
+    if (!mapContainer.value) {
+      console.error('Map container not found')
+      return
+    }
 
-  // 创建地图实例
-  map.value = L.map(mapContainer.value).setView([35.8617, 104.1954], 4)
+    // 如果地图已存在，先清理
+    if (map.value) {
+      map.value.remove()
+      map.value = null
+    }
 
-  // 添加基础瓦片图层
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(map.value)
+    // 初始化地图 - 使用默认的OpenStreetMap图层
+    map.value = L.map(mapContainer.value).setView([35.8617, 104.1954], 4)
+    
+    // 添加OpenStreetMap瓦片图层
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map.value)
 
-  // 加载初始地图数据
-  await updateMap()
+    console.log('Map initialized successfully') // 调试用
+    
+    // 加载GeoJSON数据并更新地图
+    await updateMap()
+  } catch (error) {
+    loadError.value = error.message
+    console.error('初始化地图时出错:', error)
+  }
 }
 
-// 组件挂载
-onMounted(async () => {
-  await nextTick()
-  initMap()
+// 监听属性变化
+watch(() => [props.level, props.selectedCode], () => {
+  console.log('Map props changed, updating map') // 调试用
+  updateMap()
 })
 
-// 组件卸载
+watch(() => props.mapData, (newData) => {
+  console.log('Map data changed:', newData) // 调试用
+  if (geoJsonLayer.value && map.value) {
+    // 更新现有图层的样式以反映新的数据
+    geoJsonLayer.value.eachLayer(layer => {
+      const style = {
+        fillColor: getColorForRegion(layer.feature.properties.name, props.mapData),
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        dashArray: '3',
+        fillOpacity: 0.7
+      }
+      layer.setStyle(style)
+    })
+  }
+}, { deep: true })
+
+// 生命周期钩子
+onMounted(async () => {
+  console.log('EnhancedChinaMap mounted, initializing map') // 调试用
+  // 延迟初始化地图，确保DOM完全渲染
+  await nextTick()
+  await initMap()
+})
+
 onUnmounted(() => {
   if (map.value) {
     map.value.remove()
@@ -394,55 +226,52 @@ onUnmounted(() => {
 
 // 暴露方法给父组件
 defineExpose({
-  goBack,
-  updateMap
+  updateMap,
+  initMap
 })
 </script>
 
 <style scoped>
 .map-wrapper {
-  width: 100%;
+  position: relative;
 }
 
 .map-header {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #f5f5f5;
 }
 
 .back-button {
-  background: none;
+  margin-right: 10px;
+  padding: 5px 10px;
+  background-color: #1890ff;
+  color: white;
   border: none;
-  color: #1890ff;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
-  padding: 4px 8px;
 }
 
 .back-button:hover {
-  color: #40a9ff;
+  background-color: #40a9ff;
 }
 
 .map-title {
-  flex: 1;
-  text-align: center;
-  font-weight: bold;
   font-size: 16px;
+  font-weight: bold;
 }
 
 .leaflet-map {
   width: 100%;
 }
 
-.level-country {
-  height: 500px;
-}
-
-.level-province {
-  height: 500px;
-}
-
-.level-city {
-  height: 500px;
+.error-message {
+  color: red;
+  padding: 10px;
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 4px;
+  margin-top: 10px;
 }
 </style>
