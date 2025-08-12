@@ -1,5 +1,5 @@
 {
-  "agent_id": "default_agent",
+  "agent_id": "book",
   "server_url": "http://localhost:5000",
   "plugins_dir": "plugins",
   "report_interval": 60,

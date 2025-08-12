@@ -90,7 +90,9 @@ def create_result():
             status=data.get('status'),
             response_time=data.get('response_time'),
             message=data.get('message'),
-            details=json.dumps(data.get('details', {})) if data.get('details') else None
+            details=json.dumps(data.get('details', {})) if data.get('details') else None,
+            agent_id=data.get('agent_id'),
+            agent_area=data.get('agent_area')
         )
         
         # 如果客户端提供了created_at，则使用客户端提供的时间

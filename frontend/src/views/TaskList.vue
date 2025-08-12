@@ -165,14 +165,17 @@ const fetchResults = async () => {
       // 只显示每个拨测点的最新记录
       const groupedResults = {}
       response.data.list.forEach(item => {
-        const agentArea = item.agent_area
-        if (!groupedResults[agentArea] || new Date(item.created_at) > new Date(groupedResults[agentArea].created_at)) {
-          // 将 agent_area 字段（如 "guangzhou"）转换为中文地区名称（如 "广州市"）
-          const locationName = pinyinToChinese[item.agent_area] || item.agent_area || '未知地区'
-          
-          groupedResults[agentArea] = {
-            ...item,
-            location: locationName
+        // 优先使用item.agent_area，如果没有则尝试使用item.task.agent_ids的第一个元素
+        const agentArea = item.agent_area || (item.task && item.task.agent_ids && item.task.agent_ids.length > 0 ? item.task.agent_ids[0] : null)
+        if (agentArea) {
+          if (!groupedResults[agentArea] || new Date(item.created_at) > new Date(groupedResults[agentArea].created_at)) {
+            // 将 agent_area 字段（如 "guangzhou"）转换为中文地区名称（如 "广州市"）
+            const locationName = pinyinToChinese[agentArea] || agentArea || '未知地区'
+            
+            groupedResults[agentArea] = {
+              ...item,
+              location: locationName
+            }
           }
         }
       })
@@ -305,8 +308,15 @@ const generateMapData = (results) => {
   }
   
   results.forEach(result => {
-    // 使用agent_area作为位置标识
-    const location = result.agent_area || '未知地区'
+    // 使用agent_area作为位置标识，如果没有则尝试使用task.agent_ids
+    let location = result.agent_area;
+    if (!location && result.task && result.task.agent_ids && result.task.agent_ids.length > 0) {
+      location = result.task.agent_ids[0];
+    }
+    
+    // 如果仍然没有位置信息，则跳过
+    if (!location) return;
+    
     // 将拼音转换为中文
     const locationName = pinyinToChinese[location] || location
     

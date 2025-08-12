@@ -173,6 +173,26 @@ class DialerAgent:
             logger.error(f"Agent注册时发生异常: {e}")
             return False
     
+    def update_agent_info(self):
+        """更新agent信息"""
+        try:
+            server_url = self.config.get("server_url", "http://localhost:5000")
+            response = requests.post(
+                f"{server_url}/api/v1/nodes/register",
+                headers={"Content-Type": "application/json"},
+                json=self.agent_info
+            )
+            
+            if response.status_code == 200 or response.status_code == 201:
+                logger.info("Agent信息更新成功")
+                return True
+            else:
+                logger.error(f"Agent信息更新失败: status_code={response.status_code}, response={response.text}")
+                return False
+        except Exception as e:
+            logger.error(f"Agent信息更新时发生异常: {e}")
+            return False
+    
     def send_heartbeat(self):
         """发送心跳信息到服务器"""
         try:
@@ -243,10 +263,27 @@ class DialerAgent:
                             "type": task["type"],
                             "target": task["target"],  # 获取目标地址
                             "interval": task["interval"],  # 获取时间间隔
-                            "params": json.loads(task["config"]) if task["config"] else {
-                                "count": 4  # 默认ping次数
-                            }
+                            "params": {}
                         }
+                        
+                        # 安全地处理config字段
+                        config_data = task.get("config")
+                        if config_data:
+                            try:
+                                # 如果config_data已经是dict类型，直接使用
+                                if isinstance(config_data, dict):
+                                    converted_task["params"] = config_data
+                                # 如果config_data是字符串，尝试解析为JSON
+                                elif isinstance(config_data, str):
+                                    converted_task["params"] = json.loads(config_data)
+                                else:
+                                    logger.warning(f"任务 {task['id']} 的config字段类型未知: {type(config_data)}")
+                                    converted_task["params"] = {"count": 4}  # 默认ping次数
+                            except (json.JSONDecodeError, TypeError) as e:
+                                logger.warning(f"任务 {task['id']} 的config字段解析失败: {e}")
+                                converted_task["params"] = {"count": 4}  # 默认ping次数
+                        else:
+                            converted_task["params"] = {"count": 4}  # 默认ping次数
                         self.tasks.append(converted_task)
                     
                     logger.info(f"从服务器获取到 {len(self.tasks)} 个拨测任务")
@@ -272,6 +309,15 @@ class DialerAgent:
         Returns:
             任务执行结果
         """
+        # 类型检查
+        if not isinstance(task, dict):
+            logger.error(f"任务参数类型错误，期望dict，实际得到{type(task)}")
+            return {
+                "task_id": "unknown",
+                "status": "error",
+                "message": f"任务参数类型错误: {type(task)}"
+            }
+            
         task_type = task.get("type")
         task_id = task.get("task_id")
         
@@ -421,13 +467,57 @@ class DialerAgent:
 
 def main():
     """主函数"""
-    agent = DialerAgent()
+    # 配置日志
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
     
     try:
-        agent.run()
-    except KeyboardInterrupt:
-        logger.info("收到退出信号，正在停止Agent")
-        agent.stop()
+        # 创建Agent实例
+        agent = DialerAgent()
+        
+        # 注册agent到服务器
+        if not agent.register_agent():
+            logger.error("Agent注册失败，退出程序")
+            return
+            
+        # 更新agent信息（确保数据库中的信息是最新的）
+        agent.update_agent_info()
+        
+        # 启动心跳线程
+        agent.start_heartbeat()
+        
+        # 主循环
+        while True:
+            try:
+                # 获取任务
+                tasks = agent.get_tasks()
+                
+                # 执行任务
+                for task in tasks:
+                    result = agent.execute_task(task)
+                    agent.report_result(result)
+                
+                # 等待下次执行
+                interval = agent.config.get("report_interval", 60)
+                logger.info(f"任务执行完成，将在 {interval} 秒后再次执行")
+                time.sleep(interval)
+                
+            except KeyboardInterrupt:
+                logger.info("收到退出信号")
+                break
+            except Exception as e:
+                logger.error(f"执行任务时发生异常: {e}")
+                time.sleep(10)  # 出错时等待10秒再继续
+                
+    except Exception as e:
+        logger.error(f"Agent运行时发生异常: {e}")
+    finally:
+        # 停止心跳线程
+        if 'agent' in locals():
+            agent.stop_heartbeat()
+        logger.info("拨测Agent已停止")
 
 
 if __name__ == "__main__":

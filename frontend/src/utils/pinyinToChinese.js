@@ -25,6 +25,7 @@ const pinyinToChinese = {
   'fujian': '福建省',
   'guizhou': '贵州省',
   'guangdong': '广东省',
+  'guangzhou': '广州市',
   'qinghai': '青海省',
   'xizang': '西藏自治区',
   'sichuan': '四川省',

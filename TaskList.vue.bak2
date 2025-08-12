@@ -236,7 +236,7 @@ import { ref, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
 import * as echarts from 'echarts'
-import EnhancedChinaMap from '@/components/EnhancedChinaMap.vue'
+import EnhancedChinaMap from '@/components/EnhancedChinaMap/EnhancedChinaMap.vue'
 import pinyinToChinese from '@/utils/pinyinToChinese.js'
 import { getTaskResults } from '@/api/task'
 

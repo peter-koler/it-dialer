@@ -72,6 +72,7 @@ import SearchBar from './SearchBar.vue'
 import StatusTag from './StatusTag.vue'
 import TaskDetailModal from './TaskDetailModal.vue'
 import ProbeDetailModal from './ProbeDetailModal.vue'
+import pinyinToChinese from '@/utils/pinyinToChinese.js'
 
 // 定义变量
 const route = useRoute()
@@ -165,14 +166,17 @@ const fetchResults = async () => {
       // 只显示每个拨测点的最新记录
       const groupedResults = {}
       data.data.list.forEach(item => {
-        const agentArea = item.agent_area
-        if (!groupedResults[agentArea] || new Date(item.created_at) > new Date(groupedResults[agentArea].created_at)) {
-          // 将 agent_area 字段（如 "guangzhou"）转换为中文地区名称（如 "广州市"）
-          const locationName = item.location || item.agent_area || '未知地区'
-          
-          groupedResults[agentArea] = {
-            ...item,
-            location: locationName
+        // 优先使用item.agent_area，如果没有则尝试使用item.task.agent_ids的第一个元素
+        const agentArea = item.agent_area || (item.task && item.task.agent_ids && item.task.agent_ids.length > 0 ? item.task.agent_ids[0] : null)
+        if (agentArea) {
+          if (!groupedResults[agentArea] || new Date(item.created_at) > new Date(groupedResults[agentArea].created_at)) {
+            // 将 agent_area 字段（如 "guangzhou"）转换为中文地区名称（如 "广州市"）
+            const locationName = pinyinToChinese[agentArea] || agentArea || '未知地区'
+            
+            groupedResults[agentArea] = {
+              ...item,
+              location: locationName
+            }
           }
         }
       })
@@ -191,6 +195,11 @@ const fetchResults = async () => {
       const start = (pagination.value.current - 1) * pagination.value.pageSize
       const end = start + pagination.value.pageSize
       aggregatedResults.value = allResults.slice(start, end)
+      
+      // 如果是查看详情，也需要更新 selectedTask 的 results 数据
+      if (selectedTask.value) {
+        selectedTask.value.results = allResults
+      }
     } else {
       message.error(data.message || '获取结果列表失败')
     }
@@ -203,54 +212,56 @@ const fetchResults = async () => {
 
 // 显示详情
 const showDetails = (record) => {
-  selectedTask.value = record
+  // 确保使用聚合后的数据
+  const detailRecord = {
+    ...record,
+    results: aggregatedResults.value || []
+  }
+  selectedTask.value = detailRecord
   detailModalVisible.value = true
   
   // 重置地图状态
   mapLevel.value = 'country'
   selectedMapCode.value = ''
-  mapData.value = generateMapData(record.results)
+  mapData.value = generateMapData(aggregatedResults.value)
 }
 
 // 生成地图数据
 const generateMapData = (results) => {
-  // 模拟数据，实际应该根据结果中的位置信息生成
-  return [
-    { name: '北京', value: 10 },
-    { name: '天津', value: 5 },
-    { name: '上海', value: 8 },
-    { name: '重庆', value: 3 },
-    { name: '河北', value: 12 },
-    { name: '河南', value: 9 },
-    { name: '云南', value: 4 },
-    { name: '辽宁', value: 7 },
-    { name: '黑龙江', value: 6 },
-    { name: '湖南', value: 11 },
-    { name: '安徽', value: 8 },
-    { name: '山东', value: 15 },
-    { name: '新疆', value: 2 },
-    { name: '江苏', value: 13 },
-    { name: '浙江', value: 14 },
-    { name: '江西', value: 9 },
-    { name: '湖北', value: 11 },
-    { name: '广西', value: 7 },
-    { name: '甘肃', value: 4 },
-    { name: '山西', value: 8 },
-    { name: '内蒙古', value: 5 },
-    { name: '陕西', value: 9 },
-    { name: '吉林', value: 6 },
-    { name: '福建', value: 10 },
-    { name: '贵州', value: 5 },
-    { name: '广东', value: 18 },
-    { name: '青海', value: 2 },
-    { name: '西藏', value: 1 },
-    { name: '四川', value: 12 },
-    { name: '宁夏', value: 3 },
-    { name: '海南', value: 4 },
-    { name: '台湾', value: 5 },
-    { name: '香港', value: 6 },
-    { name: '澳门', value: 3 }
-  ]
+  if (!results || !Array.isArray(results)) {
+    return []
+  }
+  
+  // 统计各地区的拨测点数量
+  const regionCountMap = {}
+  
+  results.forEach(result => {
+    // 使用agent_area字段获取地区信息
+    const agentArea = result.agent_area
+    
+    if (agentArea) {
+      // 将拼音地区名转换为中文
+      const locationName = pinyinToChinese[agentArea] || agentArea
+      
+      // 统计数量
+      if (regionCountMap[locationName]) {
+        regionCountMap[locationName]++
+      } else {
+        regionCountMap[locationName] = 1
+      }
+    }
+  })
+  
+  // 转换为地图组件需要的格式
+  const mapData = Object.keys(regionCountMap).map(regionName => {
+    return {
+      name: regionName,
+      value: regionCountMap[regionName],
+      code: regionName // 使用地区名作为code
+    }
+  })
+  
+  return mapData
 }
 
 // 处理地图区域点击
@@ -288,7 +299,7 @@ const showProbeDetail = async (record) => {
     if (result.code === 0) {
       probeDetails.value[record.agent_area] = result.data.list.map(item => {
         // 获取地区中文名称
-        const locationName = item.location || item.agent_area || '未知地区'
+        const locationName = pinyinToChinese[item.agent_area] || item.agent_area || '未知地区'
         
         return {
           ...item,

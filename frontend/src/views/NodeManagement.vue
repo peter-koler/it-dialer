@@ -57,7 +57,7 @@ import { defineComponent, ref, onMounted } from 'vue'
 import { 
   getNodeList, 
   updateNodeStatus, 
-  deleteNode 
+  deleteNode as deleteNodeAPI
 } from '@/api/node'
 import { 
   ReloadOutlined 
@@ -186,15 +186,16 @@ export default defineComponent({
         cancelText: '取消',
         onOk: async () => {
           try {
-            const res = await deleteNode(record.id)
-            if (res.code === 0) {
+            const res = await deleteNodeAPI(record.id)
+            if (res && res.code === 0) {
               message.success('删除成功')
               fetchNodes()
             } else {
-              message.error(res.message || '删除失败')
+              message.error(res?.message || '删除失败')
             }
           } catch (err) {
-            message.error('删除失败: ' + err.message)
+            console.error('删除节点失败:', err)
+            message.error('删除失败: ' + (err.message || '未知错误'))
           }
         }
       })

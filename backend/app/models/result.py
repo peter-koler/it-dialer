@@ -11,6 +11,8 @@ class Result(db.Model):
     response_time = db.Column(db.Float)  # milliseconds
     message = db.Column(db.Text)  # error message or additional info
     details = db.Column(db.Text)  # JSON details of the result
+    agent_id = db.Column(db.String(100))  # Agent ID
+    agent_area = db.Column(db.String(100))  # Agent区域
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     
     # Relationship
@@ -33,6 +35,8 @@ class Result(db.Model):
             'response_time': self.response_time,
             'message': self.message,
             'details': details_data,  # 返回解析后的details数据
+            'agent_id': self.agent_id,
+            'agent_area': self.agent_area,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'task': self.task.to_dict() if self.task else None
         }
