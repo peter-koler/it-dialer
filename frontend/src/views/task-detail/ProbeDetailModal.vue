@@ -5,6 +5,7 @@
     width="800px"
     @cancel="handleCancel"
     :footer="null"
+    :z-index="1001"
   >
     <div v-if="selectedProbe">
       <a-row :gutter="16">
@@ -14,7 +15,7 @@
               {{ formatDate(selectedProbe.created_at) }}
             </a-descriptions-item>
             <a-descriptions-item label="响应时间">
-              <span v-if="selectedProbe.response_time">{{ selectedProbe.response_time }} ms</span>
+              <span v-if="selectedProbe.response_time">{{ parseFloat(selectedProbe.response_time).toFixed(2) }} ms</span>
               <span v-else>-</span>
             </a-descriptions-item>
             <a-descriptions-item label="状态">

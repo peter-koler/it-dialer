@@ -6,6 +6,7 @@ from app.models.task import Task
 import json
 from datetime import datetime
 import traceback
+from dateutil import parser
 
 
 @bp.route('/results', methods=['GET'])
@@ -17,6 +18,8 @@ def get_results():
         size = request.args.get('size', 20, type=int)
         task_id = request.args.get('task_id', type=int)
         status = request.args.get('status', type=str)
+        start_time = request.args.get('start', type=str)
+        end_time = request.args.get('end', type=str)
         
         # 构建查询
         query = Result.query
@@ -27,6 +30,25 @@ def get_results():
         
         if status:
             query = query.filter_by(status=status)
+            
+        # 应用时间范围过滤
+        if start_time:
+            try:
+                # 使用dateutil.parser可以更好地处理各种时间格式
+                start_dt = parser.isoparse(start_time)
+                query = query.filter(Result.created_at >= start_dt)
+            except (ValueError, TypeError) as e:
+                print(f"Error parsing start_time: {e}")
+                pass  # 如果时间格式不正确，忽略该过滤条件
+        
+        if end_time:
+            try:
+                # 使用dateutil.parser可以更好地处理各种时间格式
+                end_dt = parser.isoparse(end_time)
+                query = query.filter(Result.created_at <= end_dt)
+            except (ValueError, TypeError) as e:
+                print(f"Error parsing end_time: {e}")
+                pass  # 如果时间格式不正确，忽略该过滤条件
         
         # 按创建时间倒序排列
         query = query.order_by(Result.created_at.desc())

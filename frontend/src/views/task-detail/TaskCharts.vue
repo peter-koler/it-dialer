@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { ref, onMounted, watch, nextTick, onUnmounted } from 'vue'
 import * as echarts from 'echarts'
 
 const props = defineProps({
@@ -40,12 +40,22 @@ let tcpStatusChart = null
 // 监听结果变化，重新渲染图表
 watch(
   () => props.results,
-  () => {
+  (newResults) => {
     nextTick(() => {
       renderCharts()
     })
   },
   { deep: true }
+)
+
+// 监听任务类型变化
+watch(
+  () => props.taskType,
+  () => {
+    nextTick(() => {
+      renderCharts()
+    })
+  }
 )
 
 onMounted(() => {
@@ -73,37 +83,107 @@ const renderLatencyChart = () => {
   // 按创建时间排序
   const sortedResults = [...props.results].sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
   
-  // 准备时间序列数据
-  const timeData = sortedResults.map(result => {
-    // 格式化时间显示
-    const date = new Date(result.created_at)
-    return date.toLocaleTimeString('zh-CN', { 
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    })
-  })
-  
-  // 准备延迟数据
-  const rttMinData = []
-  const rttAvgData = []
-  const rttMaxData = []
+  // 按时间分组并聚合所有拨测点的数据
+  const timeGroups = {}
   
   sortedResults.forEach(result => {
     try {
+      // 检查details是否存在
+      if (!result.details) return;
+      
+      // 使用创建时间作为键（精确到分钟）
+      const timeKey = new Date(result.created_at).toISOString().slice(0, 16)
       const details = typeof result.details === 'string' 
         ? JSON.parse(result.details) 
         : result.details
       
-      rttMinData.push(details.rtt_min || 0)
-      rttAvgData.push(details.rtt_avg || 0)
-      rttMaxData.push(details.rtt_max || 0)
+      // 检查解析后的details是否有效
+      if (!details) return;
+      
+      if (!timeGroups[timeKey]) {
+        timeGroups[timeKey] = {
+          count: 0,
+          rtt_min_values: [],
+          rtt_avg_values: [],
+          rtt_max_values: []
+        }
+      }
+      
+      // 收集所有拨测点在该时间点的延迟数据
+      if (details.rtt_min !== undefined && details.rtt_min !== null) timeGroups[timeKey].rtt_min_values.push(details.rtt_min)
+      if (details.rtt_avg !== undefined && details.rtt_avg !== null) timeGroups[timeKey].rtt_avg_values.push(details.rtt_avg)
+      if (details.rtt_max !== undefined && details.rtt_max !== null) timeGroups[timeKey].rtt_max_values.push(details.rtt_max)
+      
+      timeGroups[timeKey].count += 1
     } catch (e) {
-      // 解析失败时使用默认值
-      rttMinData.push(0)
-      rttAvgData.push(0)
-      rttMaxData.push(0)
+      // 解析失败时跳过该记录
+      console.error('解析详情数据失败:', e, result)
+    }
+  })
+  
+  // 计算每个时间点的统计数据（最少延迟、平均延迟、最大延迟的平均值）
+  const timeData = []
+  const overallMinData = []   // 所有拨测点的最少延迟平均值
+  const overallAvgData = []   // 所有拨测点的平均延迟平均值
+  const overallMaxData = []   // 所有拨测点的最大延迟平均值
+  
+  // 按时间排序
+  const sortedTimeKeys = Object.keys(timeGroups).sort()
+  
+  sortedTimeKeys.forEach(timeKey => {
+    const group = timeGroups[timeKey]
+    
+    // 计算该时间点所有拨测点的最少延迟平均值
+    if (group.rtt_min_values.length > 0) {
+      const avgMin = group.rtt_min_values.reduce((sum, val) => sum + val, 0) / group.rtt_min_values.length
+      overallMinData.push(parseFloat(avgMin.toFixed(2)))
+    } else {
+      overallMinData.push(0)
+    }
+    
+    // 计算该时间点所有拨测点的平均延迟平均值
+    if (group.rtt_avg_values.length > 0) {
+      const avgAvg = group.rtt_avg_values.reduce((sum, val) => sum + val, 0) / group.rtt_avg_values.length
+      overallAvgData.push(parseFloat(avgAvg.toFixed(2)))
+    } else {
+      overallAvgData.push(0)
+    }
+    
+    // 计算该时间点所有拨测点的最大延迟平均值
+    if (group.rtt_max_values.length > 0) {
+      const avgMax = group.rtt_max_values.reduce((sum, val) => sum + val, 0) / group.rtt_max_values.length
+      overallMaxData.push(parseFloat(avgMax.toFixed(2)))
+    } else {
+      overallMaxData.push(0)
+    }
+    
+    // 格式化时间显示，包含日期和时间
+    const date = new Date(timeKey)
+    // 根据时间范围调整时间显示格式
+    const timeRangeInDays = calculateTimeRangeInDays(sortedResults)
+    
+    if (timeRangeInDays <= 1) {
+      // 时间范围在1天内，显示小时:分钟
+      timeData.push(date.toLocaleTimeString('zh-CN', { 
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }))
+    } else if (timeRangeInDays <= 7) {
+      // 时间范围在1周内，显示月-日 小时:分钟
+      timeData.push(date.toLocaleString('zh-CN', { 
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }))
+    } else {
+      // 时间范围超过1周，显示月-日
+      timeData.push(date.toLocaleDateString('zh-CN', { 
+        month: '2-digit',
+        day: '2-digit'
+      }))
     }
   })
 
@@ -116,7 +196,7 @@ const renderLatencyChart = () => {
       trigger: 'axis'
     },
     legend: {
-      data: ['最小延迟', '平均延迟', '最大延迟'],
+      data: ['最少延迟平均值', '平均延迟平均值', '最大延迟平均值'],
       top: '10%'
     },
     xAxis: {
@@ -129,27 +209,38 @@ const renderLatencyChart = () => {
     },
     series: [
       {
-        name: '最小延迟',
+        name: '最少延迟平均值',
         type: 'line',
-        data: rttMinData,
+        data: overallMinData,
         smooth: true
       },
       {
-        name: '平均延迟',
+        name: '平均延迟平均值',
         type: 'line',
-        data: rttAvgData,
+        data: overallAvgData,
         smooth: true
       },
       {
-        name: '最大延迟',
+        name: '最大延迟平均值',
         type: 'line',
-        data: rttMaxData,
+        data: overallMaxData,
         smooth: true
       }
     ]
   }
 
   latencyChart.setOption(option)
+}
+
+// 计算时间范围（天数）
+const calculateTimeRangeInDays = (results) => {
+  if (!results || results.length === 0) return 0
+  
+  const times = results.map(r => new Date(r.created_at).getTime())
+  const minTime = Math.min(...times)
+  const maxTime = Math.max(...times)
+  
+  return (maxTime - minTime) / (1000 * 60 * 60 * 24)
 }
 
 // 渲染TCP任务详情图表

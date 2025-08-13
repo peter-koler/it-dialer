@@ -10,7 +10,7 @@
         {{ formatDate(record.created_at) }}
       </template>
       <template v-if="column.dataIndex === 'responseTime'">
-        <span v-if="record.response_time">{{ record.response_time }} ms</span>
+        <span v-if="record.response_time">{{ parseFloat(record.response_time).toFixed(2) }} ms</span>
         <span v-else>-</span>
       </template>
       <template v-if="column.dataIndex === 'status'">
