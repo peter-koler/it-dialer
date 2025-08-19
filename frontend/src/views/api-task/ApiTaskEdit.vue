@@ -64,6 +64,49 @@
                     </a-form-item>
                   </a-col>
                 </a-row>
+                <a-row :gutter="16">
+                  <a-col :span="12">
+                    <a-form-item label="任务状态告警配置">
+                      <a-checkbox-group v-model:value="formData.statusAlertConfig" style="width: 100%">
+                        <a-checkbox value="failed">失败时告警</a-checkbox>
+                        <a-checkbox value="success">成功时告警</a-checkbox>
+                      </a-checkbox-group>
+                      <div v-if="formData.statusAlertConfig && formData.statusAlertConfig.length > 0" style="margin-top: 8px;">
+                        <a-form-item label="状态告警级别" :label-col="{span: 8}" :wrapper-col="{span: 16}" style="margin-bottom: 0;">
+                          <a-select v-model:value="formData.statusAlertLevel" placeholder="选择告警级别" style="width: 120px;">
+                            <a-select-option value="severe">严重</a-select-option>
+                            <a-select-option value="warning">警告</a-select-option>
+                            <a-select-option value="info">信息</a-select-option>
+                          </a-select>
+                        </a-form-item>
+                      </div>
+                    </a-form-item>
+                  </a-col>
+                  <a-col :span="12">
+                    <a-form-item label="超时告警配置">
+                      <a-input-group compact>
+                        <a-checkbox v-model:checked="formData.timeoutAlertEnabled" style="margin-right: 8px;">启用超时告警</a-checkbox>
+                        <a-input-number 
+                          v-model:value="formData.timeoutThreshold" 
+                          :min="1" 
+                          :max="60000" 
+                          :disabled="!formData.timeoutAlertEnabled"
+                          placeholder="超时阈值(毫秒)"
+                          style="width: 150px;"
+                        />
+                      </a-input-group>
+                      <div v-if="formData.timeoutAlertEnabled" style="margin-top: 8px;">
+                        <a-form-item label="超时告警级别" :label-col="{span: 8}" :wrapper-col="{span: 16}" style="margin-bottom: 0;">
+                          <a-select v-model:value="formData.timeoutAlertLevel" placeholder="选择告警级别" style="width: 120px;">
+                            <a-select-option value="severe">严重</a-select-option>
+                            <a-select-option value="warning">警告</a-select-option>
+                            <a-select-option value="info">信息</a-select-option>
+                          </a-select>
+                        </a-form-item>
+                      </div>
+                    </a-form-item>
+                  </a-col>
+                </a-row>
               </a-form>
             </a-card>
             
@@ -115,7 +158,13 @@ const formData = ref({
     tokenType: 'Bearer',
     headers: []
   },
-  steps: []
+  steps: [],
+  // 新增告警配置字段
+  statusAlertConfig: [], // 任务状态告警配置，可选值：['failed', 'success']
+  statusAlertLevel: 'warning', // 状态告警级别，默认为警告
+  timeoutAlertEnabled: false, // 是否启用超时告警
+  timeoutThreshold: 5000, // 超时阈值，单位毫秒
+  timeoutAlertLevel: 'warning' // 超时告警级别，默认为警告
 })
 
 // 返回上一页
@@ -182,7 +231,11 @@ const fetchTaskDetail = async () => {
         tokenType: 'Bearer',
         headers: []
       },
-      steps: config.steps || []
+      steps: config.steps || [],
+      // 加载告警配置数据
+      statusAlertConfig: config.statusAlertConfig || [],
+      timeoutAlertEnabled: config.timeoutAlertEnabled || false,
+      timeoutThreshold: config.timeoutThreshold || 5000
     }
   } catch (error) {
     console.error('获取任务详情失败:', error)
@@ -248,7 +301,11 @@ const saveTask = async () => {
       config: {
         steps: formData.value.steps,
         variables: formData.value.variables,
-        authentication: formData.value.authentication
+        authentication: formData.value.authentication,
+        // 包含告警配置数据
+        statusAlertConfig: formData.value.statusAlertConfig,
+        timeoutAlertEnabled: formData.value.timeoutAlertEnabled,
+        timeoutThreshold: formData.value.timeoutThreshold
       }
     }
     

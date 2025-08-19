@@ -1,0 +1,226 @@
+2025-08-19 22:51:25 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-19 22:51:25 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-19 22:51:25 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-19 22:51:25 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-19 22:51:25 - werkzeug - WARNING - _internal.py:187 -  * Debugger is active!
+2025-08-19 22:51:25 - werkzeug - INFO - _internal.py:187 -  * Debugger PIN: 620-872-712
+2025-08-19 22:51:52 - werkzeug - INFO - _internal.py:187 -  * Detected change in '/Users/peter/Documents/code/boce/it-dialer/backend/run.py', reloading
+2025-08-19 22:51:53 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-19 22:51:53 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-19 22:51:53 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-19 22:51:53 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-19 22:51:53 - werkzeug - WARNING - _internal.py:187 -  * Debugger is active!
+2025-08-19 22:51:53 - werkzeug - INFO - _internal.py:187 -  * Debugger PIN: 620-872-712
+2025-08-19 22:52:10 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-19 22:52:10 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-19 22:52:10 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-19 22:52:10 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-19 22:52:10 - werkzeug - INFO - _internal.py:187 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.31.17:5000
+2025-08-19 22:52:10 - werkzeug - INFO - _internal.py:187 - [33mPress CTRL+C to quit[0m
+2025-08-19 22:52:10 - werkzeug - INFO - _internal.py:187 -  * Restarting with stat
+2025-08-19 22:52:10 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-19 22:52:10 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-19 22:52:10 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-19 22:52:10 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-19 22:52:10 - werkzeug - WARNING - _internal.py:187 -  * Debugger is active!
+2025-08-19 22:52:10 - werkzeug - INFO - _internal.py:187 -  * Debugger PIN: 620-872-712
+2025-08-19 22:52:26 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:52:26] "GET /api/v1/tasks HTTP/1.1" 200 -
+2025-08-19 22:53:17 - tzlocal - DEBUG - unix.py:120 - /etc/localtime found
+2025-08-19 22:53:17 - tzlocal - DEBUG - unix.py:136 - 1 found:
+ {'/etc/localtime is a symlink to': 'Asia/Shanghai'}
+2025-08-19 22:53:17 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-19 22:53:17 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-19 22:53:17 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-19 22:53:17 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-19 22:53:17 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-19 22:53:17 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-19 22:58:17.421199+08:00 (in 299.999308 seconds)
+2025-08-19 22:53:17 - werkzeug - INFO - _internal.py:187 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.31.17:5000
+2025-08-19 22:53:17 - werkzeug - INFO - _internal.py:187 - [33mPress CTRL+C to quit[0m
+2025-08-19 22:53:17 - werkzeug - INFO - _internal.py:187 -  * Restarting with stat
+2025-08-19 22:53:17 - tzlocal - DEBUG - unix.py:120 - /etc/localtime found
+2025-08-19 22:53:17 - tzlocal - DEBUG - unix.py:136 - 1 found:
+ {'/etc/localtime is a symlink to': 'Asia/Shanghai'}
+2025-08-19 22:53:17 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-19 22:53:17 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-19 22:53:17 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-19 22:53:17 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-19 22:53:17 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-19 22:53:17 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-19 22:58:17.687616+08:00 (in 299.999484 seconds)
+2025-08-19 22:53:17 - werkzeug - WARNING - _internal.py:187 -  * Debugger is active!
+2025-08-19 22:53:17 - werkzeug - INFO - _internal.py:187 -  * Debugger PIN: 620-872-712
+2025-08-19 22:53:32 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:53:32] "[35m[1mPOST /api/v1/nodes/register HTTP/1.1[0m" 201 -
+2025-08-19 22:53:32 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:53:32] "[35m[1mPOST /api/v1/nodes/register HTTP/1.1[0m" 201 -
+2025-08-19 22:53:32 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:53:32] "POST /api/v1/nodes/heartbeat HTTP/1.1" 200 -
+2025-08-19 22:53:32 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:53:32] "GET /api/v1/tasks?enabled=true&agent_id=book HTTP/1.1" 200 -
+2025-08-19 22:53:32 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:53:32] "GET /api/v1/system-variables HTTP/1.1" 200 -
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:37 - 开始处理任务告警匹配 - 任务ID: 4, 任务名称: curl
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:38 - Agent上报数据: {'task_id': 4, 'status': 'failed', 'response_time': None, 'message': "步骤 '获取主机名' 失败: 执行异常: HTTPConnectionPool(host='localhost', port=6000): Max retries exceeded with url: /name?ip=%24ip (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x103a9c6b0>: Failed to establish a new connection: [Errno 61] Connection refused'))", 'details': {'status': 'failed', 'response_time': 1.77, 'message': "步骤 '获取主机名' 失败: 执行异常: HTTPConnectionPool(host='localhost', port=6000): Max retries exceeded with url: /name?ip=%24ip (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x103a9c6b0>: Failed to establish a new connection: [Errno 61] Connection refused'))", 'details': {'steps': [{'step_id': 'step_1755585696329_3mvgyxv63', 'name': '获取 ip 地址', 'status': 'failed', 'response_time': 0, 'message': "执行异常: HTTPConnectionPool(host='localhost', port=6000): Max retries exceeded with url: /ip (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x103a98050>: Failed to establish a new connection: [Errno 61] Connection refused'))", 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'response': {}, 'assertions': [], 'extractions': []}, {'step_id': 'step_1755585966494_mj4x35gnh', 'name': '获取主机名', 'status': 'failed', 'response_time': 0, 'message': "执行异常: HTTPConnectionPool(host='localhost', port=6000): Max retries exceeded with url: /name?ip=%24ip (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x103a9c6b0>: Failed to establish a new connection: [Errno 61] Connection refused'))", 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': '$ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': '$ip'}]}, 'response': {}, 'assertions': [], 'extractions': []}], 'variables': {'$public_test': 'abc'}, 'total_assertions': 0, 'passed_assertions': 0, 'start_time': '2025-08-19T14:53:32.843121', 'end_time': '2025-08-19T14:53:32.845043'}}, 'created_at': '2025-08-19T22:53:32.845294', 'agent_id': 'book', 'agent_area': 'guangzhou'}
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:42 - 任务配置: {'authentication': {'accessToken': '', 'headers': [], 'keyName': '', 'keyValue': '', 'location': 'header', 'password': '', 'token': '', 'tokenType': 'Bearer', 'type': 'none', 'username': ''}, 'statusAlertConfig': ['failed'], 'steps': [{'alerts': {'allowedStatusCodes': '200', 'responseTimeAlertLevel': 'severe', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取 ip 地址', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'step_id': 'step_1755585696329_3mvgyxv63', 'variables': [{'expression': '$.ip', 'name': '$ip', 'source': 'body'}]}, {'alerts': {'allowedStatusCodes': '200', 'responseTimeThreshold': 5}, 'assertions': [], 'name': '获取主机名', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': '$ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': '$ip'}]}, 'step_id': 'step_1755585966494_mj4x35gnh', 'variables': []}], 'timeoutAlertEnabled': False, 'timeoutThreshold': 5000, 'variables': []}
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:50 - 找到 0 个启用的告警配置
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:81 - 全局告警检查结果: 0 个告警
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:308 - 开始检查任务配置告警 - 任务ID: 4
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:312 - 任务配置内容: {'authentication': {'accessToken': '', 'headers': [], 'keyName': '', 'keyValue': '', 'location': 'header', 'password': '', 'token': '', 'tokenType': 'Bearer', 'type': 'none', 'username': ''}, 'statusAlertConfig': ['failed'], 'steps': [{'alerts': {'allowedStatusCodes': '200', 'responseTimeAlertLevel': 'severe', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取 ip 地址', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'step_id': 'step_1755585696329_3mvgyxv63', 'variables': [{'expression': '$.ip', 'name': '$ip', 'source': 'body'}]}, {'alerts': {'allowedStatusCodes': '200', 'responseTimeThreshold': 5}, 'assertions': [], 'name': '获取主机名', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': '$ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': '$ip'}]}, 'step_id': 'step_1755585966494_mj4x35gnh', 'variables': []}], 'timeoutAlertEnabled': False, 'timeoutThreshold': 5000, 'variables': []}
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:320 - 状态告警配置: ['failed']
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:323 - 开始检查任务状态告警，配置: ['failed']
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:561 - 检查任务状态告警 - 任务ID: 4
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:565 - Agent上报的任务状态: failed
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:566 - 状态告警配置: ['failed']
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:574 - 任务状态 'failed' 匹配告警配置，开始生成告警
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:683 - 开始创建告警 - 任务ID: 4, 类型: task_status, 级别: critical
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:684 - 告警标题: 任务状态告警 - curl
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:685 - 告警内容: 任务执行状态为 failed，触发告警。 错误信息: 步骤 '获取主机名' 失败: 执行异常: HTTPConnectionPool(host='localhost', port=6000): Max retries exceeded with url: /name?ip=%24ip (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x103a9c6b0>: Failed to establish a new connection: [Errno 61] Connection refused'))
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:709 - 设置告警快照数据: 2219 字符
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:715 - 告警成功保存到数据库 - 告警ID: 1, 类型: task_status, 级别: critical
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:601 - 成功创建任务状态告警: 任务状态告警 - curl
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:328 - 生成任务状态告警: 任务状态告警 - curl
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:337 - 超时告警启用状态: False
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:350 - 未启用任务超时告警
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:89 - 任务配置告警检查结果: 1 个告警
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:92 - 总共生成 1 个告警
+2025-08-19 22:53:32 - app.services.alert_matcher - INFO - alert_matcher.py:94 - 告警 1: 类型=task_status, 级别=critical, 标题=任务状态告警 - curl
+2025-08-19 22:53:32 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:53:32] "[35m[1mPOST /api/v1/results HTTP/1.1[0m" 201 -
+2025-08-19 22:53:48 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:53:48] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 22:53:48 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:53:48] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 22:55:57 - werkzeug - INFO - _internal.py:187 -  * Detected change in '/Users/peter/Documents/code/boce/it-dialer/backend/app/models/alert.py', reloading
+2025-08-19 22:55:57 - werkzeug - INFO - _internal.py:187 -  * Restarting with stat
+2025-08-19 22:55:57 - tzlocal - DEBUG - unix.py:120 - /etc/localtime found
+2025-08-19 22:55:57 - tzlocal - DEBUG - unix.py:136 - 1 found:
+ {'/etc/localtime is a symlink to': 'Asia/Shanghai'}
+2025-08-19 22:55:57 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-19 22:55:57 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-19 22:55:57 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-19 22:55:57 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-19 22:55:57 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-19 22:55:57 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-19 23:00:57.876967+08:00 (in 299.999344 seconds)
+2025-08-19 22:55:57 - werkzeug - WARNING - _internal.py:187 -  * Debugger is active!
+2025-08-19 22:55:57 - werkzeug - INFO - _internal.py:187 -  * Debugger PIN: 620-872-712
+2025-08-19 22:56:16 - tzlocal - DEBUG - unix.py:120 - /etc/localtime found
+2025-08-19 22:56:16 - tzlocal - DEBUG - unix.py:136 - 1 found:
+ {'/etc/localtime is a symlink to': 'Asia/Shanghai'}
+2025-08-19 22:56:16 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-19 22:56:16 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-19 22:56:16 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-19 22:56:16 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-19 22:56:16 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-19 23:01:16.505136+08:00 (in 299.999546 seconds)
+2025-08-19 22:56:16 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-19 22:56:16 - werkzeug - INFO - _internal.py:187 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.31.17:5000
+2025-08-19 22:56:16 - werkzeug - INFO - _internal.py:187 - [33mPress CTRL+C to quit[0m
+2025-08-19 22:56:16 - werkzeug - INFO - _internal.py:187 -  * Restarting with stat
+2025-08-19 22:56:16 - tzlocal - DEBUG - unix.py:120 - /etc/localtime found
+2025-08-19 22:56:16 - tzlocal - DEBUG - unix.py:136 - 1 found:
+ {'/etc/localtime is a symlink to': 'Asia/Shanghai'}
+2025-08-19 22:56:16 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-19 22:56:16 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-19 22:56:16 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-19 22:56:16 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-19 22:56:16 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-19 23:01:16.805434+08:00 (in 299.999349 seconds)
+2025-08-19 22:56:16 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-19 22:56:16 - werkzeug - WARNING - _internal.py:187 -  * Debugger is active!
+2025-08-19 22:56:16 - werkzeug - INFO - _internal.py:187 -  * Debugger PIN: 620-872-712
+2025-08-19 22:56:24 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:56:24] "GET /api/v1/alerts HTTP/1.1" 200 -
+2025-08-19 22:56:29 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:56:29] "GET /api/v1/alerts HTTP/1.1" 200 -
+2025-08-19 22:56:35 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:56:35] "[33mGET /?ide_webview_request_time=1755615395619 HTTP/1.1[0m" 404 -
+2025-08-19 22:56:35 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:56:35] "[33mGET /@vite/client HTTP/1.1[0m" 404 -
+2025-08-19 22:56:50 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:56:50] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 22:56:50 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:56:50] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 22:56:56 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:56:56] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 22:56:56 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:56:56] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 22:57:22 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:57:22] "OPTIONS /api/v1/nodes?page=1&size=10 HTTP/1.1" 200 -
+2025-08-19 22:57:22 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:57:22] "GET /api/v1/nodes?page=1&size=10 HTTP/1.1" 200 -
+2025-08-19 22:57:27 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:57:27] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 22:57:27 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:57:27] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 22:57:57 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:57:57] "[35m[1mPOST /api/v1/nodes/register HTTP/1.1[0m" 201 -
+2025-08-19 22:57:57 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:57:57] "[35m[1mPOST /api/v1/nodes/register HTTP/1.1[0m" 201 -
+2025-08-19 22:57:57 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:57:57] "POST /api/v1/nodes/heartbeat HTTP/1.1" 200 -
+2025-08-19 22:57:57 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:57:57] "GET /api/v1/tasks?enabled=true&agent_id=book HTTP/1.1" 200 -
+2025-08-19 22:57:57 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:57:57] "GET /api/v1/system-variables HTTP/1.1" 200 -
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:37 - 开始处理任务告警匹配 - 任务ID: 4, 任务名称: curl
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:38 - Agent上报数据: {'task_id': 4, 'status': 'failed', 'response_time': None, 'message': "步骤 '获取主机名' 失败: 执行异常: HTTPConnectionPool(host='localhost', port=6000): Max retries exceeded with url: /name?ip=%24ip (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x1044c86b0>: Failed to establish a new connection: [Errno 61] Connection refused'))", 'details': {'status': 'failed', 'response_time': 1.69, 'message': "步骤 '获取主机名' 失败: 执行异常: HTTPConnectionPool(host='localhost', port=6000): Max retries exceeded with url: /name?ip=%24ip (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x1044c86b0>: Failed to establish a new connection: [Errno 61] Connection refused'))", 'details': {'steps': [{'step_id': 'step_1755585696329_3mvgyxv63', 'name': '获取 ip 地址', 'status': 'failed', 'response_time': 0, 'message': "执行异常: HTTPConnectionPool(host='localhost', port=6000): Max retries exceeded with url: /ip (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x1044c4050>: Failed to establish a new connection: [Errno 61] Connection refused'))", 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'response': {}, 'assertions': [], 'extractions': []}, {'step_id': 'step_1755585966494_mj4x35gnh', 'name': '获取主机名', 'status': 'failed', 'response_time': 0, 'message': "执行异常: HTTPConnectionPool(host='localhost', port=6000): Max retries exceeded with url: /name?ip=%24ip (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x1044c86b0>: Failed to establish a new connection: [Errno 61] Connection refused'))", 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': '$ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': '$ip'}]}, 'response': {}, 'assertions': [], 'extractions': []}], 'variables': {'$public_test': 'abc'}, 'total_assertions': 0, 'passed_assertions': 0, 'start_time': '2025-08-19T14:57:57.043745', 'end_time': '2025-08-19T14:57:57.045615'}}, 'created_at': '2025-08-19T22:57:57.045703', 'agent_id': 'book', 'agent_area': 'guangzhou'}
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:42 - 任务配置: {'authentication': {'accessToken': '', 'headers': [], 'keyName': '', 'keyValue': '', 'location': 'header', 'password': '', 'token': '', 'tokenType': 'Bearer', 'type': 'none', 'username': ''}, 'statusAlertConfig': ['failed'], 'steps': [{'alerts': {'allowedStatusCodes': '200', 'responseTimeAlertLevel': 'severe', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取 ip 地址', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'step_id': 'step_1755585696329_3mvgyxv63', 'variables': [{'expression': '$.ip', 'name': '$ip', 'source': 'body'}]}, {'alerts': {'allowedStatusCodes': '200', 'responseTimeThreshold': 5}, 'assertions': [], 'name': '获取主机名', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': '$ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': '$ip'}]}, 'step_id': 'step_1755585966494_mj4x35gnh', 'variables': []}], 'timeoutAlertEnabled': False, 'timeoutThreshold': 5000, 'variables': []}
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:50 - 找到 0 个启用的告警配置
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:81 - 全局告警检查结果: 0 个告警
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:308 - 开始检查任务配置告警 - 任务ID: 4
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:312 - 任务配置内容: {'authentication': {'accessToken': '', 'headers': [], 'keyName': '', 'keyValue': '', 'location': 'header', 'password': '', 'token': '', 'tokenType': 'Bearer', 'type': 'none', 'username': ''}, 'statusAlertConfig': ['failed'], 'steps': [{'alerts': {'allowedStatusCodes': '200', 'responseTimeAlertLevel': 'severe', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取 ip 地址', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'step_id': 'step_1755585696329_3mvgyxv63', 'variables': [{'expression': '$.ip', 'name': '$ip', 'source': 'body'}]}, {'alerts': {'allowedStatusCodes': '200', 'responseTimeThreshold': 5}, 'assertions': [], 'name': '获取主机名', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': '$ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': '$ip'}]}, 'step_id': 'step_1755585966494_mj4x35gnh', 'variables': []}], 'timeoutAlertEnabled': False, 'timeoutThreshold': 5000, 'variables': []}
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:320 - 状态告警配置: ['failed']
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:323 - 开始检查任务状态告警，配置: ['failed']
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:561 - 检查任务状态告警 - 任务ID: 4
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:565 - Agent上报的任务状态: failed
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:566 - 状态告警配置: ['failed']
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:574 - 任务状态 'failed' 匹配告警配置，开始生成告警
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:683 - 开始创建告警 - 任务ID: 4, 类型: task_status, 级别: critical
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:684 - 告警标题: 任务状态告警 - curl
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:685 - 告警内容: 任务执行状态为 failed，触发告警。 错误信息: 步骤 '获取主机名' 失败: 执行异常: HTTPConnectionPool(host='localhost', port=6000): Max retries exceeded with url: /name?ip=%24ip (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x1044c86b0>: Failed to establish a new connection: [Errno 61] Connection refused'))
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:709 - 设置告警快照数据: 2219 字符
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:715 - 告警成功保存到数据库 - 告警ID: 2, 类型: task_status, 级别: critical
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:601 - 成功创建任务状态告警: 任务状态告警 - curl
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:328 - 生成任务状态告警: 任务状态告警 - curl
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:337 - 超时告警启用状态: False
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:350 - 未启用任务超时告警
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:89 - 任务配置告警检查结果: 1 个告警
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:92 - 总共生成 1 个告警
+2025-08-19 22:57:57 - app.services.alert_matcher - INFO - alert_matcher.py:94 - 告警 1: 类型=task_status, 级别=critical, 标题=任务状态告警 - curl
+2025-08-19 22:57:57 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:57:57] "[35m[1mPOST /api/v1/results HTTP/1.1[0m" 201 -
+2025-08-19 22:58:03 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:58:03] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 22:58:03 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 22:58:03] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 23:01:16 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-19 23:01:16 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-19 23:06:16 CST)" (scheduled at 2025-08-19 23:01:16.505136+08:00)
+2025-08-19 23:01:16 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-19 23:06:16.505136+08:00 (in 299.985390 seconds)
+2025-08-19 23:01:16 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-19 23:06:16 CST)" executed successfully
+2025-08-19 23:01:16 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-19 23:01:16 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-19 23:01:16 CST)" (scheduled at 2025-08-19 23:01:16.805434+08:00)
+2025-08-19 23:01:16 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-19 23:01:16 CST)" executed successfully
+2025-08-19 23:01:16 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-19 23:06:16.805434+08:00 (in 299.987169 seconds)
+2025-08-19 23:01:21 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-19 23:01:21 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-19 23:01:21 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-19 23:01:21 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-19 23:01:27 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-19 23:01:27 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-19 23:01:27 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-19 23:01:27 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-19 23:02:38 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:02:38] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 23:02:38 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:02:38] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 23:02:54 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:02:54] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 23:02:54 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:02:54] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 23:06:16 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-19 23:06:16 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-19 23:11:16.505136+08:00 (in 299.969188 seconds)
+2025-08-19 23:06:16 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-19 23:11:16 CST)" (scheduled at 2025-08-19 23:06:16.505136+08:00)
+2025-08-19 23:06:16 - app.scheduler - INFO - scheduler.py:24 - 节点 book 已标记为离线
+2025-08-19 23:06:16 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-19 23:11:16 CST)" executed successfully
+2025-08-19 23:06:16 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-19 23:06:16 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-19 23:11:16.805434+08:00 (in 299.988055 seconds)
+2025-08-19 23:06:16 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-19 23:11:16 CST)" (scheduled at 2025-08-19 23:06:16.805434+08:00)
+2025-08-19 23:06:16 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-19 23:11:16 CST)" executed successfully
+2025-08-19 23:07:00 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:00] "OPTIONS /api/v1/nodes HTTP/1.1" 200 -
+2025-08-19 23:07:00 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:00] "OPTIONS /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-19 23:07:00 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:00] "GET /api/v1/nodes HTTP/1.1" 200 -
+2025-08-19 23:07:00 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:00] "GET /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-19 23:07:03 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:03] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 23:07:03 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:03] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 23:07:09 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:09] "OPTIONS /api/v1/alerts/2/status HTTP/1.1" 200 -
+2025-08-19 23:07:09 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:09] "PUT /api/v1/alerts/2/status HTTP/1.1" 200 -
+2025-08-19 23:07:09 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:09] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 23:07:09 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:09] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 23:07:15 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:15] "OPTIONS /api/v1/alerts/1/status HTTP/1.1" 200 -
+2025-08-19 23:07:15 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:15] "[31m[1mPUT /api/v1/alerts/1/status HTTP/1.1[0m" 400 -
+2025-08-19 23:07:21 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:21] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 23:07:21 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:21] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 23:07:23 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:23] "OPTIONS /api/v1/results?page=1&size=10 HTTP/1.1" 200 -
+2025-08-19 23:07:23 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:23] "GET /api/v1/results?page=1&size=10 HTTP/1.1" 200 -
+2025-08-19 23:07:25 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:25] "OPTIONS /api/v1/results?task_id=4&start=2025-08-19T22:07:25%2B08:00&end=2025-08-19T23:07:25%2B08:00 HTTP/1.1" 200 -
+2025-08-19 23:07:25 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:25] "OPTIONS /api/v1/results?task_id=4&start=2025-08-19T22:07:25%2B08:00&end=2025-08-19T23:07:25%2B08:00 HTTP/1.1" 200 -
+2025-08-19 23:07:25 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:25] "GET /api/v1/results?task_id=4&start=2025-08-19T22:07:25%2B08:00&end=2025-08-19T23:07:25%2B08:00 HTTP/1.1" 200 -
+2025-08-19 23:07:25 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:25] "GET /api/v1/results?task_id=4&start=2025-08-19T22:07:25%2B08:00&end=2025-08-19T23:07:25%2B08:00 HTTP/1.1" 200 -
+2025-08-19 23:07:25 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:25] "GET /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-19 23:07:26 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:26] "GET /api/v1/results?task_id=4&type=api&page=1&size=100 HTTP/1.1" 200 -
+2025-08-19 23:07:33 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:33] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-19 23:07:33 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:33] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -

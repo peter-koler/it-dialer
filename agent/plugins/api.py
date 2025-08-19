@@ -791,6 +791,35 @@ def execute_assertion(assertion: Dict[str, Any], response: requests.Response) ->
             result["message"] = "断言通过"
         else:
             result["message"] = f"断言失败: 期望 {actual} {comparison} {target}"
+        
+        # 检查是否需要触发告警
+        enable_alert = assertion.get("enableAlert", False)
+        if enable_alert:
+            alert_condition = assertion.get("alertCondition", "match")
+            should_trigger_alert = False
+            
+            if alert_condition == "match" and result["result"]:
+                # 断言匹配时告警
+                should_trigger_alert = True
+            elif alert_condition == "not_match" and not result["result"]:
+                # 断言不匹配时告警
+                should_trigger_alert = True
+            
+            if should_trigger_alert:
+                # 触发告警
+                alert_info = {
+                    "type": "assertion_alert",
+                    "source": source,
+                    "property": property_path,
+                    "comparison": comparison,
+                    "expected": target,
+                    "actual": actual,
+                    "condition": alert_condition,
+                    "message": f"断言告警触发: {result['message']}",
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+                result["alert"] = alert_info
+                logger.warning(f"断言告警触发: {alert_info['message']}")
             
     except Exception as e:
         result["message"] = f"执行断言时发生异常: {str(e)}"

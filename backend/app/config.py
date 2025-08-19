@@ -18,6 +18,12 @@ class Config:
     # Scheduler
     SCHEDULER_API_ENABLED = True
     
+    # Logging configuration
+    LOG_FILE = os.environ.get('LOG_FILE') or os.path.join(basedir, '..', 'logs', 'backend.log')
+    LOG_LEVEL = os.environ.get('LOG_LEVEL') or 'INFO'
+    LOG_MAX_BYTES = int(os.environ.get('LOG_MAX_BYTES', 10 * 1024 * 1024))  # 10MB
+    LOG_BACKUP_COUNT = int(os.environ.get('LOG_BACKUP_COUNT', 5))  # 保留5个备份文件
+    
     # CORS
     ALLOWED_ORIGINS = [
         "http://localhost:5173", 

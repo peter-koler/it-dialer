@@ -12,6 +12,7 @@ export default {
   'menu.probeConfig.task': 'Probe Tasks',
   'menu.taskManagement': 'Task Management',
   'menu.taskManagement.list': 'Task List',
+  'menu.taskManagement.apiAlerts': 'API Alerts',
   'menu.system': 'System Management',
   'menu.system.user': 'User Management',
   

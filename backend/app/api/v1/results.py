@@ -3,6 +3,7 @@ from . import bp
 from app import db
 from app.models.result import Result
 from app.models.task import Task
+from app.services.alert_matcher import alert_matcher
 import json
 from datetime import datetime
 import traceback
@@ -158,6 +159,20 @@ def create_result():
         # 保存到数据库
         db.session.add(result)
         db.session.commit()
+        
+        # 处理告警匹配
+        try:
+            alerts = alert_matcher.process_result(data, task)
+            if alerts:
+                # process_result中的_create_alert已经保存了告警，这里不需要再次保存
+                # alert_matcher.save_alerts(alerts)
+                print(f"成功处理告警匹配，生成了 {len(alerts)} 个告警")
+            else:
+                print("告警匹配处理完成，未生成告警")
+        except Exception as e:
+            # 告警处理失败不影响结果保存
+            print(f"告警匹配处理失败: {str(e)}")
+            print(traceback.format_exc())
         
         return jsonify({
             'code': 0,

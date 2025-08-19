@@ -85,6 +85,11 @@ const menuItems = [
         key: '/task-management/list',
         label: 'menu.taskManagement.list',
         icon: ToolOutlined
+      },
+      {
+        key: '/task-management/api-alerts',
+        label: 'menu.taskManagement.apiAlerts',
+        icon: ToolOutlined
       }
     ]
   },

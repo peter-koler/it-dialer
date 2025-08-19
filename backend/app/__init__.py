@@ -15,6 +15,11 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     
+    # 设置日志配置
+    from logging_config import LoggingConfig
+    logging_config = LoggingConfig.from_config(Config)
+    logging_config.setup_logging()
+    
     # 设置CORS - 开发环境下允许所有来源
     if app.config.get('ENV') == 'development':
         CORS(app, resources={

@@ -71,6 +71,45 @@
               un-checked-children="禁用"
             />
           </a-form-item>
+          
+          <a-form-item label="任务状态告警配置" name="statusAlertConfig">
+            <a-checkbox-group v-model:value="formState.statusAlertConfig" style="width: 100%">
+              <a-checkbox value="failed">失败时告警</a-checkbox>
+              <a-checkbox value="success">成功时告警</a-checkbox>
+            </a-checkbox-group>
+            <div v-if="formState.statusAlertConfig && formState.statusAlertConfig.length > 0" style="margin-top: 8px;">
+              <a-form-item label="状态告警级别" :label-col="{span: 6}" :wrapper-col="{span: 18}" style="margin-bottom: 0;">
+                <a-select v-model:value="formState.statusAlertLevel" placeholder="选择告警级别" style="width: 120px;">
+                  <a-select-option value="severe">严重</a-select-option>
+                  <a-select-option value="warning">警告</a-select-option>
+                  <a-select-option value="info">信息</a-select-option>
+                </a-select>
+              </a-form-item>
+            </div>
+          </a-form-item>
+          
+          <a-form-item label="超时告警配置" name="timeoutAlert">
+            <a-input-group compact>
+              <a-checkbox v-model:checked="formState.timeoutAlertEnabled" style="margin-right: 8px;">启用超时告警</a-checkbox>
+              <a-input-number 
+                v-model:value="formState.timeoutThreshold" 
+                :min="1" 
+                :max="60000" 
+                :disabled="!formState.timeoutAlertEnabled"
+                placeholder="超时阈值(毫秒)"
+                style="width: 200px;"
+              />
+            </a-input-group>
+            <div v-if="formState.timeoutAlertEnabled" style="margin-top: 8px;">
+              <a-form-item label="超时告警级别" :label-col="{span: 6}" :wrapper-col="{span: 18}" style="margin-bottom: 0;">
+                <a-select v-model:value="formState.timeoutAlertLevel" placeholder="选择告警级别" style="width: 120px;">
+                  <a-select-option value="severe">严重</a-select-option>
+                  <a-select-option value="warning">警告</a-select-option>
+                  <a-select-option value="info">信息</a-select-option>
+                </a-select>
+              </a-form-item>
+            </div>
+          </a-form-item>
         </a-card>
         
 
@@ -108,7 +147,13 @@ const formState = reactive({
   enabled: true,
   apiSteps: [],
   initialVariables: [],
-  authentications: []
+  authentications: [],
+  // 新增告警配置字段
+  statusAlertConfig: [], // 任务状态告警配置，可选值：['failed', 'success']
+  statusAlertLevel: 'warning', // 状态告警级别，默认为警告
+  timeoutAlertEnabled: false, // 是否启用超时告警
+  timeoutThreshold: 5000, // 超时阈值，单位毫秒
+  timeoutAlertLevel: 'warning' // 超时告警级别，默认为警告
 })
 
 // 返回列表页
@@ -166,7 +211,11 @@ const handleSave = async () => {
       config: {
         steps: formState.apiSteps,
         initialVariables: formState.initialVariables,
-        authentications: formState.authentications
+        authentications: formState.authentications,
+        // 包含告警配置数据
+        statusAlertConfig: formState.statusAlertConfig,
+        timeoutAlertEnabled: formState.timeoutAlertEnabled,
+        timeoutThreshold: formState.timeoutThreshold
       }
     }
     

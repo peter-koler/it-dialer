@@ -348,11 +348,16 @@ class DialerAgent:
             # 记录任务详细输出（按error级别输出）
             logger.error(f"任务 {task_id} 详细输出: {json.dumps(result, ensure_ascii=False)}")
             
+            # 获取插件执行的实际状态
+            plugin_status = result.get("status", "success")
+            plugin_message = result.get("message", "")
+            
             logger.info(f"任务 {task_id} 执行完成")
             return {
                 "task_id": task_id,
-                "status": "success",
+                "status": plugin_status,  # 使用插件返回的实际状态
                 "result": result,
+                "message": plugin_message,  # 添加插件返回的消息
                 "timestamp": time.time()
             }
         except Exception as e:

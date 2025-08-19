@@ -12,6 +12,7 @@ export default {
   'menu.probeConfig.task': '拨测任务',
   'menu.taskManagement': '任务管理',
   'menu.taskManagement.list': '任务列表',
+  'menu.taskManagement.apiAlerts': 'API告警',
   'menu.system': '系统管理',
   'menu.system.user': '用户管理',
   'menu.system.variables': '系统变量',

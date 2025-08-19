@@ -122,37 +122,101 @@
               
               <a-collapse-panel key="assertions" header="断言验证">
                 <div v-for="(assertion, assertIndex) in step.assertions" :key="assertIndex" class="assertion-item">
-                  <a-select v-model:value="assertion.source" style="width: 25%">
-                    <a-select-option value="body">响应体</a-select-option>
-                    <a-select-option value="headers">响应头</a-select-option>
-                    <a-select-option value="status">状态码</a-select-option>
-                    <a-select-option value="cookie">Cookie</a-select-option>
-                    <a-select-option value="time">响应时间</a-select-option>
-                    <a-select-option value="size">响应大小</a-select-option>
-                  </a-select>
-                  <a-input v-model:value="assertion.expression" placeholder="提取表达式" style="width: 30%" />
-                  <a-select v-model:value="assertion.operator" style="width: 20%">
-                    <a-select-option value="equals">等于</a-select-option>
-                    <a-select-option value="not_equals">不等于</a-select-option>
-                    <a-select-option value="contains">包含</a-select-option>
-                    <a-select-option value="not_contains">不包含</a-select-option>
-                    <a-select-option value="startsWith">开头是</a-select-option>
-                    <a-select-option value="endsWith">结尾是</a-select-option>
-                    <a-select-option value="greater_than">大于</a-select-option>
-                    <a-select-option value="less_than">小于</a-select-option>
-                    <a-select-option value="regex">匹配正则</a-select-option>
-                    <a-select-option value="exists">存在</a-select-option>
-                    <a-select-option value="not_exists">不存在</a-select-option>
-                  </a-select>
-                  <a-input v-model:value="assertion.expected" placeholder="期望值" style="width: 15%" />
-                  <a-button type="text" danger @click="removeAssertion(index, assertIndex)">
-                    <template #icon><delete-outlined /></template>
-                  </a-button>
+                  <div class="assertion-config">
+                    <a-select v-model:value="assertion.source" style="width: 20%">
+                      <a-select-option value="body">响应体</a-select-option>
+                      <a-select-option value="headers">响应头</a-select-option>
+                      <a-select-option value="status">状态码</a-select-option>
+                      <a-select-option value="cookie">Cookie</a-select-option>
+                      <a-select-option value="time">响应时间</a-select-option>
+                      <a-select-option value="size">响应大小</a-select-option>
+                    </a-select>
+                    <a-input v-model:value="assertion.expression" placeholder="提取表达式" style="width: 25%" />
+                    <a-select v-model:value="assertion.operator" style="width: 15%">
+                      <a-select-option value="equals">等于</a-select-option>
+                      <a-select-option value="not_equals">不等于</a-select-option>
+                      <a-select-option value="contains">包含</a-select-option>
+                      <a-select-option value="not_contains">不包含</a-select-option>
+                      <a-select-option value="startsWith">开头是</a-select-option>
+                      <a-select-option value="endsWith">结尾是</a-select-option>
+                      <a-select-option value="greater_than">大于</a-select-option>
+                      <a-select-option value="less_than">小于</a-select-option>
+                      <a-select-option value="regex">匹配正则</a-select-option>
+                      <a-select-option value="exists">存在</a-select-option>
+                      <a-select-option value="not_exists">不存在</a-select-option>
+                    </a-select>
+                    <a-input v-model:value="assertion.expected" placeholder="期望值" style="width: 15%" />
+                    <a-switch 
+                      v-model:checked="assertion.enableAlert" 
+                      size="small" 
+                      style="margin-left: 8px"
+                    />
+                    <span style="margin-left: 4px; font-size: 12px; color: #666;">告警</span>
+                    <a-button type="text" danger @click="removeAssertion(index, assertIndex)" style="margin-left: 8px">
+                      <template #icon><delete-outlined /></template>
+                    </a-button>
+                  </div>
+                  <div v-if="assertion.enableAlert" class="assertion-alert-config">
+                    <a-form-item label="告警条件" :label-col="{span: 4}" :wrapper-col="{span: 20}">
+                      <a-radio-group v-model:value="assertion.alertCondition" size="small">
+                        <a-radio value="match">断言匹配时告警</a-radio>
+                        <a-radio value="not_match">断言不匹配时告警</a-radio>
+                      </a-radio-group>
+                      <div class="form-help-text">选择在什么情况下触发告警</div>
+                    </a-form-item>
+                    <a-form-item label="断言告警级别" :label-col="{span: 4}" :wrapper-col="{span: 20}">
+                      <a-select v-model:value="assertion.alertLevel" placeholder="选择告警级别" style="width: 120px;">
+                        <a-select-option value="severe">严重</a-select-option>
+                        <a-select-option value="warning">警告</a-select-option>
+                        <a-select-option value="info">信息</a-select-option>
+                      </a-select>
+                    </a-form-item>
+                  </div>
                 </div>
                 <a-button type="dashed" block @click="addAssertion(index)">
                   <template #icon><plus-outlined /></template>
                   添加断言
                 </a-button>
+              </a-collapse-panel>
+              
+              <a-collapse-panel key="alerts" header="告警配置">
+                <a-form-item label="返回码告警">
+                  <a-input 
+                    v-model:value="step.alerts.allowedStatusCodes" 
+                    placeholder="允许的返回码范围，例如：200、200,201,204 或 2xx" 
+                  />
+                  <div class="form-help-text">如果API返回码不在允许范围内，则触发告警</div>
+                  <div v-if="step.alerts.allowedStatusCodes" style="margin-top: 8px;">
+                    <a-form-item label="返回码告警级别" :label-col="{span: 8}" :wrapper-col="{span: 16}" style="margin-bottom: 0;">
+                      <a-select v-model:value="step.alerts.statusCodeAlertLevel" placeholder="选择告警级别" style="width: 120px;">
+                        <a-select-option value="severe">严重</a-select-option>
+                        <a-select-option value="warning">警告</a-select-option>
+                        <a-select-option value="info">信息</a-select-option>
+                      </a-select>
+                    </a-form-item>
+                  </div>
+                </a-form-item>
+                
+                <a-form-item label="耗时告警">
+                  <a-input-number 
+                    v-model:value="step.alerts.responseTimeThreshold" 
+                    :min="0" 
+                    :step="0.1" 
+                    placeholder="响应时间阈值" 
+                    style="width: 100%"
+                    addon-after="秒"
+                  />
+                  <div class="form-help-text">如果API响应时间超过阈值，则触发告警</div>
+                  <div v-if="step.alerts.responseTimeThreshold && step.alerts.responseTimeThreshold > 0" style="margin-top: 8px;">
+                    <a-form-item label="耗时告警级别" :label-col="{span: 8}" :wrapper-col="{span: 16}" style="margin-bottom: 0;">
+                      <a-select v-model:value="step.alerts.responseTimeAlertLevel" placeholder="选择告警级别" style="width: 120px;">
+                        <a-select-option value="severe">严重</a-select-option>
+                        <a-select-option value="warning">警告</a-select-option>
+                        <a-select-option value="info">信息</a-select-option>
+                      </a-select>
+                    </a-form-item>
+                  </div>
+                </a-form-item>
               </a-collapse-panel>
             </a-collapse>
           </a-form>
@@ -186,6 +250,8 @@ const steps = ref([...props.modelValue])
 watch(() => props.modelValue, (newValue) => {
   if (JSON.stringify(newValue) !== JSON.stringify(steps.value)) {
     steps.value = [...newValue]
+    // 确保所有步骤都有完整的结构
+    ensureStepStructure()
   }
 }, { deep: true })
 
@@ -210,7 +276,13 @@ const createDefaultStep = () => ({
     contentType: 'application/json'
   },
   variables: [],
-  assertions: []
+  assertions: [],
+  alerts: {
+    allowedStatusCodes: '200',
+    statusCodeAlertLevel: 'warning',
+    responseTimeThreshold: 5.0,
+    responseTimeAlertLevel: 'warning'
+  }
 })
 
 // 添加步骤
@@ -272,7 +344,10 @@ const addAssertion = (stepIndex) => {
     source: 'status',
     expression: '',
     operator: 'equals',
-    expected: ''
+    expected: '',
+    enableAlert: false,
+    alertCondition: 'match',
+    alertLevel: 'warning'
   })
 }
 
@@ -346,17 +421,54 @@ const syncUrlParametersToParams = (stepIndex) => {
   }
 }
 
-// 确保所有步骤都有step_id
-const ensureStepIds = () => {
+// 确保所有步骤都有完整的结构
+const ensureStepStructure = () => {
   steps.value.forEach(step => {
+    // 确保有step_id
     if (!step.step_id) {
       step.step_id = `step_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     }
+    
+    // 确保有alerts对象
+    if (!step.alerts) {
+      step.alerts = {
+        allowedStatusCodes: '200',
+        responseTimeThreshold: 5.0
+      }
+    }
+    
+    // 确保alerts对象有所有必需的属性
+    if (!step.alerts.allowedStatusCodes) {
+      step.alerts.allowedStatusCodes = '200'
+    }
+    if (!step.alerts.responseTimeThreshold) {
+      step.alerts.responseTimeThreshold = 5.0
+    }
+    
+    // 确保有request对象
+    if (!step.request) {
+      step.request = {
+        method: 'GET',
+        url: '',
+        headers: [],
+        urlParameters: [],
+        params: [],
+        body: '',
+        contentType: 'application/json'
+      }
+    }
+    
+    // 确保request对象有所有必需的属性
+    if (!step.request.headers) step.request.headers = []
+    if (!step.request.urlParameters) step.request.urlParameters = []
+    if (!step.request.params) step.request.params = []
+    if (!step.variables) step.variables = []
+    if (!step.assertions) step.assertions = []
   })
 }
 
-// 初始化时确保所有步骤都有step_id
-ensureStepIds()
+// 初始化时确保所有步骤都有完整的结构
+ensureStepStructure()
 
 // 初始化时如果没有步骤，添加一个默认步骤
 if (steps.value.length === 0) {
@@ -377,10 +489,22 @@ if (steps.value.length === 0) {
 .variable-item,
 .assertion-item,
 .url-param-item {
+  margin-bottom: 12px;
+}
+
+.assertion-config {
   display: flex;
   gap: 8px;
-  margin-bottom: 8px;
   align-items: center;
+  margin-bottom: 8px;
+}
+
+.assertion-alert-config {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 8px;
 }
 
 .header-item:last-child,
@@ -399,5 +523,12 @@ if (steps.value.length === 0) {
   text-align: center;
   padding: 20px 0;
   color: #999;
+}
+
+.form-help-text {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  line-height: 1.4;
 }
 </style>

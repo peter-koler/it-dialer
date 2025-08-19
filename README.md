@@ -214,65 +214,6 @@ MIT License
 
 ## API文档
 
-<<<<<<< HEAD
-启动后端服务后，访问 `http://localhost:5000/docs/` 查看API文档。
-
-我已经完成了对任务详情页面的修改，主要做了以下几项工作：
-
-1. 创建了中文地区名称映射文件
-创建了一个新的文件 /Users/peter/Documents/code/boce/it-dialer/frontend/src/utils/regionNames.js，其中包含了中国各省市地区的行政区划代码到中文名称的映射。这个文件涵盖了从直辖市到各省、市、自治区、特别行政区的完整映射。
-
-2. 修改了任务详情页面
-对 /Users/peter/Documents/code/boce/it-dialer/frontend/src/views/TaskDetail.vue 文件进行了以下修改：
-
-添加了从路由中获取任务ID的功能
-修改了 fetchProbeData 方法，使用真实的API接口获取数据，而不是模拟数据
-添加了将 agent_area 字段从拼音转换为中文地区名称的功能
-使用新创建的 regionNames 映射来显示中文地区名称
-现在，当用户查看任务详情时，页面将：
-
-从API获取真实的拨测点数据
-将 agent_area 字段（如 "guangzhou"）转换为中文地区名称（如 "广州市"）
-正确显示分页数据和总记录数
-3. 具体实现细节
-使用 useRoute() 获取当前任务的ID
-通过 /api/v1/results?task_id=${taskId} 接口获取真实的拨测结果数据
-使用新创建的 regionNames 工具将拼音地区代码转换为中文名称
-保留了原有的分页功能和数据处理逻辑
-
-拆分后的组件结构
-TaskDetail.vue - 主组件，负责整体协调和数据管理
-SearchBar.vue - 搜索栏组件
-StatusTag.vue - 状态标签组件
-TaskDetailModal.vue - 任务详情模态框组件
-ProbeList.vue - 拨测点列表组件
-TaskCharts.vue - 任务图表展示组件
-ProbeDetailModal.vue - 拨测点详情模态框组件
-ProbeHistoryTable.vue - 拨测点历史记录表格组件
-主要改进点
-职责分离：每个组件都有明确的职责，便于维护和扩展
-代码复用：如 StatusTag 组件可以在多处复用
-可维护性：每个文件都控制在300行以内，便于阅读和修改
-可测试性：小而专注的组件更容易进行单元测试
-组件关系
-TaskDetail.vue (主组件)
-├── SearchBar.vue (搜索栏)
-├── TaskDetailModal.vue (任务详情模态框)
-│   ├── StatusTag.vue (状态标签)
-│   ├── ProbeList.vue (拨测点列表)
-│   │   └── StatusTag.vue
-│   └── TaskCharts.vue (任务图表)
-└── ProbeDetailModal.vue (拨测点详情模态框)
-    ├── StatusTag.vue
-    └── ProbeHistoryTable.vue (历史记录表格)
-        └── StatusTag.vue
-
-        
-如果有API ，请把API 的路径配置单独放在 API 的目录下，避免进行在页面上进行直接调用
-
-
-=======
 mapUtils.js - 包含地图数据加载、编码转换等工具函数
 mapStyling.js - 包含地图样式处理、颜色计算、交互效果等
 mapInteractions.js - 包含地图交互逻辑，如下钻、返回等
->>>>>>> a13df0d1961405871b76ec9653aa9fce9ecfbe66

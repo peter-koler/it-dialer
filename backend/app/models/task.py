@@ -19,6 +19,28 @@ class Task(db.Model):
     # Relationship with results (cascade delete) - 使用不同的backref名称
     results = db.relationship('Result', backref='related_task', lazy=True, cascade='all, delete-orphan')
     
+    # Relationship with alerts (cascade delete)
+    alerts = db.relationship('Alert', backref='related_task', lazy=True, cascade='all, delete-orphan')
+    
+    # Relationship with alert configs (cascade delete)
+    alert_configs = db.relationship('AlertConfig', backref='related_task', lazy=True, cascade='all, delete-orphan')
+    
+    def get_config(self):
+        """
+        获取任务配置
+        
+        Returns:
+            dict: 解析后的配置字典，如果解析失败返回None
+        """
+        if not self.config:
+            return None
+        
+        try:
+            import json
+            return json.loads(self.config)
+        except (json.JSONDecodeError, TypeError):
+            return None
+    
     def to_dict(self):
         # 解析agent_ids字段为数组
         agent_ids_data = []

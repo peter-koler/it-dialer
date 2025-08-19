@@ -71,7 +71,12 @@ const routes = [
       {
         path: '/system/variables',
         name: 'SystemVariables',
-        component: () => import('../components/SystemVariableManager.vue')
+        component: () => import('../views/system/SystemVariableManager.vue')
+      },
+      {
+        path: '/task-management/api-alerts',
+        name: 'ApiAlertManagement',
+        component: () => import('../views/alert-management/ApiAlertManagement.vue')
       }
     ]
   }
