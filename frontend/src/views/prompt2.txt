@@ -1,0 +1,126 @@
+Prompt: 为 IT-Dialer 系统新增高级 API 拨测功能
+项目角色： 你是一名经验丰富的全栈开发工程师，负责为 “IT-Dialer” 网络拨测系统设计并实现一个全新的 “API 拨测” 功能。该功能需支持多步骤的 API 事务监控，包括动态变量传递和灵活的断言验证。
+核心目标： 扩展系统能力，支持创建、执行和分析多步骤的 API 监控任务。该功能需要覆盖从前端配置、后端处理到 Agent 执行的整个流程，重点在于实现事务性监控、动态变量传递和灵活的断言验证。
+第一部分：后端开发 (Flask & SQLAlchemy)
+1. 数据模型扩展 (app/models/)
+修改 Task 模型 (task.py):
+在 type 字段的枚举中增加新类型 'api'。
+config 字段 (JSON) 将用于存储 API 拨测的完整配置。你需要为其设计一个健壮的 JSON 结构，建议如下：
+JSON
+{
+  "variables": [
+    {"name": "$var1", "value": "initial_value"}
+  ],
+  "steps": [
+    {
+      "step_id": "s1",
+      "name": "Step 1: Login",
+      "request": {
+        "method": "POST",
+        "url": "https://api.example.com/login",
+        "auth": { "type": "basic", "username": "user", "password": "password" },
+        "headers": [{"key": "Content-Type", "value": "application/json"}],
+        "params": [],
+        "body": { "type": "json", "content": "{}" },
+        "ssl_verify": true,
+        "ssl_version": "TSLv1.2"
+      },
+      "extract": [
+        {
+          "source": "json_body",
+          "expression": "$.data.token",
+          "variable_name": "$authToken"
+        }
+      ],
+      "assertions": [
+        {
+          "source": "status_code",
+          "comparison": "equal",
+          "target": 200
+        }
+      ]
+    },
+    {
+      "step_id": "s2",
+      "name": "Step 2: Get User Info",
+      "request": {
+        "method": "GET",
+        "url": "https://api.example.com/me",
+        "headers": [{"key": "Authorization", "value": "Bearer $authToken"}]
+      },
+      "extract": [],
+      "assertions": [
+        {"source": "status_code", "comparison": "equal", "target": 200},
+        {"source": "json_body", "property": "$.user.name", "comparison": "not_empty"}
+      ]
+    }
+  ]
+}
+（可选）创建 SystemVariable 模型:
+用于存储全局可用的系统变量 ($public_...)。
+字段：id, name (唯一, 带格式校验), value, description, created_at, updated_at。
+2. API 接口 (app/api/v1/)
+修改 tasks.py:
+增强 POST /tasks 和 PUT /tasks/<id> 接口的校验逻辑。
+当 type 为 api 时，必须对传入的 config JSON 对象进行严格的结构和内容验证（例如，步骤不能为空，变量名格式正确，断言条件有效等）。
+新增 system_variables.py (如果选择创建新模型):
+GET /api/v1/system-variables: 获取所有系统变量。
+POST /api/v1/system-variables: 创建新的系统变量。
+PUT /api/v1/system-variables/<id>: 更新系统变量。
+DELETE /api/v1/system-variables/<id>: 删除系统变量。
+修改 results.py:
+details 字段 (JSON) 需要能存储多步骤 API 任务的详细结果，包括每一步的请求信息、响应头、响应体、耗时、变量提取结果和断言成功/失败状态。
+第二部分：Agent 插件开发
+核心任务： 创建一个新的拨测执行插件，专门用于处理 api 类型的任务。此插件是整个功能的执行核心。
+1. 插件输入
+插件接收后端下发的、经过完整定义的 config JSON 对象。
+2. 执行流程
+初始化执行上下文: 创建一个 context 对象（如 Python 字典）来存储会话期间的所有变量。
+加载变量: 将任务定义的 variables (初始化变量) 和从后端获取的 system_variables 加载到 context 中。
+顺序执行步骤 (Loop): 遍历 config.steps 数组。
+变量替换: 在执行请求前，扫描当前步骤的 URL、Headers、Params、Body 等配置，将所有 $variable 或 $public_variable 替换为 context 中的实际值。
+执行 HTTP 请求:
+使用 requests 或类似库构建并发送请求。
+支持 GET, POST, PUT, DELETE, HEAD, OPTIONS 方法。
+处理认证 (Basic, Digest, OAuth1/2)。
+处理 SSL 版本和证书验证。
+执行断言 (Assertions):
+根据 assertions 数组中的规则，检查响应（状态码、Header、JSON/XML/Text Body）。
+记录每一个断言的成功或失败状态。如果任何关键断言失败，可根据配置决定是中止整个事务还是继续执行。
+提取变量 (Extract):
+根据 extract 数组中的规则，从响应中提取数据（使用 JSONPath、XPath、正则表达式等）。
+将提取到的值更新或存入 context 中，供后续步骤使用。
+记录单步结果: 记录该步骤的所有详细信息：请求详情、完整响应、耗时、断言结果、变量提取情况。
+生成最终结果:
+当所有步骤执行完毕（或提前中止）后，汇总所有单步结果。
+计算总耗时、事务成功率（基于断言），并生成一个综合性的 Result 对象。
+上报结果: 将包含所有细节的 Result JSON 对象上报给后端的 results 接口。
+第三部分：前端开发 (Vue 3 & Ant Design Vue)
+核心任务： 创建一个直观、易用的界面来配置复杂的 API 拨测任务。
+1. 任务创建/编辑页面
+主表单: 当任务类型选择为 "API拨测" 时，显示全新的配置界面。
+初始化变量管理:
+提供一个独立的区域（例如一个可展开的面板或 Modal 弹窗），用于添加、编辑、删除当前任务的初始化变量（$a, $b 等）。
+事务步骤编辑器:
+这是 UI 的核心。使用一个动态列表来管理 API 请求步骤，支持 添加、删除、拖拽排序。
+每个步骤应为一个可折叠的面板 (a-collapse-panel)，面板标题显示步骤名称（如 "Step 1: Login"）。
+步骤内部配置:
+在每个步骤面板内部，使用标签页 (a-tabs) 来组织复杂的配置项：
+基本信息: 步骤名称、请求方法下拉框、URL 输入框。
+认证 (Auth): 下拉选择认证方式，并根据选择显示对应的输入字段（用户名/密码等）。
+参数 (Params): 动态键值对编辑器，用于添加 URL 查询参数。
+请求头 (Headers): 动态键值对编辑器。
+请求体 (Body): 根据请求方法显示。提供选项（如 JSON, Form-data, Text）和对应的编辑器。
+变量提取 (Extract): 一个动态表单，每一行用于定义一条提取规则（来源位置、表达式、存入的变量名）。
+断言 (Assertions): 一个动态表单，每一行用于定义一条断言规则（检查位置、属性名、比较条件、目标值）。目标值输入框旁应有一个按钮，允许用户选择已定义的变量。
+状态管理 (Pinia):
+使用 Pinia Store 来管理整个复杂的任务配置对象。这对于处理步骤列表、嵌套配置和动态表单的增删改至关重要。
+在提交时，将 Store 中的状态序列化为后端所需的 JSON 格式。
+2. 结果展示页面
+当查看 api 类型任务的结果时，需要设计新的展示组件。
+清晰地展示整个事务的成功/失败状态和总耗时。
+提供一个步骤列表或时间轴视图，点击可查看每一步的详细执行快照：请求信息、响应内容、断言检查结果、以及该步骤执行前后变量的变化情况。
+3、其他要求
+尽量把代码文件已组件化方式进行存储，每个组件负责一个功能模块，方便维护和扩展。
+每个代码文件行数不能超过 300 行 ，超过 300 行的代码需要拆分成多个文件。
+前端代码和后端代码和现有框架风格保持一致。

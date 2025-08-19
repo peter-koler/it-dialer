@@ -37,6 +37,9 @@ def create_app():
     # 初始化数据库
     db.init_app(app)
     
+    with app.app_context():
+        db.create_all()
+    
     # 注册蓝图
     from app.api.v1 import bp as api_v1_bp
     app.register_blueprint(api_v1_bp, url_prefix='/api/v1')

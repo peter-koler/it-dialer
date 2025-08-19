@@ -72,6 +72,7 @@ import { useRouter } from 'vue-router'
 import { UserOutlined, LockOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import { useI18n } from 'vue-i18n'
+import request from '@/utils/request'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -87,29 +88,17 @@ const handleLogin = async () => {
   
   try {
     // 模拟登录请求
-    const response = await fetch('http://localhost:5001/api/v1/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        username: formState.username,
-        password: formState.password
-      })
+    const response = await request.post('/auth/login', {
+      username: formState.username,
+      password: formState.password
     })
     
-    const data = await response.json()
-    
-    if (data.code === 0) {
-      // 登录成功
-      message.success('登录成功')
-      // 存储访问令牌
-      localStorage.setItem('access_token', data.data.access_token)
-      // 跳转到首页
-      router.push('/probe-config/node')
-    } else {
-      message.error(data.message || '登录失败')
-    }
+    // 登录成功
+    message.success('登录成功')
+    // 存储访问令牌
+    localStorage.setItem('access_token', response.data.access_token)
+    // 跳转到首页
+    router.push('/probe-config/node')
   } catch (error) {
     message.error('登录失败: ' + error.message)
   } finally {

@@ -24,6 +24,17 @@ const routes = [
         component: () => import('../views/probe-task/index.vue')
       },
       {
+        path: '/tasks/api/new',
+        name: 'ApiTaskNew',
+        component: () => import('../views/api-task/ApiTaskNew.vue')
+      },
+      {
+        path: '/tasks/api/edit/:id',
+        name: 'ApiTaskEdit',
+        component: () => import('../views/api-task/ApiTaskEdit.vue'),
+        props: true
+      },
+      {
         path: '/task-management/list',
         name: 'TaskList',
         component: () => import('../views/task-detail/TaskDetail.vue')
@@ -35,9 +46,32 @@ const routes = [
         props: true
       },
       {
+        path: '/task-management/api-result/:id',
+        name: 'ApiMonitoringResult',
+        component: () => import('../views/api-monitoring/ApiMonitoringResult.vue'),
+        props: true
+      },
+      {
+        path: '/api-monitoring/result/:taskId',
+        name: 'ApiMonitoringResultPage',
+        component: () => import('../views/api-monitoring/ApiMonitoringResult.vue'),
+        props: true
+      },
+      {
+        path: '/api-monitoring/task-result/:id',
+        name: 'ApiTaskResult',
+        component: () => import('../views/api-monitoring/ApiTaskResult.vue'),
+        props: true
+      },
+      {
         path: '/system/user',
         name: 'UserManagement',
         component: () => import('../views/UserManagement.vue')
+      },
+      {
+        path: '/system/variables',
+        name: 'SystemVariables',
+        component: () => import('../components/SystemVariableManager.vue')
       }
     ]
   }

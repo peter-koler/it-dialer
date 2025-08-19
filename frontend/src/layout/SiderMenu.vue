@@ -98,6 +98,11 @@ const menuItems = [
         label: 'menu.system.user',
         icon: UserOutlined,
         permission: 'sys:user'
+      },
+      {
+        key: '/system/variables',
+        label: 'menu.system.variables',
+        icon: ToolOutlined
       }
     ]
   }

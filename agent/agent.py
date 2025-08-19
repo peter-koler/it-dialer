@@ -272,18 +272,24 @@ class DialerAgent:
                             try:
                                 # 如果config_data已经是dict类型，直接使用
                                 if isinstance(config_data, dict):
-                                    converted_task["params"] = config_data
+                                    converted_task["config"] = config_data
                                 # 如果config_data是字符串，尝试解析为JSON
                                 elif isinstance(config_data, str):
-                                    converted_task["params"] = json.loads(config_data)
+                                    converted_task["config"] = json.loads(config_data)
                                 else:
                                     logger.warning(f"任务 {task['id']} 的config字段类型未知: {type(config_data)}")
-                                    converted_task["params"] = {"count": 4}  # 默认ping次数
+                                    converted_task["config"] = {"count": 4}  # 默认ping次数
                             except (json.JSONDecodeError, TypeError) as e:
                                 logger.warning(f"任务 {task['id']} 的config字段解析失败: {e}")
-                                converted_task["params"] = {"count": 4}  # 默认ping次数
+                                converted_task["config"] = {"count": 4}  # 默认ping次数
                         else:
-                            converted_task["params"] = {"count": 4}  # 默认ping次数
+                            # 根据任务类型设置默认配置
+                            if task.get("type") == "ping":
+                                converted_task["config"] = {"count": 4}  # 默认ping次数
+                            elif task.get("type") == "api":
+                                converted_task["config"] = {"steps": []}  # API任务默认配置
+                            else:
+                                converted_task["config"] = {}
                         self.tasks.append(converted_task)
                     
                     logger.info(f"从服务器获取到 {len(self.tasks)} 个拨测任务")
@@ -336,6 +342,7 @@ class DialerAgent:
         try:
             # 执行插件
             plugin = self.plugins[task_type]
+            logger.info(f"执行任务 {task_id}, 类型: {task_type}, 完整任务: {json.dumps(task, ensure_ascii=False)}")
             result = plugin.execute(task)
             
             # 记录任务详细输出（按error级别输出）
@@ -407,6 +414,9 @@ class DialerAgent:
     
     def run(self) -> None:
         """运行Agent主循环"""
+        # 设置环境变量SERVER_URL供插件使用
+        os.environ["SERVER_URL"] = self.config.get("server_url", "http://localhost:5000")
+        
         # 注册agent
         if not self.register_agent():
             logger.error("Agent注册失败，退出")
@@ -480,6 +490,9 @@ def main():
     try:
         # 创建Agent实例
         agent = DialerAgent()
+        
+        # 设置环境变量SERVER_URL供插件使用
+        os.environ["SERVER_URL"] = agent.config.get("server_url", "http://localhost:5000")
         
         # 注册agent到服务器
         if not agent.register_agent():

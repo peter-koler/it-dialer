@@ -7,14 +7,18 @@
     <div ref="tcpResponseTimeChartRef" style="width: 100%; height: 300px; margin-top: 20px;"></div>
     <div ref="tcpStatusChartRef" style="width: 100%; height: 300px; margin-top: 20px;"></div>
   </div>
+  <div v-else-if="taskType === 'api'">
+    <!-- ApiResultViewer组件已移除 -->
+  </div>
   <div v-else>
     <a-empty description="暂不支持该类型任务的图表展示" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick, onUnmounted } from 'vue'
+import { ref, onMounted, watch, nextTick, onUnmounted, computed } from 'vue'
 import * as echarts from 'echarts'
+// 已移除对ApiResultViewer的引用
 
 const props = defineProps({
   taskType: {
@@ -25,6 +29,14 @@ const props = defineProps({
     type: Array,
     default: () => []
   }
+})
+
+// 计算属性 - 获取任务ID
+const taskId = computed(() => {
+  if (props.results && props.results.length > 0) {
+    return props.results[0].task_id
+  }
+  return null
 })
 
 const latencyChartRef = ref(null)

@@ -3,10 +3,14 @@ import traceback
 from . import bp
 from app import db
 from app.models.task import Task
+from app.models.node import Node
+from app.models.system_variable import SystemVariable
 from app.models.result import Result
 from app.models.node import Node
 import json
 import re
+import os
+import sqlite3
 
 
 @bp.route('/tasks', methods=['GET'])
@@ -16,23 +20,16 @@ def get_tasks():
         # 获取查询参数
         page = request.args.get('page', 1, type=int)
         size = request.args.get('size', 20, type=int)
-        enabled = request.args.get('enabled', type=lambda x: x.lower() == 'true')
-        task_type = request.args.get('type', type=str)
         keyword = request.args.get('keyword', type=str)
-        agent_id = request.args.get('agent_id', type=str)
+        task_type = request.args.get('type', type=str)
+        enabled = request.args.get('enabled', type=str)
         
         # 构建查询
         query = Task.query
         
         # 应用过滤条件
-        if enabled is not None:
-            query = query.filter_by(enabled=enabled)
-            
-        if task_type:
-            query = query.filter_by(type=task_type)
-            
         if keyword:
-            # 搜索任务名称或目标地址
+            # 搜索任务名称或目标
             search = f"%{keyword}%"
             query = query.filter(
                 db.or_(
@@ -40,15 +37,13 @@ def get_tasks():
                     Task.target.like(search)
                 )
             )
-            
-        if agent_id:
-            # 筛选指定agent_id的任务
-            query = query.filter(
-                db.or_(
-                    Task.agent_ids.like(f'%{agent_id}%'),
-                    Task.agent_ids.is_(None)
-                )
-            )
+        
+        if task_type:
+            query = query.filter(Task.type == task_type)
+        
+        if enabled is not None:
+            enabled_bool = enabled.lower() == 'true'
+            query = query.filter(Task.enabled == enabled_bool)
         
         # 应用分页
         pagination = query.paginate(
@@ -60,15 +55,7 @@ def get_tasks():
         tasks = pagination.items
         
         # 转换为字典列表
-        tasks_data = []
-        for task in tasks:
-            try:
-                tasks_data.append(task.to_dict())
-            except Exception as e:
-                print(f"Error converting task {task.id} to dict: {str(e)}")
-                print(traceback.format_exc())
-                # 即使单个任务转换失败，也继续处理其他任务
-                continue
+        tasks_data = [task.to_dict() for task in tasks]
         
         return jsonify({
             'code': 0,
@@ -88,62 +75,11 @@ def get_tasks():
         }), 500
 
 
-@bp.route('/tasks', methods=['POST'])
-def create_task():
-    """Create a new task"""
+@bp.route('/tasks/<int:task_id>', methods=['GET'])
+def get_task(task_id):
+    """Get a task by ID"""
     try:
-        data = request.get_json()
-        
-        # 验证TCP任务的数据
-        if data.get('type') == 'tcp':
-            target = data.get('target', '')
-            # 验证目标地址格式 (host:port)
-            if not re.match(r'^[^:]+:\d+$', target):
-                return jsonify({
-                    'code': 400,
-                    'data': {},
-                    'message': 'TCP任务的目标地址格式不正确，应为 host:port'
-                }), 400
-        
-        # 处理agent_ids
-        agent_ids = data.get('agent_ids', [])
-        agent_ids_json = json.dumps(agent_ids) if agent_ids else None
-        
-        # 创建新任务
-        task = Task(
-            name=data.get('name'),
-            type=data.get('type'),
-            target=data.get('target'),
-            interval=data.get('interval', 60),
-            enabled=data.get('enabled', True),
-            config=json.dumps(data.get('config')) if data.get('config') else None,
-            agent_ids=agent_ids_json
-        )
-        
-        db.session.add(task)
-        db.session.commit()
-        
-        return jsonify({
-            'code': 0,
-            'data': task.to_dict(),
-            'message': 'ok'
-        }), 201
-    except Exception as e:
-        db.session.rollback()
-        print(f"Error in create_task: {str(e)}")
-        print(traceback.format_exc())
-        return jsonify({
-            'code': 500,
-            'data': {},
-            'message': f'创建任务失败: {str(e)}'
-        }), 500
-
-
-@bp.route('/tasks/<int:id>', methods=['GET'])
-def get_task(id):
-    """Get a specific task"""
-    try:
-        task = Task.query.get_or_404(id)
+        task = Task.query.get_or_404(task_id)
         return jsonify({
             'code': 0,
             'data': task.to_dict(),
@@ -159,46 +95,415 @@ def get_task(id):
         }), 500
 
 
-@bp.route('/tasks/<int:id>', methods=['PUT'])
-def update_task(id):
-    """Update a specific task"""
+@bp.route('/tasks', methods=['POST'])
+def create_task():
+    """Create a new task"""
     try:
-        task = Task.query.get_or_404(id)
         data = request.get_json()
+        print(f"Received data: {data}")  # 添加调试日志
         
-        # 验证TCP任务的数据
-        if data.get('type') == 'tcp':
-            target = data.get('target', '')
-            # 验证目标地址格式 (host:port)
-            if not re.match(r'^[^:]+:\d+$', target):
+        # 验证必要字段
+        required_fields = ['name', 'type', 'target', 'interval', 'enabled', 'agent_ids']
+        for field in required_fields:
+            if field not in data:
+                print(f"Missing field: {field}")  # 添加调试日志
                 return jsonify({
                     'code': 400,
                     'data': {},
-                    'message': 'TCP任务的目标地址格式不正确，应为 host:port'
+                    'message': f'缺少必要字段: {field}'
                 }), 400
         
-        # 更新任务信息
-        task.name = data.get('name', task.name)
-        task.type = data.get('type', task.type)
-        task.target = data.get('target', task.target)
-        task.interval = data.get('interval', task.interval)
-        task.enabled = data.get('enabled', task.enabled)
+        print("All required fields present")  # 添加调试日志
         
-        if 'config' in data:
-            task.config = json.dumps(data['config']) if data['config'] else None
+        # 验证任务类型
+        valid_types = ['ping', 'tcp', 'http', 'api']  # 添加了ping和http类型
+        if data['type'] not in valid_types:
+            return jsonify({
+                'code': 400,
+                'data': {},
+                'message': f'无效的任务类型: {data["type"]}，支持的类型: {valid_types}'
+            }), 400
+        
+        print(f"Valid task type: {data['type']}")  # 添加调试日志
+        
+        # 验证Agent是否存在
+        if not isinstance(data['agent_ids'], list) or len(data['agent_ids']) == 0:
+            return jsonify({
+                'code': 400,
+                'data': {},
+                'message': '必须选择至少一个Agent'
+            }), 400
             
-        if 'agent_ids' in data:
-            agent_ids = data['agent_ids']
-            task.agent_ids = json.dumps(agent_ids) if agent_ids else None
+        # 检查所有Agent是否存在
+        for agent_id in data['agent_ids']:
+            print(f"Looking for node with agent_id: {agent_id}")  # 添加调试日志
+            # 使用filter_by而不是get，因为agent_id不是主键
+            node = Node.query.filter_by(agent_id=agent_id).first()
+            print(f"Found node: {node}")  # 添加调试日志
+            if not node:
+                print(f"Node not found: {agent_id}")  # 添加调试日志
+                return jsonify({
+                    'code': 400,
+                    'data': {},
+                    'message': f'Node不存在: ID {agent_id}'
+                }), 400
         
-        task.updated_at = db.func.now()
+        print("All nodes found")  # 添加调试日志
+        
+        # 验证API任务的配置
+        if data['type'] == 'api':
+            # 确保config是字典格式
+            if 'config' not in data:
+                print("API task missing config")  # 添加调试日志
+                return jsonify({
+                    'code': 400,
+                    'data': {},
+                    'message': 'API任务必须提供config字段'
+                }), 400
+            
+            # 如果config是字符串，则解析为字典
+            config = data['config']
+            if isinstance(config, str):
+                try:
+                    config = json.loads(config)
+                    print(f"Parsed config from string: {config}")  # 添加调试日志
+                except json.JSONDecodeError as e:
+                    print(f"Failed to parse config string: {e}")  # 添加调试日志
+                    return jsonify({
+                        'code': 400,
+                        'data': {},
+                        'message': 'API任务配置格式不正确'
+                    }), 400
+            elif not isinstance(config, dict):
+                print("API task config is not dict or string")  # 添加调试日志
+                return jsonify({
+                    'code': 400,
+                    'data': {},
+                    'message': 'API任务必须提供config字段'
+                }), 400
+            
+            print(f"API config: {config}")  # 添加调试日志
+            
+            # V2格式验证：支持initialVariables和authentications
+            if 'initialVariables' in config:
+                if not isinstance(config['initialVariables'], list):
+                    return jsonify({
+                        'code': 400,
+                        'data': {},
+                        'message': 'initialVariables必须是数组格式'
+                    }), 400
+                
+                # 验证每个初始变量
+                for var in config['initialVariables']:
+                    if not isinstance(var, dict) or 'name' not in var or 'value' not in var:
+                        return jsonify({
+                            'code': 400,
+                            'data': {},
+                            'message': '初始变量必须包含name和value字段'
+                        }), 400
+                    
+                    if not var['name'].startswith('$'):
+                        return jsonify({
+                            'code': 400,
+                            'data': {},
+                            'message': f'变量名必须以$开头: {var["name"]}'
+                        }), 400
+            
+            # 验证认证配置
+            if 'authentications' in config:
+                if not isinstance(config['authentications'], list):
+                    return jsonify({
+                        'code': 400,
+                        'data': {},
+                        'message': 'authentications必须是数组格式'
+                    }), 400
+                
+                # 验证每个认证配置
+                for auth in config['authentications']:
+                    if not isinstance(auth, dict) or 'type' not in auth:
+                        return jsonify({
+                            'code': 400,
+                            'data': {},
+                            'message': '认证配置必须包含type字段'
+                        }), 400
+                    
+                    auth_type = auth['type']
+                    if auth_type not in ['basic', 'digest', 'oauth1', 'oauth2']:
+                        return jsonify({
+                            'code': 400,
+                            'data': {},
+                            'message': f'不支持的认证类型: {auth_type}'
+                        }), 400
+            
+            # 验证steps字段（允许没有步骤）
+            if 'steps' not in config or not isinstance(config['steps'], list):
+                print("API task missing steps or steps is not list")  # 添加调试日志
+                return jsonify({
+                    'code': 400,
+                    'data': {},
+                    'message': 'API任务配置必须包含steps数组'
+                }), 400
+            
+            print("API steps validation passed")  # 添加调试日志
+            
+            # 验证每个步骤（如果存在步骤）
+            for i, step in enumerate(config['steps']):
+                print(f"Validating step {i}: {step}")  # 添加调试日志
+                # 验证步骤ID
+                if 'step_id' not in step:
+                    return jsonify({
+                        'code': 400,
+                        'data': {},
+                        'message': f'第{i+1}个步骤缺少step_id字段'
+                    }), 400
+                
+                # 验证步骤名称
+                if 'name' not in step:
+                    return jsonify({
+                        'code': 400,
+                        'data': {},
+                        'message': f'第{i+1}个步骤缺少name字段'
+                    }), 400
+                
+                # 验证请求信息
+                if 'request' not in step or not isinstance(step['request'], dict):
+                    return jsonify({
+                        'code': 400,
+                        'data': {},
+                        'message': f'第{i+1}个步骤缺少request字段或格式不正确'
+                    }), 400
+                
+                step_request = step['request']
+                
+                # 验证URL和方法
+                if 'url' not in step_request:
+                    return jsonify({
+                        'code': 400,
+                        'data': {},
+                        'message': f'第{i+1}个步骤缺少url字段'
+                    }), 400
+                
+                if 'method' not in step_request:
+                    return jsonify({
+                        'code': 400,
+                        'data': {},
+                        'message': f'第{i+1}个步骤缺少method字段'
+                    }), 400
+                
+                # 验证变量名格式
+                variable_pattern = r'\$[a-zA-Z][a-zA-Z0-9_]*'
+                variables_in_url = re.findall(variable_pattern, step_request['url'])
+                
+                # 验证请求体中的变量
+                if 'body' in step_request and isinstance(step_request['body'], dict):
+                    body_str = json.dumps(step_request['body'])
+                    variables_in_body = re.findall(variable_pattern, body_str)
+                    variables_in_url.extend(variables_in_body)
+                
+                # 验证请求头中的变量
+                if 'headers' in step_request and isinstance(step_request['headers'], dict):
+                    headers_str = json.dumps(step_request['headers'])
+                    variables_in_headers = re.findall(variable_pattern, headers_str)
+                    variables_in_url.extend(variables_in_headers)
+            
+            # 验证变量字段
+            if 'variables' in config and isinstance(config['variables'], list):
+                for var in config['variables']:
+                    if 'name' not in var or 'value' not in var:
+                        return jsonify({
+                            'code': 400,
+                            'data': {},
+                            'message': '变量必须包含name和value字段'
+                        }), 400
+                    
+                    # 验证变量名格式
+                    if not re.match(r'^\$[a-zA-Z][a-zA-Z0-9_]*$', var['name']):
+                        return jsonify({
+                            'code': 400,
+                            'data': {},
+                            'message': f'变量名格式不正确: {var["name"]}，必须以$开头，后跟字母、数字或下划线'
+                        }), 400
+        
+        print("API config validation passed")  # 添加调试日志
+        
+        # 创建任务
+        task = Task(
+            name=data['name'],
+            type=data['type'],
+            target=data['target'],
+            interval=data['interval'],
+            enabled=data['enabled'],
+            agent_ids=json.dumps(data['agent_ids']),  # 保存为JSON数组字符串
+            config=json.dumps(config) if isinstance(config, dict) else config  # 保存为JSON字符串
+        )
+        
+        print(f"Creating task: {task}")  # 添加调试日志
+        
+        db.session.add(task)
+        db.session.commit()
+        
+        return jsonify({
+            'code': 0,
+            'data': task.to_dict(),
+            'message': '任务创建成功'
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error in create_task: {str(e)}")
+        print(traceback.format_exc())
+        return jsonify({
+            'code': 500,
+            'data': {},
+            'message': f'创建任务失败: {str(e)}'
+        }), 500
+
+
+@bp.route('/tasks/<int:task_id>', methods=['PUT'])
+def update_task(task_id):
+    """Update a task"""
+    try:
+        task = Task.query.get_or_404(task_id)
+        data = request.get_json()
+        
+        # 更新字段
+        if 'name' in data:
+            task.name = data['name']
+        if 'target' in data:
+            task.target = data['target']
+        if 'interval' in data:
+            task.interval = data['interval']
+        if 'enabled' in data:
+            task.enabled = data['enabled']
+        if 'agent_ids' in data:
+            # 验证Agent是否存在
+            if not isinstance(data['agent_ids'], list) or len(data['agent_ids']) == 0:
+                return jsonify({
+                    'code': 400,
+                    'data': {},
+                    'message': '必须选择至少一个Agent'
+                }), 400
+            
+            # 验证所有Agent是否存在
+            for agent_id in data['agent_ids']:
+                node = Node.query.filter_by(agent_id=agent_id).first()
+                if not node:
+                    return jsonify({
+                        'code': 400,
+                        'data': {},
+                        'message': f'Node不存在: ID {agent_id}'
+                    }), 400
+            
+            # 保存为JSON数组字符串
+            import json
+            task.agent_ids = json.dumps(data['agent_ids'])
+        if 'config' in data:
+            # 确保config是字典类型
+            config = data['config']
+            if isinstance(config, str):
+                try:
+                    config = json.loads(config)
+                except json.JSONDecodeError:
+                    return jsonify({
+                        'code': 400,
+                        'data': {},
+                        'message': 'config字段不是有效的JSON字符串'
+                    }), 400
+            
+            # 如果任务类型是api，验证配置
+            if task.type == 'api':
+                # 验证steps字段
+                if 'steps' not in config or not isinstance(config['steps'], list) or len(config['steps']) == 0:
+                    return jsonify({
+                        'code': 400,
+                        'data': {},
+                        'message': 'API任务配置必须包含至少一个步骤'
+                    }), 400
+                
+                # 验证每个步骤
+                for i, step in enumerate(config['steps']):
+                    # 验证步骤ID
+                    if 'step_id' not in step:
+                        return jsonify({
+                            'code': 400,
+                            'data': {},
+                            'message': f'第{i+1}个步骤缺少step_id字段'
+                        }), 400
+                    
+                    # 验证步骤名称
+                    if 'name' not in step:
+                        return jsonify({
+                            'code': 400,
+                            'data': {},
+                            'message': f'第{i+1}个步骤缺少name字段'
+                        }), 400
+                    
+                    # 验证请求信息
+                    if 'request' not in step or not isinstance(step['request'], dict):
+                        return jsonify({
+                            'code': 400,
+                            'data': {},
+                            'message': f'第{i+1}个步骤缺少request字段或格式不正确'
+                        }), 400
+                    
+                    step_request = step['request']
+                    
+                    # 验证URL和方法
+                    if 'url' not in step_request:
+                        return jsonify({
+                            'code': 400,
+                            'data': {},
+                            'message': f'第{i+1}个步骤缺少url字段'
+                        }), 400
+                    
+                    if 'method' not in step_request:
+                        return jsonify({
+                            'code': 400,
+                            'data': {},
+                            'message': f'第{i+1}个步骤缺少method字段'
+                        }), 400
+                    
+                    # 验证变量名格式
+                    variable_pattern = r'\$[a-zA-Z][a-zA-Z0-9_]*'
+                    variables_in_url = re.findall(variable_pattern, step_request['url'])
+                    
+                    # 验证请求体中的变量
+                    if 'body' in step_request and isinstance(step_request['body'], dict):
+                        body_str = json.dumps(step_request['body'])
+                        variables_in_body = re.findall(variable_pattern, body_str)
+                        variables_in_url.extend(variables_in_body)
+                    
+                    # 验证请求头中的变量
+                    if 'headers' in step_request and isinstance(step_request['headers'], dict):
+                        headers_str = json.dumps(step_request['headers'])
+                        variables_in_headers = re.findall(variable_pattern, headers_str)
+                        variables_in_url.extend(variables_in_headers)
+                
+                # 验证变量字段
+                if 'variables' in config and isinstance(config['variables'], list):
+                    for var in config['variables']:
+                        if 'name' not in var or 'value' not in var:
+                            return jsonify({
+                                'code': 400,
+                                'data': {},
+                                'message': '变量必须包含name和value字段'
+                            }), 400
+                        
+                        # 验证变量名格式
+                        if not re.match(r'^\$[a-zA-Z][a-zA-Z0-9_]*$', var['name']):
+                            return jsonify({
+                                'code': 400,
+                                'data': {},
+                                'message': f'变量名格式不正确: {var["name"]}，必须以$开头，后跟字母、数字或下划线'
+                            }), 400
+            
+            task.config = json.dumps(config) if isinstance(config, dict) else config
         
         db.session.commit()
         
         return jsonify({
             'code': 0,
             'data': task.to_dict(),
-            'message': 'ok'
+            'message': '任务更新成功'
         })
     except Exception as e:
         db.session.rollback()
@@ -211,18 +516,18 @@ def update_task(id):
         }), 500
 
 
-@bp.route('/tasks/<int:id>', methods=['DELETE'])
-def delete_task(id):
-    """Delete a specific task"""
+@bp.route('/tasks/<int:task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    """Delete a task"""
     try:
-        task = Task.query.get_or_404(id)
+        task = Task.query.get_or_404(task_id)
         db.session.delete(task)
         db.session.commit()
         
         return jsonify({
             'code': 0,
             'data': {},
-            'message': 'ok'
+            'message': '任务删除成功'
         })
     except Exception as e:
         db.session.rollback()
@@ -235,47 +540,113 @@ def delete_task(id):
         }), 500
 
 
-@bp.route('/tasks/stats', methods=['GET'])
-def get_task_stats():
-    """获取任务统计信息"""
+@bp.route('/tasks/execute', methods=['POST'])
+def execute_task():
+    """执行任务"""
     try:
-        # 总任务数
-        total_tasks = Task.query.count()
+        data = request.get_json()
         
-        # 启用任务数
-        enabled_tasks = Task.query.filter_by(enabled=True).count()
+        # 验证必要字段
+        if 'task_id' not in data:
+            return jsonify({
+                'code': 400,
+                'message': '缺少必要字段: task_id'
+            }), 400
         
-        # 各类型任务数
-        task_types = db.session.query(
-            Task.type, 
-            db.func.count(Task.id)
-        ).group_by(Task.type).all()
+        # 获取任务
+        task_id = data['task_id']
+        task = Task.query.get(task_id)
+        if not task:
+            return jsonify({
+                'code': 404,
+                'message': f'任务不存在: ID {task_id}'
+            }), 404
         
-        # 最近任务结果统计
-        recent_results = db.session.query(
-            Result.status,
-            db.func.count(Result.id)
-        ).filter(
-            Result.created_at >= db.func.datetime('now', '-1 day')
-        ).group_by(Result.status).all()
-        
-        stats = {
-            'total_tasks': total_tasks,
-            'enabled_tasks': enabled_tasks,
-            'task_types': dict(task_types),
-            'recent_results': dict(recent_results)
-        }
-        
-        return jsonify({
-            'code': 0,
-            'data': stats,
-            'message': 'ok'
-        })
+        # 这里只是模拟任务执行，实际应该发送到Agent执行
+        # 对于API任务，我们可以创建一个简单的结果
+        if task.type == 'api':
+            # 创建结果
+            result = Result(
+                task_id=task_id,
+                status='success',
+                data={
+                    'steps': [
+                        {
+                            'step_id': step.get('step_id', f'step{i+1}'),
+                            'name': step.get('name', f'步骤{i+1}'),
+                            'status': 'success',
+                            'duration': 100,  # 模拟耗时100ms
+                            'request': step.get('request', {}),
+                            'response': {
+                                'status_code': 200,
+                                'headers': {
+                                    'Content-Type': 'application/json'
+                                },
+                                'body': '{"message": "模拟响应"}'
+                            }
+                        } for i, step in enumerate(task.config.get('steps', []))
+                    ]
+                }
+            )
+            
+            db.session.add(result)
+            db.session.commit()
+            
+            return jsonify({
+                'code': 0,
+                'data': {
+                    'result_id': result.id
+                },
+                'message': '任务执行成功'
+            })
+        else:
+            # 对于其他类型的任务，返回未实现
+            return jsonify({
+                'code': 501,
+                'message': f'暂不支持执行{task.type}类型的任务'
+            }), 501
     except Exception as e:
-        print(f"Error in get_task_stats: {str(e)}")
-        print(traceback.format_exc())
+        print(f"Error in execute_task: {str(e)}")
+        traceback.print_exc()
         return jsonify({
             'code': 500,
-            'data': {},
-            'message': f'获取任务统计失败: {str(e)}'
+            'message': f'执行任务失败: {str(e)}'
         }), 500
+
+
+# 创建系统变量表
+def create_system_variables_table():
+    try:
+        # 获取数据库路径
+        db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../instance/app.db')
+        
+        # 连接数据库
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # 检查表是否存在
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='system_variables'")
+        if not cursor.fetchone():
+            # 创建表
+            cursor.execute('''
+            CREATE TABLE system_variables (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE,
+                value TEXT NOT NULL,
+                description TEXT,
+                is_secret BOOLEAN DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            ''')
+            conn.commit()
+            print("系统变量表创建成功")
+        
+        conn.close()
+    except Exception as e:
+        print(f"创建系统变量表失败: {str(e)}")
+        traceback.print_exc()
+
+
+# 在模块加载时创建表
+create_system_variables_table()

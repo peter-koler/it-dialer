@@ -91,13 +91,41 @@ def get_results():
         }), 500
 
 
+@bp.route('/results/<int:result_id>', methods=['GET'])
+def get_result(result_id):
+    """Get a specific result by ID"""
+    try:
+        result = Result.query.get(result_id)
+        if not result:
+            return jsonify({
+                'code': 404,
+                'data': {},
+                'message': f'结果 ID {result_id} 不存在'
+            }), 404
+        
+        return jsonify({
+            'code': 0,
+            'data': result.to_dict(),
+            'message': 'ok'
+        })
+    except Exception as e:
+        print(f"Error in get_result: {str(e)}")
+        print(traceback.format_exc())
+        return jsonify({
+            'code': 500,
+            'data': {},
+            'message': f'获取结果详情失败: {str(e)}'
+        }), 500
+
+
 @bp.route('/results', methods=['POST'])
 def create_result():
     """Create a new result"""
     try:
         data = request.get_json()
         
-        # 检查任务是否存在
+        # 检查任务是否存在，并处理API任务的特殊结果格式
+        # API任务的details字段需要包含多步骤的详细信息
         task = Task.query.get(data.get('task_id'))
         if not task:
             return jsonify({

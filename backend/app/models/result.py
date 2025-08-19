@@ -6,7 +6,7 @@ class Result(db.Model):
     __tablename__ = 'results'
     
     id = db.Column(db.Integer, primary_key=True)
-    task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=False)
+    task_id = db.Column(db.Integer, db.ForeignKey('tasks.id', ondelete='CASCADE'), nullable=False)
     status = db.Column(db.String(50), nullable=False)  # success, failed, timeout
     response_time = db.Column(db.Float)  # milliseconds
     message = db.Column(db.Text)  # error message or additional info
@@ -15,8 +15,8 @@ class Result(db.Model):
     agent_area = db.Column(db.String(100))  # Agent区域
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     
-    # Relationship
-    task = db.relationship('Task', backref=db.backref('results', lazy=True))
+    # Relationship - 添加overlaps参数以解决警告
+    task = db.relationship('Task', lazy=True, overlaps="related_task,results")
     
     def to_dict(self):
         # 解析details字段为JSON对象
@@ -34,7 +34,7 @@ class Result(db.Model):
             'status': self.status,
             'response_time': self.response_time,
             'message': self.message,
-            'details': details_data,  # 返回解析后的details数据
+            'details': details_data,
             'agent_id': self.agent_id,
             'agent_area': self.agent_area,
             'created_at': self.created_at.isoformat() if self.created_at else None,

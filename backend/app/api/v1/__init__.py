@@ -2,7 +2,7 @@ from flask import Blueprint
 
 bp = Blueprint('api_v1', __name__)
 
-from . import nodes, tasks, results, alerts, auth, users
+from . import nodes, tasks, results, alerts, auth, users, system_variables
 
 
 @bp.route('/health')

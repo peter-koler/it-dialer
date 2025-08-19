@@ -22,6 +22,11 @@
             <StatusTag :status="record.latestStatus" />
           </template>
           
+          <template v-else-if="column.dataIndex === 'latestResult'">
+            <!-- 显示最新执行结果 -->
+            <StatusTag :status="record.latestStatus" />
+          </template>
+          
           <template v-else-if="column.dataIndex === 'response_time'">
             <!-- 显示平均响应时间 -->
             <span v-if="record.avgResponseTime">{{ record.avgResponseTime.toFixed(2) }} ms</span>
@@ -60,24 +65,29 @@
       :probe-details="probeDetails"
       @cancel="handleProbeDetailCancel"
     />
+    
+    <!-- API拨测任务结果弹窗已移除，现在直接跳转到新页面 -->
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { getTaskResults } from '@/api/task'
 import SearchBar from './SearchBar.vue'
 import StatusTag from './StatusTag.vue'
 import TaskDetailModal from './TaskDetailModal.vue'
 import ProbeDetailModal from './ProbeDetailModal.vue'
+// 已移除对旧ApiTaskResultModal的引用
 import pinyinToChinese from '@/utils/pinyinToChinese.js'
 
 // 定义变量
 const route = useRoute()
+const router = useRouter()
 const detailModalVisible = ref(false)
 const probeDetailVisible = ref(false)
+// 已移除apiResultModalVisible引用
 const selectedTask = ref(null)
 const selectedProbe = ref(null)
 const aggregatedResults = ref([])
@@ -118,8 +128,12 @@ const columns = [
     dataIndex: ['task', 'type']
   },
   {
-    title: '最新状态',
+    title: '执行状态',
     dataIndex: 'status'
+  },
+  {
+    title: '最新执行结果',
+    dataIndex: 'latestResult'
   },
   {
     title: '平均响应时间',
@@ -181,14 +195,66 @@ const fetchResults = async () => {
         }
       })
       
+      // 获取该任务的所有结果数据用于统计
+      const allTaskResults = data.data.list
+      
       // 转换为数组并进行分页处理
-      const allResults = Object.values(groupedResults).map(item => ({
-        ...item,
-        latestStatus: item.status || '',  // 添加latestStatus字段
-        count: item.count || 0,  // 确保有执行次数
-        avgResponseTime: item.response_time || 0,  // 添加avgResponseTime字段
-        latestCreatedAt: formatDate(item.created_at)  // 格式化创建时间
-      }))
+      const allResults = Object.values(groupedResults).map(item => {
+        // 计算该地区的执行统计
+        const regionResults = allTaskResults.filter(r => r.agent_area === item.agent_area)
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // 按时间降序排序
+        const latestResult = regionResults.length > 0 ? regionResults[0] : item
+        
+        // 计算该地区的实际执行次数
+        const count = regionResults.length
+        
+        // 获取正确的最新状态 - 从details.status获取
+        let correctLatestStatus = '未知';
+        if (latestResult && latestResult.details && latestResult.details.status) {
+          correctLatestStatus = latestResult.details.status;
+        } else if (latestResult && latestResult.status) {
+          correctLatestStatus = latestResult.status;
+        }
+        
+        // 计算最近10次拨测结果的平均响应时间
+        const recentResults = regionResults.slice(0, 10) // 取最近10次结果
+        const responseTimes = recentResults
+          .map(r => {
+            // 从多层嵌套结构中提取response_time
+            let responseTime = r.response_time;
+            if (r.details && r.details.response_time !== undefined) {
+              responseTime = r.details.response_time;
+            }
+            if (r.details && r.details.details && r.details.details.response_time !== undefined) {
+              responseTime = r.details.details.response_time;
+            }
+            return responseTime;
+          })
+          .filter(time => time !== undefined && time !== null && time > 0)
+        const avgResponseTime = responseTimes.length > 0 
+          ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length 
+          : 0
+        
+        // 获取最新执行结果的详细信息
+        let latestResultDetails = null
+        if (latestResult && latestResult.details) {
+          latestResultDetails = {
+            status: correctLatestStatus,
+            message: latestResult.details.message || latestResult.message || '',
+            responseTime: latestResult.response_time,
+            createdAt: formatDate(latestResult.created_at)
+          }
+        }
+        
+        return {
+          ...item,
+          latestStatus: correctLatestStatus,  // 使用正确的最新状态
+          count: count,  // 使用实际执行次数
+          avgResponseTime: avgResponseTime,  // 使用最近10次平均响应时间
+          latestCreatedAt: formatDate(item.created_at),  // 格式化创建时间
+          latestResultDetails: latestResultDetails  // 最新执行结果详情
+        }
+      })
       pagination.value.total = allResults.length
       
       // 手动分页
@@ -218,12 +284,20 @@ const showDetails = (record) => {
     results: aggregatedResults.value || []
   }
   selectedTask.value = detailRecord
-  detailModalVisible.value = true
   
-  // 重置地图状态
-  mapLevel.value = 'country'
-  selectedMapCode.value = ''
-  mapData.value = generateMapData(aggregatedResults.value)
+  // 根据任务类型选择不同的详情展示模式
+  if (record.task && record.task.type === 'api') {
+    // API拨测任务跳转到新的结果展示页面
+    router.push(`/api-monitoring/result/${record.task.id}`)
+  } else {
+    // 其他类型任务使用常规详情展示
+    detailModalVisible.value = true
+    
+    // 重置地图状态
+    mapLevel.value = 'country'
+    selectedMapCode.value = ''
+    mapData.value = generateMapData(aggregatedResults.value)
+  }
 }
 
 // 生成地图数据
@@ -344,6 +418,8 @@ const handleProbeDetailCancel = () => {
   probeDetailVisible.value = false
   selectedProbe.value = null
 }
+
+// 已移除handleApiResultModalCancel函数
 
 // 组件挂载时获取数据
 onMounted(() => {

@@ -31,17 +31,22 @@
         </a-descriptions-item>
       </a-descriptions>
       
-      <!-- 添加时间选择控件和刷新按钮 -->
-      <div style="margin: 16px 0; display: flex; justify-content: space-between; align-items: center;">
+      <!-- 添加时间选择控件和刷新按钮 - 仅对ping和tcp类型显示 -->
+      <div v-if="selectedTask.task.type !== 'api'" style="margin: 16px 0; display: flex; justify-content: space-between; align-items: center;">
         <TimeRangePicker 
           v-model="selectedTimeRange" 
           @change="handleTimeRangeChange" 
         />
         <a-button type="primary" @click="refreshData">刷新</a-button>
       </div>
+      <!-- API任务类型的刷新按钮 -->
+      <div v-else style="margin: 16px 0; display: flex; justify-content: flex-end; align-items: center;">
+        <a-button type="primary" @click="refreshData">刷新</a-button>
+      </div>
       
       <a-row :gutter="16" style="margin-top: 20px;">
-        <!-- 左侧地图区域 -->
+        <!-- 左侧地图区域 - 仅对ping和tcp类型显示 -->
+      <template v-if="selectedTask.task.type !== 'api'">
         <a-col :span="14">
           <a-card class="map-container">
             <a-spin :spinning="probeDataLoading">
@@ -67,6 +72,7 @@
             />
           </a-card>
         </a-col>
+      </template>
       </a-row>
       
       <!-- 图表展示区域 -->

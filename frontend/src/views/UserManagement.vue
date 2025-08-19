@@ -37,6 +37,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
+import request from '@/utils/request'
 import UserSearchBar from '../components/UserSearchBar.vue'
 import UserTable from '../components/UserTable.vue'
 import UserModal from '../components/UserModal.vue'
@@ -67,15 +68,17 @@ const searchParams = reactive({
 const fetchUsers = async () => {
   loading.value = true
   try {
-    const response = await fetch(`http://localhost:5000/api/v1/users?page=${pagination.current}&size=${pagination.pageSize}&keyword=${searchParams.keyword}&role=${searchParams.role}`)
-    const data = await response.json()
+    const response = await request.get('/users', {
+      params: {
+        page: pagination.current,
+        size: pagination.pageSize,
+        keyword: searchParams.keyword,
+        role: searchParams.role
+      }
+    })
     
-    if (data.code === 0) {
-      users.value = data.data.list
-      pagination.total = data.data.total
-    } else {
-      message.error(data.message || '获取用户列表失败')
-    }
+    users.value = response.data.list
+    pagination.total = response.data.total
   } catch (error) {
     message.error('获取用户列表失败: ' + error.message)
   } finally {
@@ -118,17 +121,10 @@ const showResetPasswordModal = (record) => {
 // 删除用户
 const deleteUser = async (record) => {
   try {
-    const response = await fetch(`http://localhost:5000/api/v1/users/${record.id}`, {
-      method: 'DELETE'
-    })
-    const data = await response.json()
+    await request.delete(`/users/${record.id}`)
     
-    if (data.code === 0) {
-      message.success(`用户 ${record.username} 删除成功`)
-      fetchUsers()
-    } else {
-      message.error(data.message || '删除用户失败')
-    }
+    message.success(`用户 ${record.username} 删除成功`)
+    fetchUsers()
   } catch (error) {
     message.error('删除用户失败: ' + error.message)
   }
@@ -144,42 +140,14 @@ const handleTableChange = (pager) => {
 // 处理模态框确认
 const handleModalOk = async (values) => {
   try {
-    let response, data
-    
     if (editingUser.value) {
       // 编辑用户
-      response = await fetch(`http://localhost:5000/api/v1/users/${editingUser.value.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(values)
-      })
-      data = await response.json()
-      
-      if (data.code === 0) {
-        message.success('用户更新成功')
-      } else {
-        message.error(data.message || '用户更新失败')
-        return
-      }
+      await request.patch(`/users/${editingUser.value.id}`, values)
+      message.success('用户更新成功')
     } else {
       // 创建用户
-      response = await fetch('http://localhost:5000/api/v1/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(values)
-      })
-      data = await response.json()
-      
-      if (data.code === 0) {
-        message.success('用户创建成功')
-      } else {
-        message.error(data.message || '用户创建失败')
-        return
-      }
+      await request.post('/users', values)
+      message.success('用户创建成功')
     }
     
     modalVisible.value = false
@@ -197,21 +165,10 @@ const handleModalCancel = () => {
 // 处理重置密码确认
 const handleResetPasswordOk = async (values) => {
   try {
-    const response = await fetch(`http://localhost:5000/api/v1/users/${currentUser.value.id}/password`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(values)
-    })
-    const data = await response.json()
+    await request.patch(`/users/${currentUser.value.id}/password`, values)
     
-    if (data.code === 0) {
-      message.success(`用户 ${currentUser.value.username} 密码重置成功`)
-      resetPwdModalVisible.value = false
-    } else {
-      message.error(data.message || '密码重置失败')
-    }
+    message.success(`用户 ${currentUser.value.username} 密码重置成功`)
+    resetPwdModalVisible.value = false
   } catch (error) {
     message.error('密码重置失败: ' + error.message)
   }

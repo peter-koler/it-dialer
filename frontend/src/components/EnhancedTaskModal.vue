@@ -5,7 +5,7 @@
     @ok="handleModalOk"
     @cancel="handleModalCancel"
     :confirm-loading="confirmLoading"
-    width="600px"
+    width="1200px"
   >
     <a-form
       :model="formState"
@@ -57,6 +57,8 @@
         />
       </a-form-item>
       
+
+      
       <a-form-item
         label="执行间隔(秒)"
         name="interval"
@@ -97,11 +99,16 @@
       </a-form-item>
     </a-form>
   </a-modal>
+  
+
 </template>
 
 <script setup>
 import { ref, reactive, watch, computed, onMounted } from 'vue'
-import { message } from 'ant-design-vue'
+import { message, Modal } from 'ant-design-vue'
+import { PlusOutlined, DeleteOutlined, UpOutlined, DownOutlined, SettingOutlined } from '@ant-design/icons-vue'
+import request from '@/utils/request'
+
 
 const props = defineProps({
   visible: {
@@ -134,6 +141,8 @@ const modalVisible = computed({
 })
 
 const formRef = ref()
+
+// 响应式数据
 const formState = reactive({
   name: '',
   type: 'ping',
@@ -144,6 +153,8 @@ const formState = reactive({
   enabled: true
 })
 
+
+
 // 过滤节点选项
 const filterNodeOption = (input, option) => {
   return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
@@ -152,20 +163,22 @@ const filterNodeOption = (input, option) => {
 // 获取节点列表
 const fetchNodes = async () => {
   try {
-    const response = await fetch('http://localhost:5000/api/v1/nodes')
-    const data = await response.json()
+    const response = await request.get('/nodes')
     
-    if (data.code === 0) {
-      nodeOptions.value = data.data.list
-        .filter(node => node.status === 'online') // 只显示在线节点
-        .map(node => ({
-          label: `${node.name} (${node.agent_id})`,
-          value: node.agent_id
-        }))
-    }
+    nodeOptions.value = response.data.list
+      .filter(node => node.status === 'online') // 只显示在线节点
+      .map(node => ({
+        label: `${node.name} (${node.agent_id})`,
+        value: node.agent_id
+      }))
   } catch (error) {
     console.error('获取节点列表失败:', error)
-    message.error('获取节点列表失败: ' + error.message)
+    // 优雅降级：不显示错误提示，提供默认选项
+    nodeOptions.value = [{
+      label: '暂无可用节点 (请检查节点服务状态)',
+      value: 'no-nodes-available',
+      disabled: true
+    }]
   }
 }
 
@@ -195,6 +208,8 @@ watch(() => props.visible, (newVal) => {
           formState.port = 80 // 默认端口
         }
       }
+      
+
     } else {
       // 新增任务时重置表单
       formState.name = ''
@@ -221,6 +236,8 @@ const handleTypeChange = (value) => {
   }
 }
 
+
+
 // 处理模态框确认
 const handleModalOk = async () => {
   try {
@@ -235,13 +252,14 @@ const handleModalOk = async () => {
       agent_ids: formState.agentIds
     }
     
-    // 根据任务类型设置目标地址
+    // 根据任务类型设置目标地址和配置
     if (formState.type === 'tcp') {
       // TCP任务需要组合目标地址和端口
       requestData.target = `${formState.target}:${formState.port}`
       requestData.config = JSON.stringify({
         timeout: 5
       })
+
     } else {
       // 其他任务类型直接使用目标地址
       requestData.target = formState.target
@@ -275,4 +293,6 @@ onMounted(() => {
   color: #999;
   margin-top: 4px;
 }
+
+
 </style>

@@ -165,7 +165,12 @@ const fetchNodes = async () => {
     }
   } catch (error) {
     console.error('获取节点列表失败:', error)
-    message.error('获取节点列表失败: ' + error.message)
+    // 优雅降级：不显示错误提示，提供默认选项
+      nodeOptions.value = [{
+        label: '暂无可用节点 (请检查节点服务状态)',
+        value: 'no-nodes-available',
+        disabled: true
+      }]
   }
 }
 

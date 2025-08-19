@@ -12,7 +12,25 @@
         <a-tag v-if="record.type === 'ping'" color="blue">Ping</a-tag>
         <a-tag v-else-if="record.type === 'tcp'" color="cyan">TCP</a-tag>
         <a-tag v-else-if="record.type === 'http'" color="purple">HTTP</a-tag>
+        <a-tag v-else-if="record.type === 'api'" color="purple">API</a-tag>
         <a-tag v-else color="green">{{ record.type }}</a-tag>
+      </template>
+      
+      <template v-else-if="column.dataIndex === 'latest_status'">
+        <a-tag v-if="record.latest_status === 'success'" color="green">成功</a-tag>
+        <a-tag v-else-if="record.latest_status === 'failed'" color="red">失败</a-tag>
+        <a-tag v-else-if="record.latest_status === 'timeout'" color="orange">超时</a-tag>
+        <a-tag v-else-if="record.latest_status">{{ record.latest_status }}</a-tag>
+        <span v-else>-</span>
+      </template>
+      
+      <template v-else-if="column.dataIndex === 'execution_count'">
+        {{ record.execution_count || 0 }}
+      </template>
+      
+      <template v-else-if="column.dataIndex === 'avg_response_time'">
+        <span v-if="record.avg_response_time">{{ record.avg_response_time }} ms</span>
+        <span v-else>-</span>
       </template>
       
       <template v-else-if="column.dataIndex === 'enabled'">
@@ -86,8 +104,24 @@ const columns = [
     dataIndex: 'interval'
   },
   {
+    title: '最新状态',
+    dataIndex: 'latest_status',
+    width: 100
+  },
+  {
+    title: '执行次数',
+    dataIndex: 'execution_count',
+    width: 100
+  },
+  {
+    title: '平均响应时间',
+    dataIndex: 'avg_response_time',
+    width: 120
+  },
+  {
     title: '状态',
-    dataIndex: 'enabled'
+    dataIndex: 'enabled',
+    width: 100
   },
   {
     title: '创建时间',

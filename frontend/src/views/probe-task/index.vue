@@ -2,12 +2,20 @@
   <div>
     <a-card title="拨测任务">
       <template #extra>
-        <a-button type="primary" @click="showCreateModal">
-          <template #icon>
-            <PlusOutlined />
-          </template>
-          新增任务
-        </a-button>
+        <a-space>
+          <a-button type="primary" @click="showCreateModal">
+            <template #icon>
+              <PlusOutlined />
+            </template>
+            新增任务
+          </a-button>
+          <a-button type="primary" @click="createApiTask">
+            <template #icon>
+              <PlusOutlined />
+            </template>
+            新增API拨测任务
+          </a-button>
+        </a-space>
       </template>
       
       <!-- 任务筛选组件 -->
@@ -44,11 +52,17 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { PlusOutlined } from '@ant-design/icons-vue'
+import { createTask, updateTask } from '@/api/task'
+import request from '@/utils/request'
 import TaskFilter from '../../components/TaskFilter.vue'
 import TaskTable from '../../components/TaskTable.vue'
 import EnhancedTaskModal from '../../components/EnhancedTaskModal.vue'
+
+// 路由
+const router = useRouter()
 
 // 数据相关
 const tasks = ref([])
@@ -78,29 +92,27 @@ const fetchTasks = async () => {
   loading.value = true
   try {
     // 构建查询参数
-    let url = `http://localhost:5000/api/v1/tasks?page=${pagination.current}&size=${pagination.pageSize}`
+    const params = {
+      page: pagination.current,
+      size: pagination.pageSize
+    }
     
     // 添加搜索参数
     if (searchParams.keyword) {
-      url += `&keyword=${encodeURIComponent(searchParams.keyword)}`
+      params.keyword = searchParams.keyword
     }
     if (searchParams.type) {
-      url += `&type=${searchParams.type}`
+      params.type = searchParams.type
     }
     if (searchParams.status !== undefined) {
       // 将布尔值转换为字符串传递给后端
-      url += `&enabled=${searchParams.status}`
+      params.enabled = searchParams.status
     }
     
-    const response = await fetch(url)
-    const data = await response.json()
+    const response = await request.get('/tasks', { params })
     
-    if (data.code === 0) {
-      tasks.value = data.data.list
-      pagination.total = data.data.total
-    } else {
-      message.error(data.message || '获取任务列表失败')
-    }
+    tasks.value = response.data.list
+    pagination.total = response.data.total
   } catch (error) {
     message.error('获取任务列表失败: ' + error.message)
   } finally {
@@ -119,6 +131,11 @@ const showCreateModal = () => {
   modalVisible.value = true
 }
 
+// 创建API拨测任务
+const createApiTask = () => {
+  router.push('/tasks/api/new')
+}
+
 // 处理模态框可见性更新
 const handleModalVisibleUpdate = (visible) => {
   modalVisible.value = visible
@@ -133,35 +150,22 @@ const handleModalOk = async (requestData) => {
     let response
     if (editingTask.value) {
       // 更新任务
-      response = await fetch(`http://localhost:5000/api/v1/tasks/${editingTask.value.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData)
-      })
+      response = await updateTask(editingTask.value.id, requestData)
     } else {
       // 创建任务
-      response = await fetch('http://localhost:5000/api/v1/tasks', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData)
-      })
+      response = await createTask(requestData)
     }
     
-    const data = await response.json()
-    
-    if (data.code === 0) {
+    if (response.code === 0) {
       message.success(editingTask.value ? '任务更新成功' : '任务创建成功')
       modalVisible.value = false
       fetchTasks() // 刷新任务列表
     } else {
-      message.error(data.message || (editingTask.value ? '任务更新失败' : '任务创建失败'))
+      message.error(response.message || (editingTask.value ? '任务更新失败' : '任务创建失败'))
     }
   } catch (error) {
-    message.error(editingTask.value ? '任务更新失败: ' + error.message : '任务创建失败: ' + error.message)
+    console.error('保存任务失败:', error)
+    message.error('保存任务失败: ' + (error.message || error))
   } finally {
     confirmLoading.value = false
   }
@@ -175,26 +179,12 @@ const handleModalCancel = () => {
 // 更新任务状态
 const updateTaskStatus = async (record) => {
   try {
-    const response = await fetch(`http://localhost:5000/api/v1/tasks/${record.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        ...record,
-        enabled: record.enabled
-      })
+    const response = await request.put(`/tasks/${record.id}`, {
+      ...record,
+      enabled: record.enabled
     })
     
-    const data = await response.json()
-    
-    if (data.code === 0) {
-      message.success('任务状态更新成功')
-    } else {
-      message.error(data.message || '任务状态更新失败')
-      // 恢复状态
-      record.enabled = !record.enabled
-    }
+    message.success('任务状态更新成功')
   } catch (error) {
     message.error('任务状态更新失败: ' + error.message)
     // 恢复状态
@@ -204,25 +194,23 @@ const updateTaskStatus = async (record) => {
 
 // 编辑任务
 const editTask = (task) => {
-  editingTask.value = task
-  modalVisible.value = true
+  if (task.type === 'api') {
+    // API任务跳转到新的编辑页面
+    router.push(`/tasks/api/edit/${task.id}`)
+  } else {
+    // 其他类型任务使用原有的模态框编辑
+    editingTask.value = task
+    modalVisible.value = true
+  }
 }
 
 // 删除任务
 const deleteTask = async (record) => {
   try {
-    const response = await fetch(`http://localhost:5000/api/v1/tasks/${record.id}`, {
-      method: 'DELETE'
-    })
+    const response = await request.delete(`/tasks/${record.id}`)
     
-    const data = await response.json()
-    
-    if (data.code === 0) {
-      message.success('任务删除成功')
-      fetchTasks()
-    } else {
-      message.error(data.message || '任务删除失败')
-    }
+    message.success('任务删除成功')
+    fetchTasks()
   } catch (error) {
     message.error('任务删除失败: ' + error.message)
   }
