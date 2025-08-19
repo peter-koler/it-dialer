@@ -214,6 +214,7 @@ MIT License
 
 ## API文档
 
+<<<<<<< HEAD
 启动后端服务后，访问 `http://localhost:5000/docs/` 查看API文档。
 
 我已经完成了对任务详情页面的修改，主要做了以下几项工作：
@@ -270,3 +271,8 @@ TaskDetail.vue (主组件)
 如果有API ，请把API 的路径配置单独放在 API 的目录下，避免进行在页面上进行直接调用
 
 
+=======
+mapUtils.js - 包含地图数据加载、编码转换等工具函数
+mapStyling.js - 包含地图样式处理、颜色计算、交互效果等
+mapInteractions.js - 包含地图交互逻辑，如下钻、返回等
+>>>>>>> a13df0d1961405871b76ec9653aa9fce9ecfbe66

@@ -37,12 +37,17 @@ git pull origin main
 if [ $? -ne 0 ]; then
   echo ""
   echo "自动合并失败！可能有冲突需要手动解决。"
-  echo "请手动运行以下命令解决冲突："
-  echo "  git pull origin main"
-  echo "解决冲突后，再运行此脚本。"
+  echo "出现冲突的文件："
+  git status --porcelain | grep "^UU" | awk '{print $2}'
   echo ""
-  # 撤销提交，保留更改在工作区
-  git reset --soft HEAD~1
+  echo "请手动解决冲突后，运行以下命令："
+  echo "  git add .                    # 添加解决冲突后的文件"
+  echo "  git commit -m '解决冲突'      # 提交解决后的合并"
+  echo "  git push origin main         # 推送到远程仓库"
+  echo ""
+  echo "或者，如果您想取消合并并重新开始，运行："
+  echo "  git merge --abort"
+  echo ""
   exit 1
 fi
 
