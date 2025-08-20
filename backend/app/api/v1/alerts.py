@@ -180,7 +180,7 @@ def update_alert_status(alert_id):
         # 如果是解决状态，记录处理信息
         if data['status'] == 'resolved':
             alert.resolved_by = data.get('resolved_by')
-            alert.resolved_at = datetime.utcnow()
+            alert.resolved_at = datetime.now()
         
         # 如果是分配，记录分配信息
         if 'assigned_to' in data:
@@ -270,7 +270,7 @@ def update_alerts_status_batch():
             alert.status = status
             if status == 'resolved':
                 alert.resolved_by = data.get('resolved_by')
-                alert.resolved_at = datetime.utcnow()
+                alert.resolved_at = datetime.now()
             updated_count += 1
         
         db.session.commit()

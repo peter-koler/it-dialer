@@ -14,7 +14,7 @@ def check_node_status(app):
             online_nodes = Node.query.filter_by(status='online').all()
             
             # 计算超时时间（5分钟）
-            timeout_threshold = datetime.utcnow() - timedelta(minutes=5)
+            timeout_threshold = datetime.now() - timedelta(minutes=5)
             
             # 检查每个在线节点的心跳时间
             for node in online_nodes:

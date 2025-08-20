@@ -184,7 +184,7 @@ def update_user(user_id):
         
         # 更新时间
         from datetime import datetime
-        user.updated_at = datetime.utcnow()
+        user.updated_at = datetime.now()
         
         # 保存到数据库
         db.session.commit()
@@ -231,7 +231,7 @@ def reset_user_password(user_id):
         
         # 更新时间
         from datetime import datetime
-        user.updated_at = datetime.utcnow()
+        user.updated_at = datetime.now()
         
         # 保存到数据库
         db.session.commit()

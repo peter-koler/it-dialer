@@ -12,7 +12,7 @@ import time
 import logging
 import re
 from typing import Dict, Any, List, Optional, Union
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 
 # 插件名称
@@ -128,7 +128,7 @@ def execute(task: Dict[str, Any]) -> Dict[str, Any]:
             "variables": {},
             "total_assertions": 0,
             "passed_assertions": 0,
-            "start_time": datetime.utcnow().isoformat(),
+            "start_time": datetime.now().isoformat(),
             "end_time": ""
         }
     }
@@ -180,7 +180,7 @@ def execute(task: Dict[str, Any]) -> Dict[str, Any]:
     result["response_time"] = round(total_time, 2)
     result["details"]["total_assertions"] = total_assertions
     result["details"]["passed_assertions"] = passed_assertions
-    result["details"]["end_time"] = datetime.utcnow().isoformat()
+    result["details"]["end_time"] = datetime.now().isoformat()
     
     # 如果没有明确失败，但有断言失败，也标记为失败
     if result["status"] != "failed" and passed_assertions < total_assertions:
@@ -816,7 +816,7 @@ def execute_assertion(assertion: Dict[str, Any], response: requests.Response) ->
                     "actual": actual,
                     "condition": alert_condition,
                     "message": f"断言告警触发: {result['message']}",
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now().isoformat()
                 }
                 result["alert"] = alert_info
                 logger.warning(f"断言告警触发: {alert_info['message']}")

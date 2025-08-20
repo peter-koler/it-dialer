@@ -78,8 +78,8 @@ def register_node():
             node.ip_address = data.get('ip_address', node.ip_address)
             node.agent_area = data.get('agent_area', node.agent_area)
             node.status = 'online'
-            node.last_heartbeat = datetime.utcnow()
-            node.updated_at = datetime.utcnow()
+            node.last_heartbeat = datetime.now()
+            node.updated_at = datetime.now()
         else:
             # 创建新节点
             node = Node(
@@ -128,8 +128,8 @@ def heartbeat():
         
         # 更新心跳时间和状态
         node.status = 'online'
-        node.last_heartbeat = datetime.utcnow()
-        node.updated_at = datetime.utcnow()
+        node.last_heartbeat = datetime.now()
+        node.updated_at = datetime.now()
         
         db.session.commit()
         
@@ -168,7 +168,7 @@ def update_node(id):
         if 'status' in data:
             node.status = data['status']
         
-        node.updated_at = datetime.utcnow()
+        node.updated_at = datetime.now()
         
         db.session.commit()
         
@@ -220,14 +220,14 @@ def check_timeout_nodes():
         online_nodes = Node.query.filter_by(status='online').all()
         
         # 设置超时时间为5分钟
-        timeout_threshold = datetime.utcnow() - timedelta(minutes=5)
+        timeout_threshold = datetime.now() - timedelta(minutes=5)
         
         timeout_count = 0
         for node in online_nodes:
             # 如果最后心跳时间早于超时阈值，则标记为超时
             if node.last_heartbeat and node.last_heartbeat < timeout_threshold:
                 node.status = 'timeout'
-                node.updated_at = datetime.utcnow()
+                node.updated_at = datetime.now()
                 timeout_count += 1
         
         db.session.commit()

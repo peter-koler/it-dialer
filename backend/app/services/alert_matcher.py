@@ -702,7 +702,7 @@ class AlertMatcher:
                 snapshot_data = {
                     'task_name': task.name,
                     'step_id': step_id,
-                    'trigger_time': datetime.utcnow().isoformat(),
+                    'trigger_time': datetime.now().isoformat(),
                     'result_data': result_data
                 }
                 alert.set_snapshot_data(snapshot_data)

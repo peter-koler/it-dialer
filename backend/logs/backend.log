@@ -224,3 +224,361 @@
 2025-08-19 23:07:26 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:26] "GET /api/v1/results?task_id=4&type=api&page=1&size=100 HTTP/1.1" 200 -
 2025-08-19 23:07:33 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:33] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
 2025-08-19 23:07:33 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [19/Aug/2025 23:07:33] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-20 10:08:02 - tzlocal - DEBUG - unix.py:120 - /etc/localtime found
+2025-08-20 10:08:02 - tzlocal - DEBUG - unix.py:136 - 1 found:
+ {'/etc/localtime is a symlink to': 'Asia/Shanghai'}
+2025-08-20 10:08:02 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 10:08:02 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-20 10:08:02 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-20 10:08:02 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:08:02 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-20 10:08:02 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:13:02.797221+08:00 (in 299.999290 seconds)
+2025-08-20 10:08:02 - werkzeug - INFO - _internal.py:187 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.31.17:5000
+2025-08-20 10:08:02 - werkzeug - INFO - _internal.py:187 - [33mPress CTRL+C to quit[0m
+2025-08-20 10:08:02 - werkzeug - INFO - _internal.py:187 -  * Restarting with stat
+2025-08-20 10:08:03 - tzlocal - DEBUG - unix.py:120 - /etc/localtime found
+2025-08-20 10:08:03 - tzlocal - DEBUG - unix.py:136 - 1 found:
+ {'/etc/localtime is a symlink to': 'Asia/Shanghai'}
+2025-08-20 10:08:03 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 10:08:03 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-20 10:08:03 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-20 10:08:03 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:08:03 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:13:03.068031+08:00 (in 299.999504 seconds)
+2025-08-20 10:08:03 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-20 10:08:03 - werkzeug - WARNING - _internal.py:187 -  * Debugger is active!
+2025-08-20 10:08:03 - werkzeug - INFO - _internal.py:187 -  * Debugger PIN: 620-872-712
+2025-08-20 10:08:35 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:08:35] "OPTIONS /api/v1/nodes?page=1&size=10 HTTP/1.1" 200 -
+2025-08-20 10:08:35 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:08:35] "GET /api/v1/nodes?page=1&size=10 HTTP/1.1" 200 -
+2025-08-20 10:09:20 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:09:20] "[35m[1mPOST /api/v1/nodes/register HTTP/1.1[0m" 201 -
+2025-08-20 10:09:20 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:09:20] "[35m[1mPOST /api/v1/nodes/register HTTP/1.1[0m" 201 -
+2025-08-20 10:09:20 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:09:20] "POST /api/v1/nodes/heartbeat HTTP/1.1" 200 -
+2025-08-20 10:09:20 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:09:20] "GET /api/v1/tasks?enabled=true&agent_id=book HTTP/1.1" 200 -
+2025-08-20 10:09:20 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:09:20] "GET /api/v1/system-variables HTTP/1.1" 200 -
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:37 - 开始处理任务告警匹配 - 任务ID: 4, 任务名称: curl
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:38 - Agent上报数据: {'task_id': 4, 'status': 'success', 'response_time': None, 'message': '成功完成所有 2 个步骤', 'details': {'status': 'success', 'response_time': 13.31, 'message': '成功完成所有 2 个步骤', 'details': {'steps': [{'step_id': 'step_1755585696329_3mvgyxv63', 'name': '获取 ip 地址', 'status': 'success', 'response_time': 4.93, 'message': '步骤执行成功', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'response': {'status_code': 200, 'headers': {'Server': 'Werkzeug/2.3.7 Python/3.13.2', 'Date': 'Wed, 20 Aug 2025 02:09:20 GMT', 'Content-Type': 'application/json', 'Content-Length': '28', 'Connection': 'close'}, 'content_type': 'application/json', 'body': {'ip': '192.168.31.17'}, 'size': 28}, 'assertions': [], 'extractions': [{'source': 'json_body', 'expression': '$.ip', 'variable_name': '$ip', 'success': True, 'message': '成功提取变量', 'value': '192.168.31.17'}]}, {'step_id': 'step_1755585966494_mj4x35gnh', 'name': '获取主机名', 'status': 'success', 'response_time': 2.95, 'message': '步骤执行成功', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': '192.168.31.17'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': '192.168.31.17'}]}, 'response': {'status_code': 200, 'headers': {'Server': 'Werkzeug/2.3.7 Python/3.13.2', 'Date': 'Wed, 20 Aug 2025 02:09:20 GMT', 'Content-Type': 'application/json', 'Content-Length': '31', 'Connection': 'close'}, 'content_type': 'application/json', 'body': {'hostname': 'peterdembp'}, 'size': 31}, 'assertions': [], 'extractions': []}], 'variables': {'$public_test': 'abc'}, 'total_assertions': 0, 'passed_assertions': 0, 'start_time': '2025-08-20T02:09:20.365561', 'end_time': '2025-08-20T02:09:20.379035'}}, 'created_at': '2025-08-20T10:09:20.379165', 'agent_id': 'book', 'agent_area': 'guangzhou'}
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:42 - 任务配置: {'authentication': {'accessToken': '', 'headers': [], 'keyName': '', 'keyValue': '', 'location': 'header', 'password': '', 'token': '', 'tokenType': 'Bearer', 'type': 'none', 'username': ''}, 'statusAlertConfig': ['failed'], 'steps': [{'alerts': {'allowedStatusCodes': '200', 'responseTimeAlertLevel': 'severe', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取 ip 地址', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'step_id': 'step_1755585696329_3mvgyxv63', 'variables': [{'expression': '$.ip', 'name': '$ip', 'source': 'body'}]}, {'alerts': {'allowedStatusCodes': '200', 'responseTimeThreshold': 5}, 'assertions': [], 'name': '获取主机名', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': '$ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': '$ip'}]}, 'step_id': 'step_1755585966494_mj4x35gnh', 'variables': []}], 'timeoutAlertEnabled': False, 'timeoutThreshold': 5000, 'variables': []}
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:50 - 找到 0 个启用的告警配置
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:81 - 全局告警检查结果: 0 个告警
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:308 - 开始检查任务配置告警 - 任务ID: 4
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:312 - 任务配置内容: {'authentication': {'accessToken': '', 'headers': [], 'keyName': '', 'keyValue': '', 'location': 'header', 'password': '', 'token': '', 'tokenType': 'Bearer', 'type': 'none', 'username': ''}, 'statusAlertConfig': ['failed'], 'steps': [{'alerts': {'allowedStatusCodes': '200', 'responseTimeAlertLevel': 'severe', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取 ip 地址', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'step_id': 'step_1755585696329_3mvgyxv63', 'variables': [{'expression': '$.ip', 'name': '$ip', 'source': 'body'}]}, {'alerts': {'allowedStatusCodes': '200', 'responseTimeThreshold': 5}, 'assertions': [], 'name': '获取主机名', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': '$ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': '$ip'}]}, 'step_id': 'step_1755585966494_mj4x35gnh', 'variables': []}], 'timeoutAlertEnabled': False, 'timeoutThreshold': 5000, 'variables': []}
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:320 - 状态告警配置: ['failed']
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:323 - 开始检查任务状态告警，配置: ['failed']
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:561 - 检查任务状态告警 - 任务ID: 4
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:565 - Agent上报的任务状态: success
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:566 - 状态告警配置: ['failed']
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:604 - 任务状态 'success' 不在告警配置 ['failed'] 中，不触发告警
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:331 - 未触发任务状态告警
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:337 - 超时告警启用状态: False
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:350 - 未启用任务超时告警
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:89 - 任务配置告警检查结果: 0 个告警
+2025-08-20 10:09:20 - app.services.alert_matcher - INFO - alert_matcher.py:92 - 总共生成 0 个告警
+2025-08-20 10:09:20 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:09:20] "[35m[1mPOST /api/v1/results HTTP/1.1[0m" 201 -
+2025-08-20 10:09:26 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:09:26] "OPTIONS /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:09:26 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:09:26] "OPTIONS /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:09:26 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:09:26] "GET /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:09:26 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:09:26] "GET /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:09:29 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:09:29] "OPTIONS /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:09:29 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:09:29] "PUT /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:09:34 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:09:34] "OPTIONS /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:09:34 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:09:34] "GET /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:09:34 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:09:34] "GET /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:10:14 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:14] "OPTIONS /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:10:14 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:14] "PUT /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:10:14 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:14] "OPTIONS /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:10:14 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:14] "OPTIONS /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:10:14 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:14] "GET /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:10:14 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:14] "GET /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:10:16 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:16] "PUT /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:10:20 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:20] "GET /api/v1/tasks?enabled=true&agent_id=book HTTP/1.1" 200 -
+2025-08-20 10:10:20 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:20] "GET /api/v1/system-variables HTTP/1.1" 200 -
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:37 - 开始处理任务告警匹配 - 任务ID: 4, 任务名称: curl
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:38 - Agent上报数据: {'task_id': 4, 'status': 'success', 'response_time': None, 'message': '成功完成所有 2 个步骤', 'details': {'status': 'success', 'response_time': 26.44, 'message': '成功完成所有 2 个步骤', 'details': {'steps': [{'step_id': 'step_1755585696329_3mvgyxv63', 'name': '获取 ip 地址', 'status': 'success', 'response_time': 9.13, 'message': '步骤执行成功', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'response': {'status_code': 200, 'headers': {'Server': 'Werkzeug/2.3.7 Python/3.13.2', 'Date': 'Wed, 20 Aug 2025 02:10:20 GMT', 'Content-Type': 'application/json', 'Content-Length': '28', 'Connection': 'close'}, 'content_type': 'application/json', 'body': {'ip': '192.168.31.17'}, 'size': 28}, 'assertions': [], 'extractions': [{'source': 'json_body', 'expression': '$.ip', 'variable_name': '$ip', 'success': True, 'message': '成功提取变量', 'value': '192.168.31.17'}]}, {'step_id': 'step_1755585966494_mj4x35gnh', 'name': '获取主机名', 'status': 'success', 'response_time': 10.23, 'message': '步骤执行成功', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': 'ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': 'ip'}]}, 'response': {'status_code': 500, 'headers': {'Server': 'Werkzeug/2.3.7 Python/3.13.2', 'Date': 'Wed, 20 Aug 2025 02:10:20 GMT', 'Content-Type': 'application/json', 'Content-Length': '72', 'Connection': 'close'}, 'content_type': 'application/json', 'body': {'error': '[Errno 8] nodename nor servname provided, or not known'}, 'size': 72}, 'assertions': [], 'extractions': []}], 'variables': {'$public_test': 'abc'}, 'total_assertions': 0, 'passed_assertions': 0, 'start_time': '2025-08-20T02:10:20.411546', 'end_time': '2025-08-20T02:10:20.438017'}}, 'created_at': '2025-08-20T10:10:20.438286', 'agent_id': 'book', 'agent_area': 'guangzhou'}
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:42 - 任务配置: {'authentication': {'accessToken': '', 'headers': [], 'keyName': '', 'keyValue': '', 'location': 'header', 'password': '', 'token': '', 'tokenType': 'Bearer', 'type': 'none', 'username': ''}, 'statusAlertConfig': ['failed'], 'steps': [{'alerts': {'allowedStatusCodes': '200', 'responseTimeAlertLevel': 'severe', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取 ip 地址', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'step_id': 'step_1755585696329_3mvgyxv63', 'variables': [{'expression': '$.ip', 'name': '$ip', 'source': 'body'}]}, {'alerts': {'allowedStatusCodes': '200', 'responseTimeThreshold': 5}, 'assertions': [], 'name': '获取主机名', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': 'ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': 'ip'}]}, 'step_id': 'step_1755585966494_mj4x35gnh', 'variables': []}], 'timeoutAlertEnabled': False, 'timeoutThreshold': 5000, 'variables': []}
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:50 - 找到 0 个启用的告警配置
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:81 - 全局告警检查结果: 0 个告警
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:308 - 开始检查任务配置告警 - 任务ID: 4
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:312 - 任务配置内容: {'authentication': {'accessToken': '', 'headers': [], 'keyName': '', 'keyValue': '', 'location': 'header', 'password': '', 'token': '', 'tokenType': 'Bearer', 'type': 'none', 'username': ''}, 'statusAlertConfig': ['failed'], 'steps': [{'alerts': {'allowedStatusCodes': '200', 'responseTimeAlertLevel': 'severe', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取 ip 地址', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'step_id': 'step_1755585696329_3mvgyxv63', 'variables': [{'expression': '$.ip', 'name': '$ip', 'source': 'body'}]}, {'alerts': {'allowedStatusCodes': '200', 'responseTimeThreshold': 5}, 'assertions': [], 'name': '获取主机名', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': 'ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': 'ip'}]}, 'step_id': 'step_1755585966494_mj4x35gnh', 'variables': []}], 'timeoutAlertEnabled': False, 'timeoutThreshold': 5000, 'variables': []}
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:320 - 状态告警配置: ['failed']
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:323 - 开始检查任务状态告警，配置: ['failed']
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:561 - 检查任务状态告警 - 任务ID: 4
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:565 - Agent上报的任务状态: success
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:566 - 状态告警配置: ['failed']
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:604 - 任务状态 'success' 不在告警配置 ['failed'] 中，不触发告警
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:331 - 未触发任务状态告警
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:337 - 超时告警启用状态: False
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:350 - 未启用任务超时告警
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:89 - 任务配置告警检查结果: 0 个告警
+2025-08-20 10:10:20 - app.services.alert_matcher - INFO - alert_matcher.py:92 - 总共生成 0 个告警
+2025-08-20 10:10:20 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:20] "[35m[1mPOST /api/v1/results HTTP/1.1[0m" 201 -
+2025-08-20 10:10:43 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:43] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-20 10:10:43 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:43] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-20 10:10:54 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:54] "OPTIONS /api/v1/alerts/batch HTTP/1.1" 200 -
+2025-08-20 10:10:54 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:54] "DELETE /api/v1/alerts/batch HTTP/1.1" 200 -
+2025-08-20 10:10:54 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:54] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-20 10:10:54 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:54] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-20 10:10:56 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:56] "OPTIONS /api/v1/results?page=1&size=10 HTTP/1.1" 200 -
+2025-08-20 10:10:56 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:56] "GET /api/v1/results?page=1&size=10 HTTP/1.1" 200 -
+2025-08-20 10:10:58 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:58] "OPTIONS /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:10:58 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:58] "OPTIONS /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:10:58 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:58] "GET /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:10:58 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:10:58] "GET /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:11:00 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:11:00] "OPTIONS /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:11:00 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:11:00] "GET /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:11:00 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:11:00] "GET /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:11:20 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:11:20] "GET /api/v1/tasks?enabled=true&agent_id=book HTTP/1.1" 200 -
+2025-08-20 10:11:20 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:11:20] "GET /api/v1/system-variables HTTP/1.1" 200 -
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:37 - 开始处理任务告警匹配 - 任务ID: 4, 任务名称: curl
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:38 - Agent上报数据: {'task_id': 4, 'status': 'success', 'response_time': None, 'message': '成功完成所有 2 个步骤', 'details': {'status': 'success', 'response_time': 22.04, 'message': '成功完成所有 2 个步骤', 'details': {'steps': [{'step_id': 'step_1755585696329_3mvgyxv63', 'name': '获取 ip 地址', 'status': 'success', 'response_time': 8.96, 'message': '步骤执行成功', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'response': {'status_code': 200, 'headers': {'Server': 'Werkzeug/2.3.7 Python/3.13.2', 'Date': 'Wed, 20 Aug 2025 02:11:20 GMT', 'Content-Type': 'application/json', 'Content-Length': '28', 'Connection': 'close'}, 'content_type': 'application/json', 'body': {'ip': '192.168.31.17'}, 'size': 28}, 'assertions': [], 'extractions': [{'source': 'json_body', 'expression': '$.ip', 'variable_name': '$ip', 'success': True, 'message': '成功提取变量', 'value': '192.168.31.17'}]}, {'step_id': 'step_1755585966494_mj4x35gnh', 'name': '获取主机名', 'status': 'success', 'response_time': 4.85, 'message': '步骤执行成功', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': 'ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': 'ip'}]}, 'response': {'status_code': 500, 'headers': {'Server': 'Werkzeug/2.3.7 Python/3.13.2', 'Date': 'Wed, 20 Aug 2025 02:11:20 GMT', 'Content-Type': 'application/json', 'Content-Length': '72', 'Connection': 'close'}, 'content_type': 'application/json', 'body': {'error': '[Errno 8] nodename nor servname provided, or not known'}, 'size': 72}, 'assertions': [], 'extractions': []}], 'variables': {'$public_test': 'abc'}, 'total_assertions': 0, 'passed_assertions': 0, 'start_time': '2025-08-20T02:11:20.476217', 'end_time': '2025-08-20T02:11:20.498287'}}, 'created_at': '2025-08-20T10:11:20.498590', 'agent_id': 'book', 'agent_area': 'guangzhou'}
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:42 - 任务配置: {'authentication': {'accessToken': '', 'headers': [], 'keyName': '', 'keyValue': '', 'location': 'header', 'password': '', 'token': '', 'tokenType': 'Bearer', 'type': 'none', 'username': ''}, 'statusAlertConfig': ['failed'], 'steps': [{'alerts': {'allowedStatusCodes': '200', 'responseTimeAlertLevel': 'severe', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取 ip 地址', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'step_id': 'step_1755585696329_3mvgyxv63', 'variables': [{'expression': '$.ip', 'name': '$ip', 'source': 'body'}]}, {'alerts': {'allowedStatusCodes': '200', 'responseTimeThreshold': 5}, 'assertions': [], 'name': '获取主机名', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': 'ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': 'ip'}]}, 'step_id': 'step_1755585966494_mj4x35gnh', 'variables': []}], 'timeoutAlertEnabled': False, 'timeoutThreshold': 5000, 'variables': []}
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:50 - 找到 0 个启用的告警配置
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:81 - 全局告警检查结果: 0 个告警
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:308 - 开始检查任务配置告警 - 任务ID: 4
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:312 - 任务配置内容: {'authentication': {'accessToken': '', 'headers': [], 'keyName': '', 'keyValue': '', 'location': 'header', 'password': '', 'token': '', 'tokenType': 'Bearer', 'type': 'none', 'username': ''}, 'statusAlertConfig': ['failed'], 'steps': [{'alerts': {'allowedStatusCodes': '200', 'responseTimeAlertLevel': 'severe', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取 ip 地址', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'step_id': 'step_1755585696329_3mvgyxv63', 'variables': [{'expression': '$.ip', 'name': '$ip', 'source': 'body'}]}, {'alerts': {'allowedStatusCodes': '200', 'responseTimeThreshold': 5}, 'assertions': [], 'name': '获取主机名', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': 'ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': 'ip'}]}, 'step_id': 'step_1755585966494_mj4x35gnh', 'variables': []}], 'timeoutAlertEnabled': False, 'timeoutThreshold': 5000, 'variables': []}
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:320 - 状态告警配置: ['failed']
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:323 - 开始检查任务状态告警，配置: ['failed']
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:561 - 检查任务状态告警 - 任务ID: 4
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:565 - Agent上报的任务状态: success
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:566 - 状态告警配置: ['failed']
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:604 - 任务状态 'success' 不在告警配置 ['failed'] 中，不触发告警
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:331 - 未触发任务状态告警
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:337 - 超时告警启用状态: False
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:350 - 未启用任务超时告警
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:89 - 任务配置告警检查结果: 0 个告警
+2025-08-20 10:11:20 - app.services.alert_matcher - INFO - alert_matcher.py:92 - 总共生成 0 个告警
+2025-08-20 10:11:20 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:11:20] "[35m[1mPOST /api/v1/results HTTP/1.1[0m" 201 -
+2025-08-20 10:13:02 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:13:02 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:18:02 CST)" (scheduled at 2025-08-20 10:13:02.797221+08:00)
+2025-08-20 10:13:02 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:18:02.797221+08:00 (in 299.992961 seconds)
+2025-08-20 10:13:02 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:18:02 CST)" executed successfully
+2025-08-20 10:13:03 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:13:03 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:13:03 CST)" (scheduled at 2025-08-20 10:13:03.068031+08:00)
+2025-08-20 10:13:03 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:18:03.068031+08:00 (in 299.994879 seconds)
+2025-08-20 10:13:03 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:18:03 CST)" executed successfully
+2025-08-20 10:18:02 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:18:02 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:23:02.797221+08:00 (in 299.983978 seconds)
+2025-08-20 10:18:02 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:23:02 CST)" (scheduled at 2025-08-20 10:18:02.797221+08:00)
+2025-08-20 10:18:02 - app.scheduler - INFO - scheduler.py:24 - 节点 book 已标记为离线
+2025-08-20 10:18:02 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:23:02 CST)" executed successfully
+2025-08-20 10:18:03 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:18:03 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:23:03.068031+08:00 (in 299.994072 seconds)
+2025-08-20 10:18:03 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:23:03 CST)" (scheduled at 2025-08-20 10:18:03.068031+08:00)
+2025-08-20 10:18:03 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:23:03 CST)" executed successfully
+2025-08-20 10:19:23 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:19:23] "OPTIONS /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:19:23 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:19:23] "PUT /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:19:23 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:19:23] "OPTIONS /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:19:23 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:19:23] "OPTIONS /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:19:23 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:19:23] "GET /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:19:23 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:19:23] "GET /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:19:31 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:19:31] "[35m[1mPOST /api/v1/nodes/register HTTP/1.1[0m" 201 -
+2025-08-20 10:19:31 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:19:31] "[35m[1mPOST /api/v1/nodes/register HTTP/1.1[0m" 201 -
+2025-08-20 10:19:31 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:19:31] "POST /api/v1/nodes/heartbeat HTTP/1.1" 200 -
+2025-08-20 10:19:31 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:19:31] "GET /api/v1/tasks?enabled=true&agent_id=book HTTP/1.1" 200 -
+2025-08-20 10:19:31 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:19:31] "GET /api/v1/system-variables HTTP/1.1" 200 -
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:37 - 开始处理任务告警匹配 - 任务ID: 4, 任务名称: curl
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:38 - Agent上报数据: {'task_id': 4, 'status': 'failed', 'response_time': None, 'message': "步骤 '获取主机名' 失败: 断言失败", 'details': {'status': 'failed', 'response_time': 19.81, 'message': "步骤 '获取主机名' 失败: 断言失败", 'details': {'steps': [{'step_id': 'step_1755585696329_3mvgyxv63', 'name': '获取 ip 地址', 'status': 'success', 'response_time': 7.35, 'message': '步骤执行成功', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'response': {'status_code': 200, 'headers': {'Server': 'Werkzeug/2.3.7 Python/3.13.2', 'Date': 'Wed, 20 Aug 2025 02:19:31 GMT', 'Content-Type': 'application/json', 'Content-Length': '28', 'Connection': 'close'}, 'content_type': 'application/json', 'body': {'ip': '192.168.31.17'}, 'size': 28}, 'assertions': [], 'extractions': [{'source': 'json_body', 'expression': '$.ip', 'variable_name': '$ip', 'success': True, 'message': '成功提取变量', 'value': '192.168.31.17'}]}, {'step_id': 'step_1755585966494_mj4x35gnh', 'name': '获取主机名', 'status': 'failed', 'response_time': 8.08, 'message': '断言失败', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': 'ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': 'ip'}]}, 'response': {'status_code': 500, 'headers': {'Server': 'Werkzeug/2.3.7 Python/3.13.2', 'Date': 'Wed, 20 Aug 2025 02:19:31 GMT', 'Content-Type': 'application/json', 'Content-Length': '72', 'Connection': 'close'}, 'content_type': 'application/json', 'body': {'error': '[Errno 8] nodename nor servname provided, or not known'}, 'size': 72}, 'assertions': [{'source': 'status', 'comparison': 'equal', 'target': None, 'property': '', 'result': False, 'message': '不支持的数据源: status', 'actual_value': None}], 'extractions': []}], 'variables': {'$public_test': 'abc'}, 'total_assertions': 1, 'passed_assertions': 0, 'start_time': '2025-08-20T02:19:31.051020', 'end_time': '2025-08-20T02:19:31.070994'}}, 'created_at': '2025-08-20T10:19:31.071113', 'agent_id': 'book', 'agent_area': 'guangzhou'}
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:42 - 任务配置: {'steps': [{'alerts': {'allowedStatusCodes': '200', 'responseTimeAlertLevel': 'severe', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取 ip 地址', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'step_id': 'step_1755585696329_3mvgyxv63', 'variables': [{'expression': '$.ip', 'name': '$ip', 'source': 'body'}]}, {'alerts': {'allowedStatusCodes': '200', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [{'source': 'status', 'expression': '', 'operator': 'not_equals', 'expected': '200', 'enableAlert': True, 'alertCondition': 'match', 'alertLevel': 'severe'}], 'name': '获取主机名', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': 'ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': 'ip'}]}, 'step_id': 'step_1755585966494_mj4x35gnh', 'variables': []}], 'variables': [], 'authentication': {'accessToken': '', 'headers': [], 'keyName': '', 'keyValue': '', 'location': 'header', 'password': '', 'token': '', 'tokenType': 'Bearer', 'type': 'none', 'username': ''}, 'statusAlertConfig': ['failed'], 'timeoutAlertEnabled': False, 'timeoutThreshold': 5000}
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:50 - 找到 0 个启用的告警配置
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:81 - 全局告警检查结果: 0 个告警
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:308 - 开始检查任务配置告警 - 任务ID: 4
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:312 - 任务配置内容: {'steps': [{'alerts': {'allowedStatusCodes': '200', 'responseTimeAlertLevel': 'severe', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取 ip 地址', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'step_id': 'step_1755585696329_3mvgyxv63', 'variables': [{'expression': '$.ip', 'name': '$ip', 'source': 'body'}]}, {'alerts': {'allowedStatusCodes': '200', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [{'source': 'status', 'expression': '', 'operator': 'not_equals', 'expected': '200', 'enableAlert': True, 'alertCondition': 'match', 'alertLevel': 'severe'}], 'name': '获取主机名', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': 'ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': 'ip'}]}, 'step_id': 'step_1755585966494_mj4x35gnh', 'variables': []}], 'variables': [], 'authentication': {'accessToken': '', 'headers': [], 'keyName': '', 'keyValue': '', 'location': 'header', 'password': '', 'token': '', 'tokenType': 'Bearer', 'type': 'none', 'username': ''}, 'statusAlertConfig': ['failed'], 'timeoutAlertEnabled': False, 'timeoutThreshold': 5000}
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:320 - 状态告警配置: ['failed']
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:323 - 开始检查任务状态告警，配置: ['failed']
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:561 - 检查任务状态告警 - 任务ID: 4
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:565 - Agent上报的任务状态: failed
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:566 - 状态告警配置: ['failed']
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:574 - 任务状态 'failed' 匹配告警配置，开始生成告警
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:683 - 开始创建告警 - 任务ID: 4, 类型: task_status, 级别: critical
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:684 - 告警标题: 任务状态告警 - curl
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:685 - 告警内容: 任务执行状态为 failed，触发告警。 错误信息: 步骤 '获取主机名' 失败: 断言失败
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:709 - 设置告警快照数据: 2087 字符
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:715 - 告警成功保存到数据库 - 告警ID: 1, 类型: task_status, 级别: critical
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:601 - 成功创建任务状态告警: 任务状态告警 - curl
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:328 - 生成任务状态告警: 任务状态告警 - curl
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:337 - 超时告警启用状态: False
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:350 - 未启用任务超时告警
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:89 - 任务配置告警检查结果: 1 个告警
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:92 - 总共生成 1 个告警
+2025-08-20 10:19:31 - app.services.alert_matcher - INFO - alert_matcher.py:94 - 告警 1: 类型=task_status, 级别=critical, 标题=任务状态告警 - curl
+2025-08-20 10:19:31 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:19:31] "[35m[1mPOST /api/v1/results HTTP/1.1[0m" 201 -
+2025-08-20 10:19:41 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:19:41] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-20 10:19:41 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:19:41] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-20 10:20:22 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:20:22] "OPTIONS /api/v1/results?page=1&size=10 HTTP/1.1" 200 -
+2025-08-20 10:20:22 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:20:22] "GET /api/v1/results?page=1&size=10 HTTP/1.1" 200 -
+2025-08-20 10:20:24 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:20:24] "OPTIONS /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:20:24 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:20:24] "OPTIONS /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:20:24 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:20:24] "GET /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:20:24 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:20:24] "GET /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:20:25 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:20:25] "OPTIONS /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:20:25 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:20:25] "PUT /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:20:29 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:20:29] "GET /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:20:29 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:20:29] "GET /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:20:31 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:20:31] "GET /api/v1/tasks?enabled=true&agent_id=book HTTP/1.1" 200 -
+2025-08-20 10:21:06 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:21:06] "OPTIONS /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:21:06 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:21:06] "PUT /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:21:06 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:21:06] "OPTIONS /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:21:06 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:21:06] "OPTIONS /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:21:06 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:21:06] "GET /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:21:06 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:21:06] "GET /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:21:20 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:21:20] "OPTIONS /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:21:20 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:21:20] "PUT /api/v1/tasks/4 HTTP/1.1" 200 -
+2025-08-20 10:21:31 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:21:31] "GET /api/v1/tasks?enabled=true&agent_id=book HTTP/1.1" 200 -
+2025-08-20 10:21:31 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:21:31] "GET /api/v1/system-variables HTTP/1.1" 200 -
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:37 - 开始处理任务告警匹配 - 任务ID: 4, 任务名称: curl
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:38 - Agent上报数据: {'task_id': 4, 'status': 'success', 'response_time': None, 'message': '成功完成所有 2 个步骤', 'details': {'status': 'success', 'response_time': 28.1, 'message': '成功完成所有 2 个步骤', 'details': {'steps': [{'step_id': 'step_1755585696329_3mvgyxv63', 'name': '获取 ip 地址', 'status': 'success', 'response_time': 9.61, 'message': '步骤执行成功', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'response': {'status_code': 200, 'headers': {'Server': 'Werkzeug/2.3.7 Python/3.13.2', 'Date': 'Wed, 20 Aug 2025 02:21:31 GMT', 'Content-Type': 'application/json', 'Content-Length': '28', 'Connection': 'close'}, 'content_type': 'application/json', 'body': {'ip': '192.168.31.17'}, 'size': 28}, 'assertions': [], 'extractions': [{'source': 'json_body', 'expression': '$.ip', 'variable_name': '$ip', 'success': True, 'message': '成功提取变量', 'value': '192.168.31.17'}]}, {'step_id': 'step_1755585966494_mj4x35gnh', 'name': '获取主机名', 'status': 'success', 'response_time': 9.97, 'message': '步骤执行成功', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': 'ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': 'ip'}]}, 'response': {'status_code': 500, 'headers': {'Server': 'Werkzeug/2.3.7 Python/3.13.2', 'Date': 'Wed, 20 Aug 2025 02:21:31 GMT', 'Content-Type': 'application/json', 'Content-Length': '72', 'Connection': 'close'}, 'content_type': 'application/json', 'body': {'error': '[Errno 8] nodename nor servname provided, or not known'}, 'size': 72}, 'assertions': [], 'extractions': []}], 'variables': {'$public_test': 'abc'}, 'total_assertions': 0, 'passed_assertions': 0, 'start_time': '2025-08-20T02:21:31.120252', 'end_time': '2025-08-20T02:21:31.148391'}}, 'created_at': '2025-08-20T10:21:31.148705', 'agent_id': 'book', 'agent_area': 'guangzhou'}
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:42 - 任务配置: {'authentication': {'accessToken': '', 'headers': [], 'keyName': '', 'keyValue': '', 'location': 'header', 'password': '', 'token': '', 'tokenType': 'Bearer', 'type': 'none', 'username': ''}, 'statusAlertConfig': ['failed'], 'steps': [{'alerts': {'allowedStatusCodes': '200', 'responseTimeAlertLevel': 'severe', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取 ip 地址', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'step_id': 'step_1755585696329_3mvgyxv63', 'variables': [{'expression': '$.ip', 'name': '$ip', 'source': 'body'}]}, {'alerts': {'allowedStatusCodes': '200', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取主机名', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': 'ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': 'ip'}]}, 'step_id': 'step_1755585966494_mj4x35gnh', 'variables': []}], 'timeoutAlertEnabled': False, 'timeoutThreshold': 5000, 'variables': []}
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:50 - 找到 0 个启用的告警配置
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:81 - 全局告警检查结果: 0 个告警
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:308 - 开始检查任务配置告警 - 任务ID: 4
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:312 - 任务配置内容: {'authentication': {'accessToken': '', 'headers': [], 'keyName': '', 'keyValue': '', 'location': 'header', 'password': '', 'token': '', 'tokenType': 'Bearer', 'type': 'none', 'username': ''}, 'statusAlertConfig': ['failed'], 'steps': [{'alerts': {'allowedStatusCodes': '200', 'responseTimeAlertLevel': 'severe', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取 ip 地址', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [], 'url': 'http://localhost:6000/ip', 'urlParameters': []}, 'step_id': 'step_1755585696329_3mvgyxv63', 'variables': [{'expression': '$.ip', 'name': '$ip', 'source': 'body'}]}, {'alerts': {'allowedStatusCodes': '200', 'responseTimeThreshold': 5, 'statusCodeAlertLevel': 'severe'}, 'assertions': [], 'name': '获取主机名', 'request': {'body': '', 'contentType': 'application/json', 'headers': [], 'method': 'GET', 'params': [{'key': 'ip', 'value': 'ip'}], 'url': 'http://localhost:6000/name', 'urlParameters': [{'key': 'ip', 'value': 'ip'}]}, 'step_id': 'step_1755585966494_mj4x35gnh', 'variables': []}], 'timeoutAlertEnabled': False, 'timeoutThreshold': 5000, 'variables': []}
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:320 - 状态告警配置: ['failed']
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:323 - 开始检查任务状态告警，配置: ['failed']
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:561 - 检查任务状态告警 - 任务ID: 4
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:565 - Agent上报的任务状态: success
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:566 - 状态告警配置: ['failed']
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:604 - 任务状态 'success' 不在告警配置 ['failed'] 中，不触发告警
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:331 - 未触发任务状态告警
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:337 - 超时告警启用状态: False
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:350 - 未启用任务超时告警
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:89 - 任务配置告警检查结果: 0 个告警
+2025-08-20 10:21:31 - app.services.alert_matcher - INFO - alert_matcher.py:92 - 总共生成 0 个告警
+2025-08-20 10:21:31 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:21:31] "[35m[1mPOST /api/v1/results HTTP/1.1[0m" 201 -
+2025-08-20 10:21:41 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:21:41] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-20 10:21:41 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:21:41] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-20 10:22:05 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:22:05] "OPTIONS /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:22:05 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:22:05] "OPTIONS /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:22:05 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:22:05] "GET /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:22:05 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:22:05] "GET /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:23:02 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:23:02 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:28:02.797221+08:00 (in 299.995605 seconds)
+2025-08-20 10:23:02 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:28:02 CST)" (scheduled at 2025-08-20 10:23:02.797221+08:00)
+2025-08-20 10:23:02 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:28:02 CST)" executed successfully
+2025-08-20 10:23:03 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:23:03 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:28:03.068031+08:00 (in 299.998090 seconds)
+2025-08-20 10:23:03 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:28:03 CST)" (scheduled at 2025-08-20 10:23:03.068031+08:00)
+2025-08-20 10:23:03 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:28:03 CST)" executed successfully
+2025-08-20 10:25:33 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:25:33] "OPTIONS /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-20 10:25:33 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:25:33] "GET /api/v1/alerts?page=1&per_page=20&task_name= HTTP/1.1" 200 -
+2025-08-20 10:25:35 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:25:35] "OPTIONS /api/v1/results?page=1&size=10 HTTP/1.1" 200 -
+2025-08-20 10:25:35 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:25:35] "GET /api/v1/results?page=1&size=10 HTTP/1.1" 200 -
+2025-08-20 10:25:37 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:25:37] "OPTIONS /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:25:37 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:25:37] "OPTIONS /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:25:37 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:25:37] "GET /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:25:37 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:25:37] "GET /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:25:45 - werkzeug - INFO - _internal.py:187 -  * Detected change in '/Users/peter/Documents/code/boce/it-dialer/backend/app/services/alert_matcher.py', reloading
+2025-08-20 10:25:45 - werkzeug - INFO - _internal.py:187 -  * Restarting with stat
+2025-08-20 10:25:45 - tzlocal - DEBUG - unix.py:120 - /etc/localtime found
+2025-08-20 10:25:45 - tzlocal - DEBUG - unix.py:136 - 1 found:
+ {'/etc/localtime is a symlink to': 'Asia/Shanghai'}
+2025-08-20 10:25:45 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 10:25:45 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-20 10:25:45 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-20 10:25:45 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:25:45 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-20 10:25:45 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:30:45.644933+08:00 (in 299.999222 seconds)
+2025-08-20 10:25:45 - werkzeug - WARNING - _internal.py:187 -  * Debugger is active!
+2025-08-20 10:25:45 - werkzeug - INFO - _internal.py:187 -  * Debugger PIN: 620-872-712
+2025-08-20 10:28:02 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:28:02 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:33:02.797221+08:00 (in 299.993797 seconds)
+2025-08-20 10:28:02 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:33:02 CST)" (scheduled at 2025-08-20 10:28:02.797221+08:00)
+2025-08-20 10:28:02 - app.scheduler - INFO - scheduler.py:24 - 节点 book 已标记为离线
+2025-08-20 10:28:02 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:33:02 CST)" executed successfully
+2025-08-20 10:28:11 - werkzeug - INFO - _internal.py:187 -  * Detected change in '/Users/peter/Documents/code/boce/it-dialer/backend/app/api/v1/users.py', reloading
+2025-08-20 10:28:11 - werkzeug - INFO - _internal.py:187 -  * Restarting with stat
+2025-08-20 10:28:11 - tzlocal - DEBUG - unix.py:120 - /etc/localtime found
+2025-08-20 10:28:11 - tzlocal - DEBUG - unix.py:136 - 1 found:
+ {'/etc/localtime is a symlink to': 'Asia/Shanghai'}
+2025-08-20 10:28:11 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 10:28:11 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-20 10:28:11 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-20 10:28:11 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:28:11 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-20 10:28:11 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:33:11.610145+08:00 (in 299.999370 seconds)
+2025-08-20 10:28:11 - werkzeug - WARNING - _internal.py:187 -  * Debugger is active!
+2025-08-20 10:28:11 - werkzeug - INFO - _internal.py:187 -  * Debugger PIN: 620-872-712
+2025-08-20 10:33:07 - tzlocal - DEBUG - unix.py:120 - /etc/localtime found
+2025-08-20 10:33:07 - tzlocal - DEBUG - unix.py:136 - 1 found:
+ {'/etc/localtime is a symlink to': 'Asia/Shanghai'}
+2025-08-20 10:33:07 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 10:33:07 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-20 10:33:07 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-20 10:33:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:33:07 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-20 10:33:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:38:07.325535+08:00 (in 299.999335 seconds)
+2025-08-20 10:33:07 - werkzeug - INFO - _internal.py:187 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.31.17:5000
+2025-08-20 10:33:07 - werkzeug - INFO - _internal.py:187 - [33mPress CTRL+C to quit[0m
+2025-08-20 10:33:07 - werkzeug - INFO - _internal.py:187 -  * Restarting with stat
+2025-08-20 10:33:07 - tzlocal - DEBUG - unix.py:120 - /etc/localtime found
+2025-08-20 10:33:07 - tzlocal - DEBUG - unix.py:136 - 1 found:
+ {'/etc/localtime is a symlink to': 'Asia/Shanghai'}
+2025-08-20 10:33:07 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 10:33:07 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-08-20 10:33:07 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-08-20 10:33:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:33:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:38:07.654372+08:00 (in 299.999387 seconds)
+2025-08-20 10:33:07 - app.scheduler - INFO - scheduler.py:45 - 定时任务调度器已启动
+2025-08-20 10:33:07 - werkzeug - WARNING - _internal.py:187 -  * Debugger is active!
+2025-08-20 10:33:07 - werkzeug - INFO - _internal.py:187 -  * Debugger PIN: 620-872-712
+2025-08-20 10:33:43 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:33:43] "OPTIONS /api/v1/results?page=1&size=10 HTTP/1.1" 200 -
+2025-08-20 10:33:43 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:33:43] "GET /api/v1/results?page=1&size=10 HTTP/1.1" 200 -
+2025-08-20 10:33:46 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:33:46] "OPTIONS /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:33:46 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:33:46] "OPTIONS /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:33:46 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:33:46] "GET /api/v1/nodes HTTP/1.1" 200 -
+2025-08-20 10:33:46 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [20/Aug/2025 10:33:46] "GET /api/v1/tasks?page=1&size=20 HTTP/1.1" 200 -
+2025-08-20 10:38:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:38:07 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:38:07 CST)" (scheduled at 2025-08-20 10:38:07.325535+08:00)
+2025-08-20 10:38:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:43:07.325535+08:00 (in 299.995207 seconds)
+2025-08-20 10:38:07 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:43:07 CST)" executed successfully
+2025-08-20 10:38:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:38:07 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:43:07 CST)" (scheduled at 2025-08-20 10:38:07.654372+08:00)
+2025-08-20 10:38:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:43:07.654372+08:00 (in 299.996693 seconds)
+2025-08-20 10:38:07 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:43:07 CST)" executed successfully
+2025-08-20 10:43:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:43:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:48:07.325535+08:00 (in 299.988000 seconds)
+2025-08-20 10:43:07 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:48:07 CST)" (scheduled at 2025-08-20 10:43:07.325535+08:00)
+2025-08-20 10:43:07 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:48:07 CST)" executed successfully
+2025-08-20 10:43:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:43:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:48:07.654372+08:00 (in 299.995881 seconds)
+2025-08-20 10:43:07 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:48:07 CST)" (scheduled at 2025-08-20 10:43:07.654372+08:00)
+2025-08-20 10:43:07 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:48:07 CST)" executed successfully
+2025-08-20 10:48:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:48:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:48:07.325535+08:00 (in 0.003238 seconds)
+2025-08-20 10:48:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:48:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:53:07.325535+08:00 (in 299.998744 seconds)
+2025-08-20 10:48:07 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:53:07 CST)" (scheduled at 2025-08-20 10:48:07.325535+08:00)
+2025-08-20 10:48:07 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:53:07 CST)" executed successfully
+2025-08-20 10:48:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:48:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:48:07.654372+08:00 (in 0.003548 seconds)
+2025-08-20 10:48:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:48:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:53:07.654372+08:00 (in 299.999270 seconds)
+2025-08-20 10:48:07 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:53:07 CST)" (scheduled at 2025-08-20 10:48:07.654372+08:00)
+2025-08-20 10:48:07 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:53:07 CST)" executed successfully
+2025-08-20 10:53:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:53:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:58:07.325535+08:00 (in 299.995331 seconds)
+2025-08-20 10:53:07 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:58:07 CST)" (scheduled at 2025-08-20 10:53:07.325535+08:00)
+2025-08-20 10:53:07 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:58:07 CST)" executed successfully
+2025-08-20 10:53:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:53:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 10:58:07.654372+08:00 (in 299.995837 seconds)
+2025-08-20 10:53:07 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:58:07 CST)" (scheduled at 2025-08-20 10:53:07.654372+08:00)
+2025-08-20 10:53:07 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 10:58:07 CST)" executed successfully
+2025-08-20 10:58:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:58:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 11:03:07.325535+08:00 (in 299.996166 seconds)
+2025-08-20 10:58:07 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 11:03:07 CST)" (scheduled at 2025-08-20 10:58:07.325535+08:00)
+2025-08-20 10:58:07 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 11:03:07 CST)" executed successfully
+2025-08-20 10:58:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 10:58:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 11:03:07.654372+08:00 (in 299.993372 seconds)
+2025-08-20 10:58:07 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 11:03:07 CST)" (scheduled at 2025-08-20 10:58:07.654372+08:00)
+2025-08-20 10:58:07 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 11:03:07 CST)" executed successfully
+2025-08-20 11:03:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 11:03:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 11:08:07.325535+08:00 (in 299.997970 seconds)
+2025-08-20 11:03:07 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 11:08:07 CST)" (scheduled at 2025-08-20 11:03:07.325535+08:00)
+2025-08-20 11:03:07 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 11:08:07 CST)" executed successfully
+2025-08-20 11:03:07 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-08-20 11:03:07 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-08-20 11:08:07.654372+08:00 (in 299.996367 seconds)
+2025-08-20 11:03:07 - apscheduler.executors.default - INFO - base.py:123 - Running job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 11:08:07 CST)" (scheduled at 2025-08-20 11:03:07.654372+08:00)
+2025-08-20 11:03:07 - apscheduler.executors.default - INFO - base.py:144 - Job "start_scheduler.<locals>.<lambda> (trigger: interval[0:05:00], next run at: 2025-08-20 11:08:07 CST)" executed successfully

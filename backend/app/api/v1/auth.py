@@ -26,13 +26,13 @@ def login():
                 'user_id': user.id,
                 'username': user.username,
                 'role': user.role,
-                'exp': datetime.datetime.utcnow() + Config.JWT_ACCESS_TOKEN_EXPIRES
+                'exp': datetime.datetime.now() + Config.JWT_ACCESS_TOKEN_EXPIRES
             }, Config.JWT_SECRET_KEY, algorithm='HS256')
             
             refresh_token = jwt.encode({
                 'user_id': user.id,
                 'username': user.username,
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)
+                'exp': datetime.datetime.now() + datetime.timedelta(days=1)
             }, Config.JWT_SECRET_KEY, algorithm='HS256')
             
             response = make_response(jsonify({
@@ -83,7 +83,7 @@ def refresh():
                 'user_id': data['user_id'],
                 'username': data['username'],
                 'role': data.get('role', 'viewer'),
-                'exp': datetime.datetime.utcnow() + Config.JWT_ACCESS_TOKEN_EXPIRES
+                'exp': datetime.datetime.now() + Config.JWT_ACCESS_TOKEN_EXPIRES
             }, Config.JWT_SECRET_KEY, algorithm='HS256')
             
             return jsonify({
