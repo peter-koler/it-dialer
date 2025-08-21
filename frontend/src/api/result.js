@@ -25,3 +25,20 @@ export function getSingleResult(resultId) {
     method: 'get'
   })
 }
+
+// 获取任务结果列表
+export function getTaskResults(params) {
+  return request({
+    url: '/results',
+    method: 'get',
+    params
+  })
+}
+
+// 获取结果详情
+export function getResultDetail(resultId) {
+  return request({
+    url: `/results/${resultId}`,
+    method: 'get'
+  })
+}

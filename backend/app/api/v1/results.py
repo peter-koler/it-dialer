@@ -188,3 +188,114 @@ def create_result():
             'data': {},
             'message': f'创建结果失败: {str(e)}'
         }), 500
+
+
+@bp.route('/tasks/<int:task_id>/results/aggregated', methods=['GET'])
+def get_aggregated_results(task_id):
+    """Get aggregated results for a specific task"""
+    try:
+        # 获取查询参数
+        page = request.args.get('page', 1, type=int)
+        size = request.args.get('size', 20, type=int)
+        result_type = request.args.get('type', type=str)
+        start_time = request.args.get('start', type=str)
+        end_time = request.args.get('end', type=str)
+        
+        # 检查任务是否存在
+        task = Task.query.get(task_id)
+        if not task:
+            return jsonify({
+                'code': 404,
+                'data': {},
+                'message': f'任务 ID {task_id} 不存在'
+            }), 404
+        
+        # 构建查询
+        query = Result.query.filter_by(task_id=task_id)
+        
+        # 应用类型过滤（如果指定了type参数）
+        if result_type:
+            # 这里可以根据需要添加类型过滤逻辑
+            pass
+            
+        # 应用时间范围过滤
+        if start_time:
+            try:
+                start_dt = parser.isoparse(start_time)
+                query = query.filter(Result.created_at >= start_dt)
+            except (ValueError, TypeError) as e:
+                print(f"Error parsing start_time: {e}")
+                pass
+        
+        if end_time:
+            try:
+                end_dt = parser.isoparse(end_time)
+                query = query.filter(Result.created_at <= end_dt)
+            except (ValueError, TypeError) as e:
+                print(f"Error parsing end_time: {e}")
+                pass
+        
+        # 按创建时间倒序排列
+        query = query.order_by(Result.created_at.desc())
+        
+        # 应用分页
+        pagination = query.paginate(
+            page=page, 
+            per_page=size, 
+            error_out=False
+        )
+        
+        results = pagination.items
+        
+        # 转换为字典列表
+        results_data = []
+        for result in results:
+            try:
+                results_data.append(result.to_dict())
+            except Exception as e:
+                print(f"Error converting result {result.id} to dict: {str(e)}")
+                continue
+        
+        # 计算聚合统计信息
+        total_results = pagination.total
+        success_count = query.filter_by(status='success').count()
+        failed_count = query.filter_by(status='failed').count()
+        
+        # 计算成功率
+        success_rate = (success_count / total_results * 100) if total_results > 0 else 0
+        
+        # 计算平均响应时间
+        avg_response_time = 0
+        if results:
+            response_times = [r.response_time for r in results if r.response_time is not None]
+            if response_times:
+                avg_response_time = sum(response_times) / len(response_times)
+        
+        return jsonify({
+            'code': 0,
+            'data': {
+                'list': results_data,
+                'total': total_results,
+                'pagination': {
+                    'page': page,
+                    'size': size,
+                    'total': total_results
+                },
+                'statistics': {
+                    'total_count': total_results,
+                    'success_count': success_count,
+                    'failed_count': failed_count,
+                    'success_rate': round(success_rate, 2),
+                    'avg_response_time': round(avg_response_time, 2)
+                }
+            },
+            'message': 'ok'
+        })
+    except Exception as e:
+        print(f"Error in get_aggregated_results: {str(e)}")
+        print(traceback.format_exc())
+        return jsonify({
+            'code': 500,
+            'data': {},
+            'message': f'获取聚合结果失败: {str(e)}'
+        }), 500

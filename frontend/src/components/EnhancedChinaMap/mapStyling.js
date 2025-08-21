@@ -1,6 +1,14 @@
 // 为区域获取颜色
-export const getColorForRegion = (regionName, mapData) => {
-  // 根据拨测点数量确定颜色
+export const getColorForRegion = (regionName, mapData, getRegionAlertLevel) => {
+  // 优先根据告警级别确定颜色
+  if (getRegionAlertLevel) {
+    const alertLevel = getRegionAlertLevel(regionName)
+    if (alertLevel === 'critical') return '#ff4d4f' // 严重告警 - 红色
+    if (alertLevel === 'warning') return '#faad14'  // 警告告警 - 黄色
+    if (alertLevel === 'info') return '#1890ff'     // 信息告警 - 深蓝色
+  }
+  
+  // 如果没有告警，根据拨测点数量确定颜色
   const regionData = mapData.find(item => item.name === regionName)
   const value = regionData ? regionData.value : 0
   

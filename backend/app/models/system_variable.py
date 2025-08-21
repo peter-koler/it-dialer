@@ -11,8 +11,8 @@ class SystemVariable(db.Model):
     value = db.Column(db.Text, nullable=False)  # 变量值
     description = db.Column(db.Text)  # 变量描述
     is_secret = db.Column(db.Boolean, default=False)  # 是否为密钥变量
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
     
     @staticmethod
     def validate_name(name):

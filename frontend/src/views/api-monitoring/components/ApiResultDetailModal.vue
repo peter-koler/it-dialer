@@ -1,7 +1,7 @@
 <template>
   <a-modal
     :open="open"
-    :title="`拨测点: ${probeData.location}`"
+    :title="`拨测点: ${getLocationName(probeData.location)}`"
     width="80%"
     :footer="null"
     @cancel="handleCancel"
@@ -116,6 +116,7 @@ import {
 import ApiStepSnapshot from './ApiStepSnapshot.vue'
 import ApiStepTimeline from './ApiStepTimeline.vue'
 import ApiVariableTracker from './ApiVariableTracker.vue'
+import pinyinToChinese from '@/utils/pinyinToChinese'
 
 const props = defineProps({
   open: Boolean,
@@ -165,6 +166,10 @@ const assertionPassRate = computed(() => {
 
 const handleStepClick = (index) => {
   activeStepIndex.value = index
+}
+
+const getLocationName = (location) => {
+  return pinyinToChinese[location] || location
 }
 
 const handleCancel = () => {

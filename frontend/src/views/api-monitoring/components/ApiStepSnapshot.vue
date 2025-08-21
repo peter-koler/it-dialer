@@ -298,6 +298,43 @@
           </a-card>
         </div>
       </a-tab-pane>
+      
+      <!-- 原始报文 -->
+      <a-tab-pane key="raw" tab="原始报文">
+        <a-tabs v-model:activeKey="rawActiveTab" type="line" size="small">
+          <!-- 原始请求 -->
+          <a-tab-pane key="rawRequest" tab="原始请求">
+            <div class="code-container">
+              <div class="code-header">
+                <a-space>
+                  <a-tag size="small">HTTP Request</a-tag>
+                  <a-button size="small" type="text" @click="copyToClipboard(formatRawRequest())">
+                    <template #icon><CopyOutlined /></template>
+                    复制
+                  </a-button>
+                </a-space>
+              </div>
+              <pre class="code-block raw-message">{{ formatRawRequest() }}</pre>
+            </div>
+          </a-tab-pane>
+          
+          <!-- 原始响应 -->
+          <a-tab-pane key="rawResponse" tab="原始响应">
+            <div class="code-container">
+              <div class="code-header">
+                <a-space>
+                  <a-tag size="small">HTTP Response</a-tag>
+                  <a-button size="small" type="text" @click="copyToClipboard(formatRawResponse())">
+                    <template #icon><CopyOutlined /></template>
+                    复制
+                  </a-button>
+                </a-space>
+              </div>
+              <pre class="code-block raw-message">{{ formatRawResponse() }}</pre>
+            </div>
+          </a-tab-pane>
+        </a-tabs>
+      </a-tab-pane>
     </a-tabs>
   </div>
 </template>
@@ -321,6 +358,7 @@ const props = defineProps({
 // 响应式数据
 const activeTab = ref('request')
 const responseViewMode = ref('formatted')
+const rawActiveTab = ref('rawRequest')
 
 // 计算属性
 const requestHeaders = computed(() => {
@@ -601,6 +639,62 @@ const formatExtractionValue = (value) => {
   return String(value)
 }
 
+// 格式化原始HTTP请求报文
+const formatRawRequest = () => {
+  if (!props.step) return ''
+  
+  const { method, url, headers, body } = props.step
+  let rawRequest = `${method} ${url} HTTP/1.1\r\n`
+  
+  // 添加请求头
+  if (headers && typeof headers === 'object') {
+    Object.entries(headers).forEach(([key, value]) => {
+      rawRequest += `${key}: ${value}\r\n`
+    })
+  }
+  
+  rawRequest += '\r\n'
+  
+  // 添加请求体
+  if (body) {
+    if (typeof body === 'object') {
+      rawRequest += JSON.stringify(body, null, 2)
+    } else {
+      rawRequest += body
+    }
+  }
+  
+  return rawRequest
+}
+
+// 格式化原始HTTP响应报文
+const formatRawResponse = () => {
+  if (!props.step || !props.step.response) return ''
+  
+  const { status_code, headers, body, response_time } = props.step.response
+  let rawResponse = `HTTP/1.1 ${status_code} ${getStatusText(status_code)}\r\n`
+  
+  // 添加响应头
+  if (headers && typeof headers === 'object') {
+    Object.entries(headers).forEach(([key, value]) => {
+      rawResponse += `${key}: ${value}\r\n`
+    })
+  }
+  
+  rawResponse += '\r\n'
+  
+  // 添加响应体
+  if (body) {
+    if (typeof body === 'object') {
+      rawResponse += JSON.stringify(body, null, 2)
+    } else {
+      rawResponse += body
+    }
+  }
+  
+  return rawResponse
+}
+
 const copyToClipboard = async (text) => {
   try {
     await navigator.clipboard.writeText(text)
@@ -646,6 +740,17 @@ const copyToClipboard = async (text) => {
 
 .response-body {
   max-height: 400px;
+}
+
+.raw-message {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  background: #f8f8f8;
+  color: #333;
+  border: none;
+  max-height: 500px;
+  overflow-y: auto;
 }
 
 .status-text {

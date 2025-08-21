@@ -22,8 +22,8 @@ class Alert(db.Model):
     assigned_to = db.Column(db.String(100), nullable=True)  # 分配给的用户
     resolved_by = db.Column(db.String(100), nullable=True)  # 处理人
     resolved_at = db.Column(db.DateTime, nullable=True)  # 处理时间
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
     
     # 关系
     task = db.relationship('Task', lazy=True)
@@ -116,8 +116,8 @@ class AlertConfig(db.Model):
     alert_type = db.Column(db.String(50), nullable=False)  # status_code, response_time
     enabled = db.Column(db.Boolean, nullable=False, default=True)
     config = db.Column(db.Text, nullable=False)  # JSON配置
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
     
     # 关系
     task = db.relationship('Task', lazy=True)

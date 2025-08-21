@@ -13,8 +13,8 @@ class Task(db.Model):
     enabled = db.Column(db.Boolean, nullable=False, default=True)
     config = db.Column(db.Text)  # JSON configuration for the task
     agent_ids = db.Column(db.Text)  # JSON array of agent IDs
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
     
     # Relationship with results (cascade delete) - 使用不同的backref名称
     results = db.relationship('Result', backref='related_task', lazy=True, cascade='all, delete-orphan')

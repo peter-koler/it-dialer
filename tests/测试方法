@@ -40,5 +40,10 @@ with app.app_context():
 
 curl -X GET "http://localhost:5000/api/v1/node"
 
+it-dialer 终端
+
+curl -s "http://localhost:5000/api/v1/tasks/4/results/aggregated" | jq '.list[0] | {id, agent_area, agent_id, location, status, response_time, created_at}'
+
+
 
 curl -X PUT "http://localhost:5000/api/v1/tasks/5" -H "Content-Type: application/json" -d '{"name":"api1","type":"api","interval":60,"enabled":true,"agent_ids":["book"],"target":"","config":"{\"steps\":[]}"}'

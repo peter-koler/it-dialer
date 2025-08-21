@@ -13,7 +13,7 @@ class Result(db.Model):
     details = db.Column(db.Text)  # JSON details of the result
     agent_id = db.Column(db.String(100))  # Agent ID
     agent_area = db.Column(db.String(100))  # Agent区域
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     
     # Relationship - 添加overlaps参数以解决警告
     task = db.relationship('Task', lazy=True, overlaps="related_task,results")
