@@ -127,12 +127,26 @@ def create_task():
         print(f"Valid task type: {data['type']}")  # 添加调试日志
         
         # 验证Agent是否存在
-        if not isinstance(data['agent_ids'], list) or len(data['agent_ids']) == 0:
+        if not isinstance(data['agent_ids'], list):
             return jsonify({
                 'code': 400,
                 'data': {},
-                'message': '必须选择至少一个Agent'
+                'message': 'agent_ids必须是数组格式'
             }), 400
+        
+        # 如果没有选择Agent，则获取所有可用的Agent
+        if len(data['agent_ids']) == 0:
+            print("No agents selected, using all available agents")  # 添加调试日志
+            all_nodes = Node.query.all()
+            if len(all_nodes) == 0:
+                return jsonify({
+                    'code': 400,
+                    'data': {},
+                    'message': '系统中没有可用的Agent节点'
+                }), 400
+            # 使用所有可用节点的agent_id
+            data['agent_ids'] = [node.agent_id for node in all_nodes]
+            print(f"Using all available agents: {data['agent_ids']}")  # 添加调试日志
             
         # 检查所有Agent是否存在
         for agent_id in data['agent_ids']:
@@ -149,6 +163,9 @@ def create_task():
                 }), 400
         
         print("All nodes found")  # 添加调试日志
+        
+        # 处理config字段
+        config = data.get('config', {})  # 为所有任务类型提供默认空配置
         
         # 验证API任务的配置
         if data['type'] == 'api':

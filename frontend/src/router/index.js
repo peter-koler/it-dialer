@@ -52,6 +52,19 @@ const routes = [
         props: true
       },
       {
+        path: '/task-management/http-result/:id',
+        name: 'HttpMonitoringResult',
+        component: () => import('../views/http-monitoring/HttpMonitoringResult.vue'),
+        props: true
+      },
+      {
+        path: '/task-management/http-probe-detail/:taskId/:probeName/:agentArea',
+        name: 'HttpProbeDetail',
+        component: () => import('../views/http-monitoring/HttpProbeDetail.vue'),
+        meta: { title: 'HTTP拨测点详情' },
+        props: true
+      },
+      {
         path: '/api-monitoring/result/:taskId',
         name: 'ApiMonitoringResultPage',
         component: () => import('../views/api-monitoring/ApiMonitoringResult.vue'),

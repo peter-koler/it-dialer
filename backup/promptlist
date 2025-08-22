@@ -1,0 +1,54 @@
+项目背景：目前 IT-Dialer 系统的 HTTP 拨测功能缺少告警能力，用户无法及时获知任务异常。我们需要增强此功能，提供灵活的告警配置，并实现一个专门的告警管理面板。
+核心目标：
+在 HTTP 拨测任务的编辑页面中，增加可配置的告警规则。
+后端实现告警判断逻辑，并生成告警事件。
+新增一个独立的告警管理页面，用于展示 HTTP 拨测任务产生的告警。
+第一部分：前端开发
+1. 修改拨测任务编辑页面
+目标文件：修改 EnhancedTaskModal.vue 或处理 HTTP 任务编辑逻辑的相应组件。
+功能添加：
+当任务类型 (task_type) 被选择为 HTTP 时，在表单中增加一个可展开的**“告警配置”**面板。
+该面板应包含四个独立的告警配置项，每个配置项都可以独立开启/关闭。
+配置项设计：
+1) 状态告警：提供一个下拉菜单，让用户选择触发告警的“webstatus”状态（正常、异常）。
+2) 返回代码告警：提供输入框和下拉菜单，让用户配置返回代码 (response_code) 的判断条件（等于、不等于、大于），并输入一个目标值。
+3) 响应时间告警：提供输入框和下拉菜单，让用户配置响应时间 (response_time) 的判断条件（大于、小于、等于），并输入一个目标值（毫秒）。
+4) DNS IP 告警：提供一个可编辑的列表，让用户输入期望的 IP 地址列表 (dns_ips)，当拨测结果的 IP 不在该列表中时触发告警。
+告警级别设置：在每个告警配置项旁边，增加一个下拉菜单，让用户选择告警级别（例如：通知、警告、严重）。
+2. 新增告警管理页面
+菜单添加：在主导航菜单中，新增一个名为“拨测告警管理”的菜单项。
+页面设计：
+页面风格采用 Ant Design Pro 框架的列表页设计，包括表格、筛选表单和分页器。
+页面布局应具备自适应能力，当窗口放大或缩小时，表格和面板能自动调整大小。
+表格列：表格中应展示告警的核心信息，包括：
+任务名称
+拨测点（Agent 位置）
+告警类型（例如：返回代码异常、响应超时）
+告警级别
+告警详情（具体触发条件，例如“返回代码为 404”）
+触发时间
+处理状态（例如：未处理、已处理）
+第二部分：后端开发
+1. 数据模型修改
+Task 模型：在 Task 模型中，新增一个 alarm_config 字段（JSON 类型），用于存储前端配置的告警规则。
+JSON 结构：设计一个清晰的 JSON 结构，能够包含四种告警类型及其各自的判断条件、告警级别和启用状态。
+2. API 接口修改
+PUT /tasks/<id>：修改任务更新 API，使其能够接收并正确校验 alarm_config 字段的数据，并将其持久化到数据库。
+3. 告警处理逻辑
+告警判断：在处理 HTTP 拨测结果的后端服务中（可能是 Agent 的结果上报处理服务或独立的任务结果处理器），增加告警判断逻辑。
+根据数据库中任务的 alarm_config 字段，对每次拨测的返回结果进行判断。
+判断规则：依次检查 webstatus、response_code、response_time 和 dns_ips 是否满足告警条件。
+告警事件生成：
+当任何告警条件被触发时，生成一个告警事件对象。
+将告警事件存储到数据库表中（例如 Alarms 表），该表应包含告警的所有详细信息，如任务ID、告警类型、级别、详情、触发时间等。
+4. 新增告警管理 API
+GET /alarms/http：新增一个 API，用于查询和分页展示 HTTP 拨测任务产生的告警列表，供前端的“拨测告警管理”页面调用。
+API 应支持根据任务名称、告警级别等进行筛选。
+5. 调试日志
+在后端处理告警判断的逻辑中，使用 debug 级别的日志。
+日志内容：
+记录正在处理的任务 ID。
+详细记录每个告警判断项的检查过程，例如：“[DEBUG] 任务 <id> 正在检查返回代码。配置条件：> 200，实际返回：404。触发告警。”
+记录告警事件的生成和存储过程。
+5、下面是agent 的详细日志输出，你可以参考
+任务 5 详细输出: {"status": "success", "response_time": 450.4969120025635, "message": "HTTP请求成功，状态码: 200", "webstatus": "正常", "details": {"dns_time": 5.914211273193359, "tcp_time": 21.19588851928711, "ssl_time": 0, "first_byte_time": 271.78072929382324, "download_time": 151.49307250976562, "http_time": 423.3837127685547, "status_code": 200, "response_headers": {"Connection": "close", "Transfer-Encoding": "chunked", "Bdpagetype": "1", "Bdqid": "0xd0f57d26004b0b31", "Content-Encoding": "gzip", "Content-Type": "text/html; charset=utf-8", "Date": "Fri, 22 Aug 2025 01:30:58 GMT", "P3p": "CP=\" OTI DSP COR IVA OUR IND COM \", CP=\" OTI DSP COR IVA OUR IND COM \"", "Server": "BWS/1.1", "Set-Cookie": "BAIDUID=223803ADA9C7CE6DBE1F72B4757E4CC9:FG=1; expires=Thu, 31-Dec-37 23:55:55 GMT; max-age=2147483647; path=/; domain=.baidu.com, BIDUPSID=223803ADA9C7CE6DBE1F72B4757E4CC9; expires=Thu, 31-Dec-37 23:55:55 GMT; max-age=2147483647; path=/; domain=.baidu.com, PSTM=1755826258; expires=Thu, 31-Dec-37 23:55:55 GMT; max-age=2147483647; path=/; domain=.baidu.com, BAIDUID=223803ADA9C7CE6D5AF7E5258B9040A8:FG=1; max-age=31536000; expires=Sat, 22-Aug-26 01:30:58 GMT; domain=.baidu.com; path=/; version=1; comment=bd, BDSVRTM=4; path=/, BD_HOME=1; path=/", "Tr_id": "super_0xd0f57d26004b0b31", "Traceid": "1755826258027998413815057078531350268721", "X-Ua-Compatible": "IE=Edge,chrome=1", "X-Xss-Protection": "1;mode=block"}, "content_length": 616595, "dns_ips": ["183.240.99.58", "183.240.99.169"], "final_url": "http://www.baidu.com/"}}

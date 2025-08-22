@@ -1,6 +1,27 @@
 <template>
   <div>
     <a-card title="任务结果列表">
+      <template #extra>
+        <a-space>
+          <a-button 
+            v-for="preset in timePresets" 
+            :key="preset.key"
+            :type="selectedTimeRange === preset.key ? 'primary' : 'default'"
+            size="small"
+            @click="handleTimePresetClick(preset)"
+          >
+            {{ preset.label }}
+          </a-button>
+          <a-range-picker
+            v-model:value="timeRange"
+            show-time
+            format="YYYY-MM-DD HH:mm:ss"
+            @change="handleTimeRangeChange"
+            style="width: 300px;"
+          />
+        </a-space>
+      </template>
+      
       <!-- 搜索栏 -->
       <SearchBar 
         :search-params="searchParams"
@@ -14,7 +35,7 @@
         :loading="loading"
         :pagination="pagination"
         @change="handleTableChange"
-        :rowKey="(record) => record.task.id"
+        :rowKey="(record) => record.task_id"
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.dataIndex === 'status'">
@@ -81,6 +102,7 @@ import TaskDetailModal from './TaskDetailModal.vue'
 import ProbeDetailModal from './ProbeDetailModal.vue'
 // 已移除对旧ApiTaskResultModal的引用
 import pinyinToChinese from '@/utils/pinyinToChinese.js'
+import dayjs from 'dayjs'
 
 // 定义变量
 const route = useRoute()
@@ -103,6 +125,16 @@ const searchParams = ref({
 })
 const probeDetails = ref({}) // 存储每个拨测点的详细数据
 
+// 时间选择相关变量
+const timeRange = ref([dayjs().startOf('day'), dayjs().endOf('day')]) // 默认当天
+const selectedTimeRange = ref('today')
+const timePresets = ref([
+  { key: 'hour', label: '1小时', value: () => [dayjs().subtract(1, 'hour'), dayjs()] },
+  { key: '8hours', label: '8小时', value: () => [dayjs().subtract(8, 'hour'), dayjs()] },
+  { key: 'today', label: '今天', value: () => [dayjs().startOf('day'), dayjs().endOf('day')] },
+  { key: 'week', label: '7天', value: () => [dayjs().subtract(7, 'day'), dayjs()] }
+])
+
 // 地图相关数据
 const mapData = ref([])
 const mapLevel = ref('country')
@@ -112,7 +144,7 @@ const selectedMapCode = ref('')
 const columns = [
   {
     title: '任务ID',
-    dataIndex: ['task', 'id'],
+    dataIndex: 'task_id',
     width: 80
   },
   {
@@ -160,34 +192,52 @@ const formatDate = (dateString) => {
   return date.toLocaleString('zh-CN')
 }
 
+// 处理时间预设选择
+const handleTimePresetClick = (preset) => {
+  selectedTimeRange.value = preset.key
+  timeRange.value = preset.value()
+  fetchResults()
+}
+
+// 处理自定义时间范围选择
+const handleTimeRangeChange = (dates) => {
+  if (dates && dates.length === 2) {
+    timeRange.value = dates
+    selectedTimeRange.value = '' // 清空预设选择
+    fetchResults()
+  }
+}
+
 // 获取结果列表并聚合
 const fetchResults = async () => {
   loading.value = true
   try {
-    // 使用 useRoute() 获取当前任务的ID
-    const taskId = route.params.id
-    
-    // 通过 /api/v1/results?task_id=${taskId} 接口获取真实的拨测结果数据
+    // 获取所有任务的拨测结果数据，按任务ID聚合显示
     const params = {
-      task_id: taskId,
       page: pagination.value.current,
       size: pagination.value.pageSize
+    }
+    
+    // 添加时间过滤参数
+    if (timeRange.value && timeRange.value.length === 2) {
+      // 使用本地时间格式，避免时区转换问题
+      params.start = timeRange.value[0].format('YYYY-MM-DD HH:mm:ss')
+      params.end = timeRange.value[1].format('YYYY-MM-DD HH:mm:ss')
     }
     
     const data = await getTaskResults(params)
     
     if (data.code === 0) {
-      // 只显示每个拨测点的最新记录
+      // 按任务ID进行聚合显示
       const groupedResults = {}
       data.data.list.forEach(item => {
-        // 优先使用item.agent_area，如果没有则尝试使用item.task.agent_ids的第一个元素
-        const agentArea = item.agent_area || (item.task && item.task.agent_ids && item.task.agent_ids.length > 0 ? item.task.agent_ids[0] : null)
-        if (agentArea) {
-          if (!groupedResults[agentArea] || new Date(item.created_at) > new Date(groupedResults[agentArea].created_at)) {
+        const taskId = item.task_id
+        if (taskId) {
+          if (!groupedResults[taskId] || new Date(item.created_at) > new Date(groupedResults[taskId].created_at)) {
             // 将 agent_area 字段（如 "guangzhou"）转换为中文地区名称（如 "广州市"）
-            const locationName = pinyinToChinese[agentArea] || agentArea || '未知地区'
+            const locationName = pinyinToChinese[item.agent_area] || item.agent_area || '未知地区'
             
-            groupedResults[agentArea] = {
+            groupedResults[taskId] = {
               ...item,
               location: locationName
             }
@@ -200,13 +250,13 @@ const fetchResults = async () => {
       
       // 转换为数组并进行分页处理
       const allResults = Object.values(groupedResults).map(item => {
-        // 计算该地区的执行统计
-        const regionResults = allTaskResults.filter(r => r.agent_area === item.agent_area)
+        // 计算该任务的执行统计
+        const taskResults = allTaskResults.filter(r => r.task_id === item.task_id)
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // 按时间降序排序
-        const latestResult = regionResults.length > 0 ? regionResults[0] : item
+        const latestResult = taskResults.length > 0 ? taskResults[0] : item
         
-        // 计算该地区的实际执行次数
-        const count = regionResults.length
+        // 计算该任务的实际执行次数
+        const count = taskResults.length
         
         // 获取正确的最新状态 - 从details.status获取
         let correctLatestStatus = '未知';
@@ -217,7 +267,7 @@ const fetchResults = async () => {
         }
         
         // 计算最近10次拨测结果的平均响应时间
-        const recentResults = regionResults.slice(0, 10) // 取最近10次结果
+        const recentResults = taskResults.slice(0, 10) // 取最近10次结果
         const responseTimes = recentResults
           .map(r => {
             // 从多层嵌套结构中提取response_time
@@ -289,6 +339,9 @@ const showDetails = (record) => {
   if (record.task && record.task.type === 'api') {
     // API拨测任务跳转到新的结果展示页面
     router.push(`/api-monitoring/result/${record.task.id}`)
+  } else if (record.task && record.task.type === 'http') {
+    // HTTP拨测任务跳转到HTTP结果展示页面
+    router.push(`/task-management/http-result/${record.task.id}`)
   } else {
     // 其他类型任务使用常规详情展示
     detailModalVisible.value = true

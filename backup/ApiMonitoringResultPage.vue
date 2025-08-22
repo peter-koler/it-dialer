@@ -40,7 +40,7 @@
               <StatusTag :status="record.status" />
             </template>
             <template v-else-if="column.dataIndex === 'action'">
-              <a-button type="link" @click="showAggregatedProbeDetail(record)">查看详情</a-button>
+              <a-button type="link" @click="showAggregatedProbeDetail(record)">查看API拨测点详情</a-button>
             </template>
           </template>
         </a-table>

@@ -32,7 +32,7 @@
               </a-tag>
             </template>
             <template v-if="column.dataIndex === 'action'">
-              <a-button type="link" @click="showAggregatedProbeDetail(record)">查看详情</a-button>
+              <a-button type="link" @click="showAggregatedProbeDetail(record)">查看监测点详情</a-button>
             </template>
           </template>
         </a-table>
