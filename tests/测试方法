@@ -1,0 +1,49 @@
+curl -X GET http://localhost:5001/api/v1/results
+# 获取最新的拨测结果（默认按创建时间倒序排列）
+curl -X GET "http://localhost:5001/api/v1/results" \
+  -H "Content-Type: application/json"
+
+# 获取最新的10条拨测结果
+curl -X GET "http://localhost:5001/api/v1/results?page=1&size=1" \
+  -H "Content-Type: application/json"
+
+# 如果API需要认证（从前端代码看可能需要Bearer Token）
+curl -X GET "http://localhost:5001/api/v1/results" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+curl -X GET "http://localhost:5000/api/v1/results?task_id=3&type=api&page=1&size=100" \
+  -H "Content-Type: application/json"
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+task_id=3&type=api&page=1&size=100
+
+  cd /Users/peter/Documents/code/boce/it-dialer && git status
+  cd /Users/peter/Documents/code/boce/it-dialer && git add frontend/src/views/TaskList.vue frontend/src/components/EnhancedChinaMap/ frontend/src/views/task-detail/ frontend/src/api/task.js
+  cd /Users/peter/Documents/code/boce/it-dialer && git commit -m "修复任务列表数据显示问题和地图组件重构"
+
+  cd /Users/peter/Documents/code/boce/it-dialer && git status
+
+  cd /Users/peter/Documents/code/boce/it-dialer/backend && python3 -c "
+import sys
+sys.path.append('app')
+from app import create_app, db
+from app.models.node import Node
+
+app = create_app()
+with app.app_context():
+    nodes = Node.query.all()
+    print('Nodes in database:')
+    for node in nodes:
+        print(f'  Agent ID: {node.agent_id}, Hostname: {node.hostname}, Status: {node.status}')
+"
+
+curl -X GET "http://localhost:5000/api/v1/node"
+
+it-dialer 终端
+
+curl -s "http://localhost:5000/api/v1/tasks/4/results/aggregated" | jq '.list[0] | {id, agent_area, agent_id, location, status, response_time, created_at}'
+
+
+
+curl -X PUT "http://localhost:5000/api/v1/tasks/5" -H "Content-Type: application/json" -d '{"name":"api1","type":"api","interval":60,"enabled":true,"agent_ids":["book"],"target":"","config":"{\"steps\":[]}"}'

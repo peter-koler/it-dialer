@@ -1,0 +1,10 @@
+{
+  "agent_id": "book",
+  "server_url": "http://localhost:5001",
+  "plugins_dir": "plugins",
+  "report_interval": 60,
+  "log_level": "INFO",
+  "agent_area": "guangzhou",
+  "api_token": "agent-default-token-2024",
+  "auth_required": true
+}

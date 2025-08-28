@@ -1,0 +1,558 @@
+<script setup>
+import { ref, onMounted } from 'vue'
+import { message } from 'ant-design-vue'
+import * as echarts from 'echarts'
+
+// 定义变量
+const detailModalVisible = ref(false)
+const selectedTask = ref(null)
+const aggregatedResults = ref([])
+const loading = ref(false)
+const pagination = ref({
+  current: 1,
+  pageSize: 10,
+  total: 0
+})
+const searchParams = ref({
+  keyword: '',
+  status: ''
+})
+
+// 表格列定义
+const columns = [
+  {
+    title: '任务ID',
+    dataIndex: ['task', 'id'],
+    width: 80
+  },
+  {
+    title: '任务名称',
+    dataIndex: ['task', 'name']
+  },
+  {
+    title: '任务目标',
+    dataIndex: ['task', 'target']
+  },
+  {
+    title: '任务类型',
+    dataIndex: ['task', 'type']
+  },
+  {
+    title: '最新状态',
+    dataIndex: 'status'
+  },
+  {
+    title: '平均响应时间',
+    dataIndex: 'response_time'
+  },
+  {
+    title: '执行次数',
+    dataIndex: 'count'
+  },
+  {
+    title: '创建时间',
+    dataIndex: 'latestCreatedAt'
+  },
+  {
+    title: '操作',
+    dataIndex: 'details',
+    width: 100
+  }
+]
+
+// 获取结果列表并聚合
+const fetchResults = async () => {
+  loading.value = true
+  try {
+    // 获取所有结果数据
+    let url = `http://localhost:5000/api/v1/results?page=${pagination.value.current}&size=1000`
+    
+    if (searchParams.value.status) {
+      url += `&status=${searchParams.value.status}`
+    }
+    
+    const response = await fetch(url)
+    const data = await response.json()
+    
+    if (data.code === 0) {
+      // 按任务名称聚合结果
+      const aggregated = aggregateResults(data.data.list)
+      
+      // 分页处理
+      const start = (pagination.value.current - 1) * pagination.value.pageSize
+      const end = start + pagination.value.pageSize
+      aggregatedResults.value = aggregated.slice(start, end)
+      pagination.value.total = aggregated.length
+    } else {
+      message.error(data.message || '获取结果列表失败')
+    }
+  } catch (error) {
+    message.error('获取结果列表失败: ' + error.message)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 按任务聚合结果
+const aggregateResults = (results) => {
+  const taskMap = new Map()
+  
+  results.forEach(result => {
+    const taskId = result.task.id
+    if (!taskMap.has(taskId)) {
+      taskMap.set(taskId, {
+        task: result.task,
+        results: [],
+        count: 0,
+        avgResponseTime: 0,
+        latestStatus: '',
+        latestCreatedAt: ''
+      })
+    }
+    
+    const taskGroup = taskMap.get(taskId)
+    taskGroup.results.push(result)
+    taskGroup.count++
+    
+    // 更新最新状态和时间
+    if (!taskGroup.latestCreatedAt || result.created_at > taskGroup.latestCreatedAt) {
+      taskGroup.latestStatus = result.status
+      taskGroup.latestCreatedAt = result.created_at
+    }
+  })
+  
+  // 计算平均响应时间
+  taskMap.forEach(taskGroup => {
+    const totalResponseTime = taskGroup.results.reduce((sum, result) => {
+      // 对于TCP任务，使用execution_time作为响应时间
+      if (taskGroup.task.type === 'tcp') {
+        try {
+          const details = typeof result.details === 'string' 
+            ? JSON.parse(result.details) 
+            : result.details;
+          return sum + (details.execution_time * 1000 || 0); // 转换为毫秒
+        } catch (e) {
+          return sum + (result.response_time || 0);
+        }
+      } else {
+        return sum + (result.response_time || 0);
+      }
+    }, 0)
+    
+    taskGroup.avgResponseTime = taskGroup.count > 0 ? totalResponseTime / taskGroup.count : 0
+  })
+  
+  // 转换为数组并按最新创建时间排序
+  return Array.from(taskMap.values()).sort((a, b) => {
+    return new Date(b.latestCreatedAt) - new Date(a.latestCreatedAt)
+  })
+}
+
+// 显示详情
+const showDetails = (record) => {
+  selectedTask.value = record
+  detailModalVisible.value = true
+  
+  // 等待DOM更新后渲染图表
+  setTimeout(() => {
+    if (record.task.type === 'ping') {
+      renderLatencyChart(record.results)
+    } else if (record.task.type === 'tcp') {
+      renderTcpCharts(record.results)
+    }
+  }, 100)
+}
+
+// 渲染延迟图表（时间序列）
+const renderLatencyChart = (results) => {
+  const chartDom = document.getElementById('latency-chart')
+  if (!chartDom) return
+  
+  const myChart = echarts.init(chartDom)
+  
+  // 按创建时间排序
+  results.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+  
+  // 准备时间序列数据
+  const timeData = results.map(result => {
+    // 格式化时间显示
+    const date = new Date(result.created_at)
+    return date.toLocaleTimeString('zh-CN', { 
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })
+  })
+  
+  // 准备延迟数据
+  const rttMinData = []
+  const rttAvgData = []
+  const rttMaxData = []
+  
+  results.forEach(result => {
+    try {
+      const details = typeof result.details === 'string' 
+        ? JSON.parse(result.details) 
+        : result.details
+      
+      rttMinData.push(details.rtt_min || 0)
+      rttAvgData.push(details.rtt_avg || 0)
+      rttMaxData.push(details.rtt_max || 0)
+    } catch (e) {
+      // 解析失败时使用默认值
+      rttMinData.push(0)
+      rttAvgData.push(0)
+      rttMaxData.push(0)
+    }
+  })
+
+  const option = {
+    title: {
+      text: '延迟时间序列图',
+      left: 'center'
+    },
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {
+      data: ['最小延迟', '平均延迟', '最大延迟'],
+      top: '10%'
+    },
+    xAxis: {
+      type: 'category',
+      data: timeData
+    },
+    yAxis: {
+      type: 'value',
+      name: '延迟 (ms)'
+    },
+    series: [
+      {
+        name: '最小延迟',
+        type: 'line',
+        data: rttMinData,
+        smooth: true
+      },
+      {
+        name: '平均延迟',
+        type: 'line',
+        data: rttAvgData,
+        smooth: true
+      },
+      {
+        name: '最大延迟',
+        type: 'line',
+        data: rttMaxData,
+        smooth: true
+      }
+    ]
+  }
+
+  myChart.setOption(option)
+}
+
+// 渲染TCP任务详情图表
+const renderTcpCharts = (results) => {
+  // 按创建时间排序
+  results.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  
+  // 准备时间序列数据
+  const timeData = results.map(result => {
+    // 格式化时间显示
+    const date = new Date(result.created_at);
+    return date.toLocaleTimeString('zh-CN', { 
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  });
+  
+  // 准备连通性数据
+  const connectedData = results.map(result => {
+    try {
+      const details = typeof result.details === 'string' 
+        ? JSON.parse(result.details) 
+        : result.details;
+      return details.connected ? 1 : 0;
+    } catch (e) {
+      return 0;
+    }
+  });
+  
+  // 准备响应时间数据 (转换为毫秒)
+  const responseTimeData = results.map(result => {
+    try {
+      const details = typeof result.details === 'string' 
+        ? JSON.parse(result.details) 
+        : result.details;
+      // TCP插件返回的是秒，转换为毫秒
+      return details.execution_time ? details.execution_time * 1000 : 0;
+    } catch (e) {
+      return 0;
+    }
+  });
+  
+  // 准备状态和返回码数据
+  const statusData = results.map(result => {
+    try {
+      const details = typeof result.details === 'string' 
+        ? JSON.parse(result.details) 
+        : result.details;
+      return details.return_code || 0;
+    } catch (e) {
+      return -1; // 表示解析失败
+    }
+  });
+  
+  // 渲染连通性图表
+  const connectedChartDom = document.getElementById('tcp-connected-chart');
+  if (connectedChartDom) {
+    const connectedChart = echarts.init(connectedChartDom);
+    const connectedOption = {
+      title: {
+        text: 'TCP连通性',
+        left: 'center'
+      },
+      tooltip: {
+        trigger: 'axis',
+        formatter: function(params) {
+          const param = params[0];
+          return `${param.name}<br/>${param.seriesName}: ${param.value === 1 ? '连通' : '未连通'}`;
+        }
+      },
+      xAxis: {
+        type: 'category',
+        data: timeData
+      },
+      yAxis: {
+        type: 'value',
+        name: '连通状态',
+        axisLabel: {
+          formatter: function(value) {
+            return value === 1 ? '连通' : '未连通';
+          }
+        }
+      },
+      series: [{
+        name: '连通性',
+        type: 'line',
+        step: 'middle',
+        data: connectedData,
+        markLine: {
+          silent: true,
+          data: [{
+            yAxis: 1,
+            lineStyle: {
+              color: '#52c41a'
+            },
+            label: {
+              show: false
+            }
+          }, {
+            yAxis: 0,
+            lineStyle: {
+              color: '#f5222d'
+            },
+            label: {
+              show: false
+            }
+          }]
+        }
+      }]
+    };
+    connectedChart.setOption(connectedOption);
+  }
+  
+  // 渲染响应时间图表
+  const responseTimeChartDom = document.getElementById('tcp-response-time-chart');
+  if (responseTimeChartDom) {
+    const responseTimeChart = echarts.init(responseTimeChartDom);
+    const responseTimeOption = {
+      title: {
+        text: '响应时间',
+        left: 'center'
+      },
+      tooltip: {
+        trigger: 'axis'
+      },
+      xAxis: {
+        type: 'category',
+        data: timeData
+      },
+      yAxis: {
+        type: 'value',
+        name: '响应时间 (毫秒)'
+      },
+      series: [{
+        name: '响应时间',
+        type: 'line',
+        data: responseTimeData,
+        smooth: true
+      }]
+    };
+    responseTimeChart.setOption(responseTimeOption);
+  }
+  
+  // 渲染状态码图表
+  const statusChartDom = document.getElementById('tcp-status-chart');
+  if (statusChartDom) {
+    const statusChart = echarts.init(statusChartDom);
+    const statusOption = {
+      title: {
+        text: '连接返回码',
+        left: 'center'
+      },
+      tooltip: {
+        trigger: 'axis'
+      },
+      xAxis: {
+        type: 'category',
+        data: timeData
+      },
+      yAxis: {
+        type: 'value',
+        name: '返回码'
+      },
+      series: [{
+        name: '返回码',
+        type: 'line',
+        data: statusData,
+        step: 'middle'
+      }]
+    };
+    statusChart.setOption(statusOption);
+  }
+}
+
+// 处理搜索
+const handleSearch = () => {
+  pagination.value.current = 1
+  fetchResults()
+}
+
+// 处理状态筛选
+const handleStatusChange = () => {
+  pagination.value.current = 1
+  fetchResults()
+}
+
+// 处理表格变化
+const handleTableChange = (pager) => {
+  pagination.value.current = pager.current
+  pagination.value.pageSize = pager.pageSize
+  fetchResults()
+}
+
+// 处理详情模态框取消
+const handleDetailModalCancel = () => {
+  detailModalVisible.value = false
+  selectedTask.value = null
+}
+
+// 组件挂载时获取数据
+onMounted(() => {
+  fetchResults()
+})
+</script>
+
+<template>
+  <div>
+    <a-card title="任务结果列表">
+      <!-- 搜索栏 -->
+      <a-row :gutter="16" style="margin-bottom: 16px;">
+        <a-col :span="6">
+          <a-input-search 
+            v-model:value="searchParams.keyword" 
+            placeholder="搜索任务名称" 
+            enter-button 
+            @search="handleSearch" 
+          />
+        </a-col>
+        <a-col :span="6">
+          <a-select 
+            v-model:value="searchParams.status" 
+            placeholder="选择状态" 
+            style="width: 100%" 
+            allow-clear
+            @change="handleStatusChange"
+          >
+            <a-select-option value="success">成功</a-select-option>
+            <a-select-option value="failed">失败</a-select-option>
+            <a-select-option value="timeout">超时</a-select-option>
+          </a-select>
+        </a-col>
+      </a-row>
+      
+      <a-table
+        :dataSource="aggregatedResults"
+        :columns="columns"
+        :loading="loading"
+        :pagination="pagination"
+        @change="handleTableChange"
+        :rowKey="(record) => record.task.id"
+      >
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'status'">
+            <!-- 显示任务的最新状态 -->
+            <a-tag v-if="record.latestStatus === 'success'" color="green">成功</a-tag>
+            <a-tag v-else-if="record.latestStatus === 'failed'" color="red">失败</a-tag>
+            <a-tag v-else-if="record.latestStatus === 'timeout'" color="orange">超时</a-tag>
+            <a-tag v-else>{{ record.latestStatus }}</a-tag>
+          </template>
+          
+          <template v-else-if="column.dataIndex === 'response_time'">
+            <!-- 显示平均响应时间 -->
+            <span v-if="record.avgResponseTime">{{ record.avgResponseTime.toFixed(2) }} ms</span>
+            <span v-else>-</span>
+          </template>
+          
+          <template v-else-if="column.dataIndex === 'count'">
+            {{ record.count }}
+          </template>
+          
+          <template v-else-if="column.dataIndex === 'details'">
+            <a-button type="link" size="small" @click="showDetails(record)">查看详情</a-button>
+          </template>
+        </template>
+      </a-table>
+    </a-card>
+    
+    <!-- 详情模态框 -->
+    <a-modal
+      v-model:visible="detailModalVisible"
+      title="任务详情"
+      width="900px"
+      @cancel="handleDetailModalCancel"
+      :footer="null"
+    >
+      <div v-if="selectedTask">
+        <a-descriptions bordered size="small" :column="1">
+          <a-descriptions-item label="任务名称">
+            {{ selectedTask.task.name }}
+          </a-descriptions-item>
+          <a-descriptions-item label="任务目标">
+            {{ selectedTask.task.target }}
+          </a-descriptions-item>
+          <a-descriptions-item label="任务类型">
+            {{ selectedTask.task.type }}
+          </a-descriptions-item>
+        </a-descriptions>
+        
+        <!-- 根据任务类型显示不同的图表 -->
+        <div v-if="selectedTask.task.type === 'ping'">
+          <div id="latency-chart" style="width: 100%; height: 400px; margin-top: 20px;"></div>
+        </div>
+        <div v-else-if="selectedTask.task.type === 'tcp'">
+          <div id="tcp-connected-chart" style="width: 100%; height: 300px; margin-top: 20px;"></div>
+          <div id="tcp-response-time-chart" style="width: 100%; height: 300px; margin-top: 20px;"></div>
+          <div id="tcp-status-chart" style="width: 100%; height: 300px; margin-top: 20px;"></div>
+        </div>
+        <div v-else>
+          <a-empty description="暂不支持该类型任务的图表展示" />
+        </div>
+      </div>
+    </a-modal>
+  </div>
+</template>

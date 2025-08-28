@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Test</title>
+</head>
+<body>
+    <h1>Debug Test</h1>
+    <div id="output"></div>
+    
+    <script>
+        // 模拟API数据 - 3条广州数据，但都是同一个拨测点
+        const mockData = [
+            {
+                id: 2148,
+                agent_area: 'guangzhou',
+                agent_id: 'book',
+                status: 'success',
+                response_time: 100
+            },
+            {
+                id: 2147,
+                agent_area: 'guangzhou', 
+                agent_id: 'book',
+                status: 'success',
+                response_time: 120
+            },
+            {
+                id: 2146,
+                agent_area: 'guangzhou', 
+                agent_id: 'book',
+                status: 'success',
+                response_time: 90
+            }
+        ];
+        
+        // 拼音到省份的映射关系
+        const pinyinToProvince = {
+            'guangzhou': '广东省'
+        };
+        
+        // 获取省份函数
+        function getProvinceByPinyin(pinyinLocation) {
+            return pinyinToProvince[pinyinLocation] || pinyinLocation;
+        }
+        
+        // 统计函数 - 使用去重逻辑
+        function statisticsByProvince(probeData) {
+            const provinceStats = {};
+            
+            probeData.forEach(probe => {
+                const locationForStats = probe.agent_area || probe.location;
+                const province = getProvinceByPinyin(locationForStats);
+                
+                if (!provinceStats[province]) {
+                    provinceStats[province] = {
+                        name: province,
+                        count: 0,
+                        cities: {},
+                        probes: [],
+                        uniqueLocations: new Set() // 用于去重统计唯一拨测点
+                    };
+                }
+                
+                // 添加唯一位置到Set中进行去重
+                provinceStats[province].uniqueLocations.add(locationForStats);
+                provinceStats[province].probes.push(probe);
+            });
+            
+            // 将Set的大小作为实际的拨测点数量
+            Object.values(provinceStats).forEach(province => {
+                province.count = province.uniqueLocations.size;
+                // 清理Set对象，避免序列化问题
+                delete province.uniqueLocations;
+            });
+            
+            return provinceStats;
+        }
+        
+        // 测试
+        console.log('原始数据:', mockData);
+        const stats = statisticsByProvince(mockData);
+        console.log('统计结果:', stats);
+        
+        const mapData = Object.values(stats).map(province => ({
+            name: province.name,
+            value: province.count,
+            probes: province.probes
+        }));
+        
+        console.log('地图数据:', mapData);
+        
+        // 显示结果
+        document.getElementById('output').innerHTML = `
+            <h2>原始数据:</h2>
+            <pre>${JSON.stringify(mockData, null, 2)}</pre>
+            <h2>统计结果:</h2>
+            <pre>${JSON.stringify(stats, null, 2)}</pre>
+            <h2>地图数据:</h2>
+            <pre>${JSON.stringify(mapData, null, 2)}</pre>
+        `;
+    </script>
+</body>
+</html>

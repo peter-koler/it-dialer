@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API调试页面</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>任务结果API调试</h1>
+    
+    <div class="section">
+        <h2>测试getTaskResults API</h2>
+        <button onclick="testAPI()">调用API</button>
+        <div id="result"></div>
+    </div>
+    
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '正在调用API...';
+            
+            try {
+                // 获取token（从localStorage或其他地方）
+                const token = localStorage.getItem('token') || 'your-jwt-token-here';
+                
+                const response = await fetch('/api/v1/results', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <h3>API响应:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                    
+                    <h3>数据分析:</h3>
+                    <p>状态码: ${data.code}</p>
+                    <p>消息: ${data.message}</p>
+                    <p>数据列表长度: ${data.data?.list?.length || 0}</p>
+                    <p>总数: ${data.data?.total || 0}</p>
+                    
+                    ${data.data?.list?.length > 0 ? `
+                        <h4>第一条数据结构:</h4>
+                        <pre>${JSON.stringify(data.data.list[0], null, 2)}</pre>
+                        
+                        <h4>task_id检查:</h4>
+                        <p>第一条数据的task_id: ${data.data.list[0]?.task_id || '未找到'}</p>
+                        <p>第一条数据的task对象: ${data.data.list[0]?.task ? '存在' : '不存在'}</p>
+                    ` : ''}
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3>错误:</h3>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        }
+        
+        // 页面加载时自动调用API
+        window.onload = function() {
+            testAPI();
+        };
+    </script>
+</body>
+</html>
