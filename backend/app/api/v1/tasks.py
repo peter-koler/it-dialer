@@ -174,7 +174,7 @@ def get_task(task_id):
         }), 500
 
 
-@bp.route('/tasks', methods=['POST'])
+@bp.route('/v1/tasks', methods=['POST'])
 @token_required
 @check_resource_limit('tasks')
 def create_task():
@@ -699,7 +699,7 @@ def delete_task(task_id):
         }), 500
 
 
-@bp.route('/tasks/<int:task_id>/restore', methods=['POST'])
+@bp.route('/v1/tasks/<int:task_id>/restore', methods=['POST'])
 @token_required
 def restore_task(task_id):
     """恢复已删除的任务"""

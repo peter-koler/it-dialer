@@ -11,8 +11,14 @@ const routes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/probe-config/node',
+    redirect: '/dashboard',
     children: [
+      {
+        path: '/dashboard',
+        name: 'Dashboard',
+        component: () => import('../views/dashboard/Dashboard.vue'),
+        meta: { title: '仪表板' }
+      },
       {
         path: '/probe-config/node',
         name: 'NodeManagement',

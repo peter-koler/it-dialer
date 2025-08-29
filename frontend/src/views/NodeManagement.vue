@@ -19,33 +19,32 @@
         rowKey="id"
         @change="handleTableChange"
       >
-        <template #status="{ record }">
-          <a-tag :color="getStatusColor(record.status)">
-            {{ getStatusText(record.status) }}
-          </a-tag>
-        </template>
-        
-        <template #lastHeartbeat="{ record }">
-          {{ formatDateTime(record.last_heartbeat) }}
-        </template>
-        
-        <template #createdAt="{ record }">
-          {{ formatDateTime(record.created_at) }}
-        </template>
-        
-        <template #action="{ record }">
-          <a-space>
-            <a-button 
-              size="small" 
-              :type="record.status === 'online' ? 'default' : 'primary'"
-              @click="toggleNodeStatus(record)"
-            >
-              {{ record.status === 'online' ? '下线' : '上线' }}
-            </a-button>
-            <a-button size="small" type="primary" danger @click="deleteNode(record)">
-              删除
-            </a-button>
-          </a-space>
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'status'">
+            <a-tag :color="getStatusColor(record.status)">
+              {{ getStatusText(record.status) }}
+            </a-tag>
+          </template>
+          <template v-else-if="column.key === 'lastHeartbeat'">
+            {{ formatDateTime(record.last_heartbeat) }}
+          </template>
+          <template v-else-if="column.key === 'createdAt'">
+            {{ formatDateTime(record.created_at) }}
+          </template>
+          <template v-else-if="column.key === 'action' && canOperateNodes">
+            <a-space>
+              <a-button 
+                size="small" 
+                :type="record.status === 'online' ? 'default' : 'primary'"
+                @click="toggleNodeStatus(record)"
+              >
+                {{ record.status === 'online' ? '下线' : '上线' }}
+              </a-button>
+              <a-button size="small" type="primary" danger @click="deleteNode(record)">
+                删除
+              </a-button>
+            </a-space>
+          </template>
         </template>
       </a-table>
     </a-card>
@@ -53,7 +52,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, onMounted, computed } from 'vue'
 import { 
   getNodeList, 
   updateNodeStatus, 
@@ -63,6 +62,7 @@ import {
   ReloadOutlined 
 } from '@ant-design/icons-vue'
 import { message, Modal } from 'ant-design-vue'
+import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'NodeManagement',
@@ -70,6 +70,7 @@ export default defineComponent({
     ReloadOutlined
   },
   setup() {
+    const userStore = useUserStore()
     const nodes = ref([])
     const loading = ref(false)
     const pagination = ref({
@@ -81,50 +82,61 @@ export default defineComponent({
       showTotal: (total) => `共 ${total} 条记录`
     })
     
-    const columns = [
-      {
-        title: 'ID',
-        dataIndex: 'id',
-        width: 80
-      },
-      {
-        title: 'Agent ID',
-        dataIndex: 'agent_id'
-      },
-      {
-        title: '区域',
-        dataIndex: 'agent_area'
-      },
-      {
-        title: 'IP地址',
-        dataIndex: 'ip_address'
-      },
-      {
-        title: '主机名',
-        dataIndex: 'hostname'
-      },
-      {
-        title: '状态',
-        dataIndex: 'status',
-        slots: { customRender: 'status' }
-      },
-      {
-        title: '最后心跳',
-        dataIndex: 'last_heartbeat',
-        slots: { customRender: 'lastHeartbeat' }
-      },
-      {
-        title: '创建时间',
-        dataIndex: 'created_at',
-        slots: { customRender: 'createdAt' }
-      },
-      {
-        title: '操作',
-        key: 'action',
-        width: 200,
-        slots: { customRender: 'action' }
+    // 权限控制
+    const canOperateNodes = computed(() => userStore.isSuperAdmin)
+    
+    // 动态列配置，根据权限显示操作列
+    const columns = computed(() => {
+      const baseColumns = [
+        {
+          title: 'ID',
+          dataIndex: 'id',
+          width: 80
+        },
+        {
+          title: 'Agent ID',
+          dataIndex: 'agent_id'
+        },
+        {
+          title: '区域',
+          dataIndex: 'agent_area'
+        },
+        {
+          title: 'IP地址',
+          dataIndex: 'ip_address'
+        },
+        {
+          title: '主机名',
+          dataIndex: 'hostname'
+        },
+        {
+          title: '状态',
+          dataIndex: 'status',
+          key: 'status'
+        },
+        {
+          title: '最后心跳',
+          dataIndex: 'last_heartbeat',
+          key: 'lastHeartbeat'
+        },
+        {
+          title: '创建时间',
+          dataIndex: 'created_at',
+          key: 'createdAt'
+        }
+      ]
+      
+      // 只有超级管理员才显示操作列
+      if (canOperateNodes.value) {
+        baseColumns.push({
+          title: '操作',
+          key: 'action',
+          width: 200
+        })
       }
-    ]
+      
+      return baseColumns
+    })
     
     // 获取节点列表
     const fetchNodes = async (params = {}) => {
@@ -137,11 +149,12 @@ export default defineComponent({
         }
         
         const res = await getNodeList(query)
-        if (res.data.code === 0) {
-          nodes.value = res.data.data.list
-          pagination.value.total = res.data.data.total
+        
+        if (res.code === 0) {
+          nodes.value = res.data.list
+          pagination.value.total = res.data.total
         } else {
-          message.error(res.data.message || '获取节点列表失败')
+          message.error(res.message || '获取节点列表失败')
         }
       } catch (err) {
         // 如果是登录过期错误，不显示错误消息，让axios拦截器处理跳转
@@ -164,6 +177,12 @@ export default defineComponent({
     
     // 切换节点状态
     const toggleNodeStatus = async (record) => {
+      // 权限检查
+      if (!canOperateNodes.value) {
+        message.error('您没有权限执行此操作')
+        return
+      }
+      
       try {
         const newStatus = record.status === 'online' ? 'offline' : 'online'
         const res = await updateNodeStatus({
@@ -171,11 +190,11 @@ export default defineComponent({
           status: newStatus
         })
         
-        if (res.data.code === 0) {
+        if (res.code === 0) {
           message.success(`${record.agent_id} ${newStatus === 'online' ? '上线' : '下线'}成功`)
           fetchNodes()
         } else {
-          message.error(res.data.message || '操作失败')
+          message.error(res.message || '操作失败')
         }
       } catch (err) {
         message.error('操作失败: ' + err.message)
@@ -184,6 +203,12 @@ export default defineComponent({
     
     // 删除节点
     const deleteNode = (record) => {
+      // 权限检查
+      if (!canOperateNodes.value) {
+        message.error('您没有权限执行此操作')
+        return
+      }
+      
       Modal.confirm({
         title: '确认删除',
         content: `确定要删除节点 ${record.agent_id} 吗？此操作不可恢复。`,
@@ -192,11 +217,11 @@ export default defineComponent({
         onOk: async () => {
           try {
             const res = await deleteNodeAPI(record.id)
-            if (res && res.data.code === 0) {
+            if (res && res.code === 0) {
               message.success('删除成功')
               fetchNodes()
             } else {
-              message.error(res?.data.message || '删除失败')
+              message.error(res?.message || '删除失败')
             }
           } catch (err) {
             console.error('删除节点失败:', err)
@@ -243,6 +268,7 @@ export default defineComponent({
       loading,
       pagination,
       columns,
+      canOperateNodes,
       fetchNodes,
       handleTableChange,
       toggleNodeStatus,

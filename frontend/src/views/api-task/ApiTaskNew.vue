@@ -1,12 +1,125 @@
 <template>
   <div class="api-task-new">
-    <a-card title="新增API拨测任务">
-      <template #extra>
+    <!-- API错误提示 -->
+    <a-alert
+      v-if="apiError.show"
+      :message="apiError.message"
+      :description="apiError.description"
+      type="error"
+      show-icon
+      closable
+      @close="apiError.show = false"
+      style="margin-bottom: 16px;"
+    />
+
+    <!-- 资源限额显示 -->
+    <a-card size="small" style="margin-bottom: 16px;" v-if="quotaInfo">
+      <template #title>
         <a-space>
-          <a-button @click="goBack">返回</a-button>
-          <a-button type="primary" @click="handleSave" :loading="saving">保存</a-button>
+          <ApiOutlined />
+          <span>任务资源限额</span>
         </a-space>
       </template>
+      <template #extra>
+        <a-button size="small" @click="refreshQuota" :loading="quotaLoading">
+          <template #icon><ReloadOutlined /></template>
+          刷新
+        </a-button>
+      </template>
+      
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-statistic
+            title="当前任务数"
+            :value="quotaInfo.current"
+            :suffix="`/ ${quotaInfo.limit}`"
+            :value-style="getQuotaValueStyle()"
+          >
+            <template #prefix>
+              <ApiOutlined />
+            </template>
+          </a-statistic>
+        </a-col>
+        <a-col :span="12">
+          <div style="margin-top: 8px;">
+            <a-progress
+              :percent="quotaInfo.usage_rate || 0"
+              :status="getQuotaProgressStatus()"
+              :stroke-color="getQuotaProgressColor()"
+            />
+            <div style="margin-top: 4px; font-size: 12px; color: #666;">
+              使用率: {{ quotaInfo.usage_rate || 0 }}%
+            </div>
+          </div>
+        </a-col>
+      </a-row>
+      
+      <a-alert
+        v-if="quotaInfo.usage_rate >= 90"
+        message="任务数量即将达到限额，请谨慎创建新任务"
+        type="warning"
+        show-icon
+        style="margin-top: 12px"
+      />
+     </a-card>
+     
+     <!-- 超限提示Modal -->
+     <a-modal
+       v-model:open="quotaModalVisible"
+       title="资源限额超限提醒"
+       :closable="false"
+       :maskClosable="false"
+       width="500px"
+     >
+       <template #footer>
+         <a-space>
+           <a-button @click="quotaModalVisible = false">取消</a-button>
+           <a-button type="primary" @click="goToTenantManagement">管理限额</a-button>
+         </a-space>
+       </template>
+       
+       <div style="text-align: center; padding: 20px 0;">
+         <a-result
+           status="warning"
+           title="任务数量已达限额"
+           sub-title="当前租户的任务数量已达到限额，无法创建新任务。请联系管理员调整限额或删除不需要的任务。"
+         >
+           <template #icon>
+             <ExclamationCircleOutlined style="color: #faad14;" />
+           </template>
+         </a-result>
+         
+         <a-descriptions :column="1" bordered size="small" style="margin-top: 16px;">
+           <a-descriptions-item label="当前任务数">
+             <a-tag color="orange">{{ quotaInfo?.current || 0 }}</a-tag>
+           </a-descriptions-item>
+           <a-descriptions-item label="限额">
+             <a-tag color="red">{{ quotaInfo?.limit || 0 }}</a-tag>
+           </a-descriptions-item>
+           <a-descriptions-item label="使用率">
+             <a-tag color="red">{{ quotaInfo?.usage_rate || 0 }}%</a-tag>
+           </a-descriptions-item>
+         </a-descriptions>
+       </div>
+     </a-modal>
+     
+     <a-card title="新增API拨测任务">
+      <template #extra>
+          <a-space>
+            <a-button @click="goBack">返回</a-button>
+            <a-button 
+              type="primary" 
+              @click="handleSave" 
+              :loading="saving"
+              :disabled="isQuotaExceeded"
+            >
+              保存
+            </a-button>
+            <a-tooltip v-if="isQuotaExceeded" title="任务数量已达限额，无法创建新任务">
+              <ExclamationCircleOutlined style="color: #ff4d4f; margin-left: 8px;" />
+            </a-tooltip>
+          </a-space>
+        </template>
       
       <a-form
         :model="formState"
@@ -125,7 +238,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { ArrowLeftOutlined } from '@ant-design/icons-vue'
+import { ArrowLeftOutlined, ApiOutlined, ReloadOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import request from '@/utils/request'
 import { createTask } from '@/api/task'
 import ApiStepsManager from '@/components/ApiStepsManager.vue'
@@ -136,6 +249,18 @@ const saving = ref(false)
 
 // 节点选项
 const nodeOptions = ref([])
+
+// 资源限额相关
+const quotaInfo = ref(null)
+const quotaLoading = ref(false)
+const quotaModalVisible = ref(false)
+
+// API错误提示相关
+const apiError = reactive({
+  show: false,
+  message: '',
+  description: ''
+})
 
 // 表单数据
 const formState = reactive({
@@ -173,7 +298,11 @@ const fetchNodes = async () => {
     }))
   } catch (error) {
     console.error('获取节点列表失败:', error)
-    // 优雅降级：不显示错误提示，提供默认选项
+    // 显示API错误提示
+    apiError.show = true
+    apiError.message = '获取节点列表失败'
+    apiError.description = '无法获取可用的探测节点，请检查网络连接或联系管理员'
+    // 优雅降级：提供默认选项
     nodeOptions.value = [{
       label: '暂无可用节点 (请检查节点服务状态)',
       value: 'no-nodes-available',
@@ -195,6 +324,12 @@ const handleSave = async () => {
     
     if (!formState.agentIds.length) {
       message.error('请选择至少一个探测节点')
+      return
+    }
+    
+    // 检查资源限额
+    if (quotaInfo.value && quotaInfo.value.usage_rate >= 100) {
+      showQuotaExceededModal()
       return
     }
     
@@ -231,6 +366,10 @@ const handleSave = async () => {
       message.error('请检查表单填写是否正确')
     } else {
       message.error('任务创建失败: ' + error.message)
+      // 显示API错误提示
+      apiError.show = true
+      apiError.message = '任务创建失败'
+      apiError.description = error.message || '创建任务时发生未知错误，请重试或联系管理员'
     }
   } finally {
     saving.value = false
@@ -242,9 +381,82 @@ const handleSubmit = (values) => {
   handleSave()
 }
 
+// 获取资源限额数据
+const fetchQuotaData = async () => {
+  quotaLoading.value = true
+  try {
+    // 获取当前用户的租户ID
+    const userResponse = await request.get('/users/profile')
+    const tenantId = userResponse.data.tenant_id
+    
+    if (!tenantId) {
+      console.warn('未找到租户ID')
+      return
+    }
+    
+    // 获取租户资源使用情况
+    const response = await request.get(`/v2/tenants/${tenantId}/usage`)
+    if (response.code === 0 && response.data.usage_stats.tasks) {
+      quotaInfo.value = response.data.usage_stats.tasks
+    }
+  } catch (error) {
+    console.error('获取资源限额失败:', error)
+    // 显示API错误提示
+    apiError.show = true
+    apiError.message = '获取资源限额失败'
+    apiError.description = '无法获取当前租户的资源使用情况，请刷新页面重试'
+  } finally {
+    quotaLoading.value = false
+  }
+}
+
+// 刷新资源限额
+const refreshQuota = () => {
+  fetchQuotaData()
+}
+
+// 获取限额数值样式
+const getQuotaValueStyle = () => {
+  if (!quotaInfo.value) return {}
+  const usageRate = quotaInfo.value.usage_rate || 0
+  if (usageRate >= 90) return { color: '#ff4d4f' }
+  if (usageRate >= 75) return { color: '#faad14' }
+  return { color: '#52c41a' }
+}
+
+// 获取进度条状态
+const getQuotaProgressStatus = () => {
+  if (!quotaInfo.value) return 'success'
+  const usageRate = quotaInfo.value.usage_rate || 0
+  if (usageRate >= 90) return 'exception'
+  if (usageRate >= 75) return 'active'
+  return 'success'
+}
+
+// 获取进度条颜色
+const getQuotaProgressColor = () => {
+  if (!quotaInfo.value) return '#52c41a'
+  const usageRate = quotaInfo.value.usage_rate || 0
+  if (usageRate >= 90) return '#ff4d4f'
+  if (usageRate >= 75) return '#faad14'
+  return '#52c41a'
+}
+
+// 显示超限Modal
+const showQuotaExceededModal = () => {
+  quotaModalVisible.value = true
+}
+
+// 跳转到租户管理页面
+const goToTenantManagement = () => {
+  quotaModalVisible.value = false
+  router.push('/system/tenant')
+}
+
 // 组件挂载时获取数据
 onMounted(() => {
   fetchNodes()
+  fetchQuotaData()
 })
 </script>
 

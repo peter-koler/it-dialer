@@ -2,11 +2,20 @@ import axios from 'axios'
 
 // 需要使用v2 API的路径列表（支持租户隔离的功能）
 const V2_API_PATHS = [
-  '/tasks'            // 拨测任务列表查询
+  '/tasks',           // 拨测任务列表查询
+  '/tenants'          // 租户相关API
 ]
 
 // API版本选择函数
 export const getApiVersion = (url = '') => {
+  // 如果URL明确指定了版本（如/v1/xxx或/v2/xxx），直接返回对应版本
+  if (url.startsWith('/v1/')) {
+    return 'v1'
+  }
+  if (url.startsWith('/v2/')) {
+    return 'v2'
+  }
+  
   // 监测点相关的路径应该使用v1 API
   const probePatterns = [
     '/tasks/\\d+/ping/probes',
@@ -37,6 +46,11 @@ export const getApiVersion = (url = '') => {
 
 // 获取API基础URL
 export const getApiBaseUrl = (url = '') => {
+  // 如果URL已经包含版本号，直接返回基础URL
+  if (url.startsWith('/v1/') || url.startsWith('/v2/')) {
+    return 'http://localhost:5001/api'
+  }
+  
   const version = getApiVersion(url)
   return `http://localhost:5001/api/${version}`
 }

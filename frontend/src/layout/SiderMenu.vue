@@ -46,7 +46,7 @@
             </a-menu-item>
           </template>
         </a-sub-menu>
-        <a-menu-item v-else :key="`item-${item.key}`">
+        <a-menu-item v-else :key="item.key">
           <component v-if="item.icon" :is="item.icon" />
           <span>{{ t(item.label) }}</span>
         </a-menu-item>
@@ -69,7 +69,8 @@ import {
   AlertOutlined,
   BarChartOutlined,
   LineChartOutlined,
-  TeamOutlined
+  TeamOutlined,
+  DashboardOutlined
 } from '@ant-design/icons-vue'
 
 const { t } = useI18n()
@@ -79,6 +80,11 @@ const userStore = useUserStore()
 
 // 菜单数据
 const menuItems = [
+  {
+    key: '/dashboard',
+    label: 'menu.dashboard',
+    icon: DashboardOutlined
+  },
   {
     key: 'probe-config',
     label: 'menu.probeConfig',
@@ -242,7 +248,9 @@ watch(
     selectedKeys.value = [newPath]
     
     // 根据当前路径确定展开的菜单
-    if (newPath.startsWith('/probe-config')) {
+    if (newPath === '/dashboard') {
+      openKeys.value = []
+    } else if (newPath.startsWith('/probe-config')) {
       openKeys.value = ['probe-config']
     } else if (newPath.startsWith('/system')) {
       openKeys.value = ['system']

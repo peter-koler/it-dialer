@@ -40,6 +40,11 @@ def get_tasks_v2():
         else:
             query = Task.query.filter(Task.tenant_id == tenant_id)  # 普通用户只看自己租户的任务
         
+        # 默认过滤掉已删除的任务
+        include_deleted = request.args.get('include_deleted', 'false').lower() == 'true'
+        if not include_deleted:
+            query = query.filter(Task.status != 'deleted')
+        
         # 添加其他过滤条件
         if keyword:
             query = query.filter(

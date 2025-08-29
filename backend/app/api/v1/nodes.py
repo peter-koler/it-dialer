@@ -130,6 +130,7 @@ def get_deleted_nodes():
 
 @bp.route('/nodes/register', methods=['POST'])
 @agent_token_required
+@check_resource_limit('nodes')
 def register_node():
     """注册节点"""
     try:

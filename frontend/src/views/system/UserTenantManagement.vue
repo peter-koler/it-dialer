@@ -270,7 +270,7 @@ const loadUserTenants = async () => {
 // 获取租户选项
 const loadTenants = async () => {
   try {
-    const response = await request.get('/tenants')
+    const response = await request.get('/v1/tenants')
     // 租户接口返回的数据结构直接包含tenants数组
     tenantOptions.value = response.tenants || []
   } catch (error) {

@@ -7,6 +7,7 @@ export default {
   'login.passwordRequired': '请输入密码',
   
   // 菜单
+  'menu.dashboard': '仪表板',
   'menu.probeConfig': '拨测配置',
   'menu.probeConfig.node': '节点管理',
   'menu.probeConfig.task': '拨测任务',

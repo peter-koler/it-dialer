@@ -8,3 +8,4 @@ from . import alerts
 from . import api_alerts
 from . import nodes
 from . import results
+from . import tenants

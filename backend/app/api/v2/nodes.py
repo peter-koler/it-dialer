@@ -139,6 +139,7 @@ def get_deleted_nodes_v2():
 
 @v2_bp.route('/nodes/register', methods=['POST'])
 @agent_token_required
+@check_resource_limit('nodes')
 def register_node_v2():
     """注册节点 - v2版本"""
     try:

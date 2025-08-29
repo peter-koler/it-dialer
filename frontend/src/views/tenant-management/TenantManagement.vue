@@ -311,7 +311,7 @@ onMounted(() => {
 const fetchTenants = async () => {
   loading.value = true
   try {
-    const response = await request.get('/tenants', {
+    const response = await request.get('/v1/tenants', {
       params: {
         page: pagination.current,
         size: pagination.pageSize

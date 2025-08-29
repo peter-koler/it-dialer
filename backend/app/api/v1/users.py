@@ -6,6 +6,24 @@ from app.models.user import User
 from app.utils.auth_decorators import token_required
 
 
+@bp.route('/users/profile', methods=['GET'])
+@token_required
+def get_user_profile(current_user):
+    """获取当前用户的个人信息"""
+    try:
+        return jsonify({
+            'code': 0,
+            'data': current_user.to_dict(),
+            'message': 'ok'
+        })
+    except Exception as e:
+        return jsonify({
+            'code': 500,
+            'data': {},
+            'message': f'获取用户信息失败: {str(e)}'
+        }), 500
+
+
 def require_role(role):
     """装饰器：检查用户角色权限"""
     def decorator(f):

@@ -99,7 +99,13 @@ def token_required(f):
                 'message': f'Token验证失败: {str(e)}'
             }), 401
         
-        return f(*args, **kwargs)
+        # 检查函数是否需要current_user参数
+        import inspect
+        sig = inspect.signature(f)
+        if 'current_user' in sig.parameters:
+            return f(current_user, *args, **kwargs)
+        else:
+            return f(*args, **kwargs)
     
     return decorated
 
