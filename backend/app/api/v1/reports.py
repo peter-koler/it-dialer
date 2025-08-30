@@ -903,6 +903,65 @@ def get_api_report():
         task_details = []
         for stat in task_stats:
             success_rate = (stat.success / stat.total * 100) if stat.total > 0 else 0
+            
+            # 获取该任务的性能分析数据
+            task_results = base_query.filter(Task.id == stat.id).all()
+            
+            # 计算性能指标
+            response_times = []
+            assertion_passes = 0
+            step_breakdown_data = []
+            
+            for result in task_results:
+                if result.result_data:
+                    try:
+                        data = json.loads(result.result_data) if isinstance(result.result_data, str) else result.result_data
+                        
+                        # 收集响应时间
+                        if 'response_time' in data:
+                            response_times.append(data['response_time'])
+                        elif 'transaction_time' in data:
+                            response_times.append(data['transaction_time'])
+                        
+                        # 统计断言通过
+                        if 'assertion_passed' in data and data['assertion_passed']:
+                            assertion_passes += 1
+                        
+                        # 收集步骤分解数据
+                        if 'step_breakdown' in data and isinstance(data['step_breakdown'], list):
+                            step_breakdown_data.extend(data['step_breakdown'])
+                    except:
+                        pass
+            
+            # 计算性能统计
+            avg_response_time = sum(response_times) / len(response_times) if response_times else 0
+            response_times_sorted = sorted(response_times) if response_times else [0]
+            p95_index = int(len(response_times_sorted) * 0.95) if response_times_sorted else 0
+            p99_index = int(len(response_times_sorted) * 0.99) if response_times_sorted else 0
+            p95_response_time = response_times_sorted[p95_index] if p95_index < len(response_times_sorted) else avg_response_time * 1.5
+            p99_response_time = response_times_sorted[p99_index] if p99_index < len(response_times_sorted) else avg_response_time * 2
+            
+            assertion_pass_rate = (assertion_passes / stat.total * 100) if stat.total > 0 else 0
+            
+            # 处理步骤分解数据
+            step_summary = []
+            if step_breakdown_data:
+                step_dict = {}
+                for step in step_breakdown_data:
+                    if isinstance(step, dict) and 'name' in step and 'time' in step:
+                        step_name = step['name']
+                        step_time = step['time']
+                        if step_name not in step_dict:
+                            step_dict[step_name] = []
+                        step_dict[step_name].append(step_time)
+                
+                for step_name, times in step_dict.items():
+                    avg_time = sum(times) / len(times) if times else 0
+                    step_summary.append({
+                        'name': step_name,
+                        'avg_time': round(avg_time, 2)
+                    })
+            
             task_details.append({
                 'task_id': stat.id,
                 'task_name': stat.name,
@@ -910,6 +969,11 @@ def get_api_report():
                 'total': stat.total,
                 'success': stat.success,
                 'success_rate': round(success_rate, 2),
+                'assertion_pass_rate': round(assertion_pass_rate, 2),
+                'avg_response_time': round(avg_response_time, 2),
+                'p95_response_time': round(p95_response_time, 2),
+                'p99_response_time': round(p99_response_time, 2),
+                'step_breakdown': step_summary,
                 'last_execution': stat.last_execution.strftime('%Y-%m-%d %H:%M:%S') if stat.last_execution else None
             })
         
@@ -922,6 +986,9 @@ def get_api_report():
                     'avg_transaction_time': round(avg_transaction_time, 2),
                     'failure_rate': round(failure_rate, 2)
                 },
+                'success_rate_trend': trend_data,
+                'task_list': task_details,
+                'failure_reasons': failure_analysis,
                 'transaction_success_trend': trend_data,
                 'failure_analysis': failure_analysis,
                 'task_details': task_details

@@ -1,6 +1,6 @@
 <template>
   <a-modal
-    :visible="visible"
+    :open="visible"
     title="重置密码"
     @ok="handleOk"
     @cancel="handleCancel"

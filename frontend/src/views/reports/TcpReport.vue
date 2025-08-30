@@ -148,9 +148,6 @@
                   <a-button type="link" size="small" @click="viewTaskDetail(record)">
                     查看详情
                   </a-button>
-                  <a-button type="link" size="small" @click="viewTaskTrend(record)">
-                    趋势分析
-                  </a-button>
                 </a-space>
               </template>
             </template>
@@ -164,6 +161,7 @@
 <script setup>
 import { ref, onMounted, h, nextTick } from 'vue'
 import { message } from 'ant-design-vue'
+import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import {
   SyncOutlined,
@@ -173,6 +171,8 @@ import {
   LinkOutlined,
   WarningOutlined
 } from '@ant-design/icons-vue'
+import { getTasks } from '@/api/task'
+import { getTcpReport } from '@/api/reports'
 
 // 筛选条件
 const selectedTimeRange = ref('1d')
@@ -184,6 +184,18 @@ const activePortTab = ref('port-success')
 const currentPage = ref(1)
 const pageSize = ref(10)
 const totalTasks = ref(50)
+
+// 数据状态
+const loading = ref(false)
+const chartData = ref({
+  successRateTrend: { times: [], successRates: [], targetRates: [] },
+  connectionTimeDistribution: [],
+  portAnalysis: {
+    portSuccess: { ports: [], successRates: [] },
+    portResponse: { ports: [], avgTimes: [], maxTimes: [] },
+    errorAnalysis: []
+  }
+})
 
 // 图表引用
 const successRateChart = ref(null)
@@ -200,19 +212,256 @@ let portResponseChartInstance = null
 let errorAnalysisChartInstance = null
 
 // TCP任务列表
-const tcpTasks = ref([
-  { id: 1, name: 'TCP本地测试' },
-  { id: 2, name: 'TCP数据库连接' },
-  { id: 3, name: 'TCP Web服务' },
-  { id: 4, name: 'TCP API服务' }
-])
+const tcpTasks = ref([])
+
+// 获取TCP任务列表
+const fetchTcpTasks = async () => {
+  try {
+    const response = await getTasks({ task_type: 'tcp' })
+    // 处理API返回格式: {code: 0, data: {list: [...], total: N}, message: ""}
+    if (response && response.code === 0 && response.data) {
+      if (Array.isArray(response.data.list)) {
+        // v1 API格式: data.list
+        tcpTasks.value = response.data.list.map(task => ({
+          id: task.id,
+          name: task.name
+        }))
+      } else if (Array.isArray(response.data)) {
+        // v2 API格式: data直接是数组
+        tcpTasks.value = response.data.map(task => ({
+          id: task.id,
+          name: task.name
+        }))
+      } else {
+        console.warn('TCP任务数据格式不正确:', response)
+        tcpTasks.value = []
+      }
+    } else if (response && Array.isArray(response.data)) {
+      // 兼容直接返回data数组的情况
+      tcpTasks.value = response.data.map(task => ({
+        id: task.id,
+        name: task.name
+      }))
+    } else {
+      console.warn('TCP任务数据格式不正确:', response)
+      tcpTasks.value = []
+    }
+  } catch (error) {
+    console.error('获取TCP任务列表失败:', error)
+    message.error('获取TCP任务列表失败')
+    tcpTasks.value = []
+  }
+}
+
+// 获取TCP报表数据
+const fetchTcpReportData = async () => {
+  loading.value = true
+  try {
+    const params = {
+      task_type: 'tcp',
+      time_range: selectedTimeRange.value,
+      task_id: selectedTask.value !== 'all' ? selectedTask.value : undefined,
+      port: selectedPort.value !== 'all' ? selectedPort.value : undefined
+    }
+    
+    const response = await getTcpReport(params)
+    if (response && response.data) {
+      // 处理TCP报表数据
+      processTcpReportData(response.data)
+    }
+  } catch (error) {
+    console.error('获取TCP报表数据失败:', error)
+    message.error('获取TCP报表数据失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 处理TCP报表数据
+const processTcpReportData = (data) => {
+  // 更新关键指标
+  if (data.metrics) {
+    tcpMetrics.value[0].value = data.metrics.success_rate || 0
+    tcpMetrics.value[1].value = data.metrics.avg_connect_time || 0
+    tcpMetrics.value[2].value = data.metrics.total_connections || 0
+    tcpMetrics.value[3].value = data.metrics.failure_rate || 0
+  }
+  
+  // 处理连接时间趋势数据（v2 API返回connect_time_trend）
+  if (data.connect_time_trend) {
+    chartData.value.successRateTrend = {
+      times: data.connect_time_trend.map(item => item.time),
+      successRates: data.connect_time_trend.map(item => item.success_rate),
+      targetRates: data.connect_time_trend.map(() => 98) // 目标成功率
+    }
+    
+    // 处理连接时间分布数据（从趋势数据中提取）
+    const timeRanges = ['0-50ms', '50-100ms', '100-200ms', '200-500ms', '500ms+']
+    const timeCounts = [0, 0, 0, 0, 0]
+    
+    data.connect_time_trend.forEach(item => {
+      const avgTime = item.avg_connect_time || 0
+      if (avgTime <= 50) timeCounts[0]++
+      else if (avgTime <= 100) timeCounts[1]++
+      else if (avgTime <= 200) timeCounts[2]++
+      else if (avgTime <= 500) timeCounts[3]++
+      else timeCounts[4]++
+    })
+    
+    chartData.value.connectionTimeDistribution = timeRanges.map((range, index) => ({
+      range: range,
+      count: timeCounts[index]
+    }))
+  }
+  
+  // 处理任务列表数据
+  if (data.task_list) {
+    taskTableData.value = data.task_list.map(task => ({
+      key: task.task_id,
+      taskName: task.task_name,
+      target: task.target_address,
+      port: task.target_address ? task.target_address.split(':')[1] : 'N/A',
+      status: task.success_rate > 80 ? 'success' : 'warning',
+      successRate: task.success_rate,
+      avgResponseTime: task.avg_connect_time,
+      totalTests: task.total_connections,
+      lastTestTime: task.last_execution_time
+    }))
+  }
+  
+  // 处理端口分析数据（从任务列表中提取）
+  if (data.task_list) {
+    const portMap = new Map()
+    data.task_list.forEach(task => {
+      const port = task.target_address ? task.target_address.split(':')[1] : 'unknown'
+      if (!portMap.has(port)) {
+        portMap.set(port, { total: 0, success: 0, avgTime: 0, count: 0 })
+      }
+      const portData = portMap.get(port)
+      portData.total += task.total_connections
+      portData.success += Math.round(task.total_connections * task.success_rate / 100)
+      portData.avgTime += task.avg_connect_time
+      portData.count++
+    })
+    
+    const portAnalysis = []
+    portMap.forEach((data, port) => {
+      portAnalysis.push({
+        port: port,
+        success_rate: data.total > 0 ? (data.success / data.total * 100) : 0,
+        avg_response_time: data.count > 0 ? (data.avgTime / data.count) : 0,
+        total_tests: data.total
+      })
+    })
+    
+    // 设置端口分析数据结构
+    chartData.value.portAnalysis = {
+      portSuccess: {
+        ports: portAnalysis.map(item => item.port),
+        successRates: portAnalysis.map(item => item.success_rate)
+      },
+      portResponse: {
+        ports: portAnalysis.map(item => item.port),
+        avgTimes: portAnalysis.map(item => item.avg_response_time),
+        maxTimes: portAnalysis.map(item => item.avg_response_time * 1.2) // 模拟最大时间
+      },
+      errorAnalysis: []
+    }
+  }
+  
+  // 处理连接时间分布数据（如果v2 API有专门的字段）
+  if (data.connection_time_distribution) {
+    chartData.value.connectionTimeDistribution = data.connection_time_distribution
+  }
+  
+  // 如果v2 API有专门的端口分析数据，则覆盖上面的计算结果
+  if (data.port_analysis) {
+    if (data.port_analysis.port_success) {
+      chartData.value.portAnalysis.portSuccess = {
+        ports: data.port_analysis.port_success.map(item => item.port),
+        successRates: data.port_analysis.port_success.map(item => item.success_rate)
+      }
+    }
+    if (data.port_analysis.port_response) {
+      chartData.value.portAnalysis.portResponse = {
+        ports: data.port_analysis.port_response.map(item => item.port),
+        avgTimes: data.port_analysis.port_response.map(item => item.avg_time),
+        maxTimes: data.port_analysis.port_response.map(item => item.max_time) || []
+      }
+    }
+    if (data.port_analysis.error_analysis) {
+      chartData.value.portAnalysis.errorAnalysis = data.port_analysis.error_analysis
+    }
+  }
+  
+  // 更新表格数据
+  if (data.task_details) {
+    taskTableData.value = data.task_details.map(task => ({
+      key: task.id.toString(),
+      taskName: task.name,
+      target: task.target,
+      port: task.port,
+      successRate: task.success_rate,
+      avgResponseTime: task.avg_response_time,
+      totalTests: task.total_tests,
+      lastTestTime: task.last_test_time
+    }))
+  }
+  
+  // 更新关键指标
+  if (data.metrics) {
+    tcpMetrics.value = [
+      {
+        key: 'successRate',
+        title: '总体连接成功率',
+        value: data.metrics.overall_success_rate || 0,
+        suffix: '%',
+        precision: 1,
+        color: '#52c41a',
+        icon: CheckCircleOutlined
+      },
+      {
+        key: 'avgConnectionTime',
+        title: '平均连接时间',
+        value: data.metrics.avg_connection_time || 0,
+        suffix: 'ms',
+        precision: 1,
+        color: '#1890ff',
+        icon: ClockCircleOutlined
+      },
+      {
+        key: 'totalConnections',
+        title: '总连接次数',
+        value: data.metrics.total_connections || 0,
+        suffix: '',
+        precision: 0,
+        color: '#722ed1',
+        icon: LinkOutlined
+      },
+      {
+        key: 'errorRate',
+        title: '连接错误率',
+        value: data.metrics.error_rate || 0,
+        suffix: '%',
+        precision: 1,
+        color: '#ff4d4f',
+        icon: WarningOutlined
+      }
+    ]
+  }
+  
+  // 重新初始化图表
+  nextTick(() => {
+    initAllCharts()
+  })
+}
 
 // TCP关键指标
 const tcpMetrics = ref([
   {
     key: 'successRate',
     title: '总体连接成功率',
-    value: 95.8,
+    value: 0,
     suffix: '%',
     precision: 1,
     color: '#52c41a',
@@ -221,7 +470,7 @@ const tcpMetrics = ref([
   {
     key: 'avgConnectionTime',
     title: '平均连接时间',
-    value: 45.2,
+    value: 0,
     suffix: 'ms',
     precision: 1,
     color: '#1890ff',
@@ -230,7 +479,7 @@ const tcpMetrics = ref([
   {
     key: 'totalConnections',
     title: '总连接次数',
-    value: 12580,
+    value: 0,
     suffix: '',
     precision: 0,
     color: '#722ed1',
@@ -239,7 +488,7 @@ const tcpMetrics = ref([
   {
     key: 'errorRate',
     title: '连接错误率',
-    value: 4.2,
+    value: 0,
     suffix: '%',
     precision: 1,
     color: '#ff4d4f',
@@ -302,60 +551,19 @@ const taskColumns = [
 ]
 
 // 表格数据
-const taskTableData = ref([
-  {
-    key: '1',
-    taskName: 'TCP本地测试',
-    target: '127.0.0.1',
-    port: 8080,
-    successRate: 98.5,
-    avgResponseTime: 25,
-    totalTests: 2880,
-    lastTestTime: '2024-01-15 14:30:25'
-  },
-  {
-    key: '2',
-    taskName: 'TCP数据库连接',
-    target: 'db.server.com',
-    port: 3306,
-    successRate: 92.3,
-    avgResponseTime: 85,
-    totalTests: 1440,
-    lastTestTime: '2024-01-15 14:29:45'
-  },
-  {
-    key: '3',
-    taskName: 'TCP Web服务',
-    target: 'web.server.com',
-    port: 80,
-    successRate: 96.7,
-    avgResponseTime: 45,
-    totalTests: 2160,
-    lastTestTime: '2024-01-15 14:28:15'
-  },
-  {
-    key: '4',
-    taskName: 'TCP API服务',
-    target: 'api.server.com',
-    port: 443,
-    successRate: 89.2,
-    avgResponseTime: 120,
-    totalTests: 1800,
-    lastTestTime: '2024-01-15 14:27:30'
-  }
-])
+const taskTableData = ref([])
 
 // 方法
 const handleTimeRangeChange = (value) => {
-  refreshData()
+  fetchTcpReportData()
 }
 
 const handleTaskChange = (value) => {
-  refreshData()
+  fetchTcpReportData()
 }
 
 const handlePortChange = (value) => {
-  refreshData()
+  fetchTcpReportData()
 }
 
 const handlePortTabChange = (key) => {
@@ -368,29 +576,43 @@ const handlePortTabChange = (key) => {
 const handleTableChange = (pagination) => {
   currentPage.value = pagination.current
   pageSize.value = pagination.pageSize
-  refreshData()
+  fetchTcpReportData()
 }
 
 const refreshData = async () => {
   message.loading('正在刷新数据...', 1)
-  // 这里应该调用API获取最新数据
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  initAllCharts()
+  await fetchTcpReportData()
   message.success('数据刷新完成')
 }
 
 const exportReport = async () => {
   try {
+    message.loading('正在导出报表...', 0)
+    
+    // 获取最新数据
+    await fetchTcpReportData()
+    
     const { ExportUtils } = await import('@/utils/exportUtils')
     await ExportUtils.quickExport('tcp', 'excel', selectedTimeRange.value)
+    
+    message.destroy()
+    message.success('报表导出成功')
   } catch (error) {
+    message.destroy()
     console.error('导出TCP报表失败:', error)
     message.error('导出TCP报表失败，请稍后重试')
   }
 }
 
+const router = useRouter()
+
 const viewTaskDetail = (record) => {
-  message.info(`查看任务详情: ${record.taskName}`)
+  // 跳转到TCP任务结果列表页面
+  if (record.key) {
+    router.push(`/task-management/tcp-result/${record.key}`)
+  } else {
+    message.error('任务ID不存在，无法查看详情')
+  }
 }
 
 const viewTaskTrend = (record) => {
@@ -401,13 +623,43 @@ const viewTaskTrend = (record) => {
 const initSuccessRateChart = () => {
   if (!successRateChart.value) return
   
+  // 销毁已存在的实例
+  if (successRateChartInstance) {
+    successRateChartInstance.dispose()
+    successRateChartInstance = null
+  }
+  
   successRateChartInstance = echarts.init(successRateChart.value)
+  
+  // 检查数据是否存在
+  if (!chartData.value.successRateTrend.times.length) {
+    const option = {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'center',
+        textStyle: {
+          color: '#999',
+          fontSize: 14
+        }
+      }
+    }
+    successRateChartInstance.setOption(option)
+    return
+  }
   
   const option = {
     tooltip: {
       trigger: 'axis',
       axisPointer: {
         type: 'cross'
+      },
+      formatter: function(params) {
+        let result = params[0].axisValue + '<br/>'
+        params.forEach(param => {
+          result += param.marker + param.seriesName + ': ' + param.value + '%<br/>'
+        })
+        return result
       }
     },
     legend: {
@@ -421,12 +673,10 @@ const initSuccessRateChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00']
+      data: chartData.value.successRateTrend.times
     },
     yAxis: {
       type: 'value',
-      min: 80,
-      max: 100,
       axisLabel: {
         formatter: '{value}%'
       }
@@ -435,7 +685,7 @@ const initSuccessRateChart = () => {
       {
         name: '连接成功率',
         type: 'line',
-        data: [95, 94, 96, 95, 97, 96, 95],
+        data: chartData.value.successRateTrend.successRates,
         smooth: true,
         itemStyle: { color: '#1890ff' },
         areaStyle: {
@@ -455,7 +705,7 @@ const initSuccessRateChart = () => {
       {
         name: '目标成功率',
         type: 'line',
-        data: [98, 98, 98, 98, 98, 98, 98],
+        data: chartData.value.successRateTrend.targetRates,
         lineStyle: {
           type: 'dashed',
           color: '#52c41a'
@@ -472,12 +722,50 @@ const initSuccessRateChart = () => {
 const initConnectionTimeChart = () => {
   if (!connectionTimeChart.value) return
   
+  // 销毁已存在的实例
+  if (connectionTimeChartInstance) {
+    connectionTimeChartInstance.dispose()
+    connectionTimeChartInstance = null
+  }
+  
   connectionTimeChartInstance = echarts.init(connectionTimeChart.value)
+  
+  // 检查数据是否存在
+  if (!chartData.value.connectionTimeDistribution.length) {
+    const option = {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'center',
+        textStyle: {
+          color: '#999',
+          fontSize: 14
+        }
+      }
+    }
+    connectionTimeChartInstance.setOption(option)
+    return
+  }
+  
+  // 为连接时间分布数据设置颜色
+  const distributionData = chartData.value.connectionTimeDistribution.map(item => {
+    let color = '#52c41a' // 默认绿色
+    if (item.range.includes('50-100')) color = '#1890ff'
+    else if (item.range.includes('100-200')) color = '#faad14'
+    else if (item.range.includes('200-500')) color = '#ff7a45'
+    else if (item.range.includes('>500') || item.range.includes('500+')) color = '#ff4d4f'
+    
+    return {
+      name: item.range,
+      value: item.count,
+      itemStyle: { color }
+    }
+  })
   
   const option = {
     tooltip: {
       trigger: 'item',
-      formatter: '{a} <br/>{b}: {c}ms ({d}%)'
+      formatter: '{a} <br/>{b}: {c} ({d}%)'
     },
     legend: {
       orient: 'vertical',
@@ -489,13 +777,7 @@ const initConnectionTimeChart = () => {
         type: 'pie',
         radius: ['40%', '70%'],
         avoidLabelOverlap: false,
-        data: [
-          { value: 45, name: '0-50ms', itemStyle: { color: '#52c41a' } },
-          { value: 30, name: '50-100ms', itemStyle: { color: '#1890ff' } },
-          { value: 15, name: '100-200ms', itemStyle: { color: '#faad14' } },
-          { value: 8, name: '200-500ms', itemStyle: { color: '#ff7a45' } },
-          { value: 2, name: '>500ms', itemStyle: { color: '#ff4d4f' } }
-        ],
+        data: distributionData,
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
@@ -536,13 +818,52 @@ const initPortChart = (type) => {
 const initPortSuccessChart = () => {
   if (!portSuccessChart.value) return
   
+  // 销毁已存在的实例
+  if (portSuccessChartInstance) {
+    portSuccessChartInstance.dispose()
+    portSuccessChartInstance = null
+  }
+  
   portSuccessChartInstance = echarts.init(portSuccessChart.value)
+  
+  // 检查数据是否存在
+  if (!chartData.value.portAnalysis.portSuccess.ports.length) {
+    const option = {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'center',
+        textStyle: {
+          color: '#999',
+          fontSize: 14
+        }
+      }
+    }
+    portSuccessChartInstance.setOption(option)
+    return
+  }
+  
+  // 根据成功率设置颜色
+  const successRateData = chartData.value.portAnalysis.portSuccess.successRates.map(rate => {
+    let color = '#52c41a' // 绿色 >= 95%
+    if (rate < 85) color = '#ff4d4f' // 红色 < 85%
+    else if (rate < 95) color = '#faad14' // 黄色 85-95%
+    
+    return {
+      value: rate,
+      itemStyle: { color }
+    }
+  })
   
   const option = {
     tooltip: {
       trigger: 'axis',
       axisPointer: {
         type: 'shadow'
+      },
+      formatter: function(params) {
+        const param = params[0]
+        return `端口: ${param.axisValue}<br/>${param.marker}${param.seriesName}: ${param.value}%`
       }
     },
     legend: {
@@ -556,12 +877,10 @@ const initPortSuccessChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['80', '443', '3306', '8080', '22', '21', '25', '53']
+      data: chartData.value.portAnalysis.portSuccess.ports
     },
     yAxis: {
       type: 'value',
-      min: 80,
-      max: 100,
       axisLabel: {
         formatter: '{value}%'
       }
@@ -570,16 +889,7 @@ const initPortSuccessChart = () => {
       {
         name: '成功率',
         type: 'bar',
-        data: [
-          { value: 96.7, itemStyle: { color: '#52c41a' } },
-          { value: 89.2, itemStyle: { color: '#faad14' } },
-          { value: 92.3, itemStyle: { color: '#52c41a' } },
-          { value: 98.5, itemStyle: { color: '#52c41a' } },
-          { value: 85.6, itemStyle: { color: '#ff7a45' } },
-          { value: 82.1, itemStyle: { color: '#ff4d4f' } },
-          { value: 88.9, itemStyle: { color: '#faad14' } },
-          { value: 94.3, itemStyle: { color: '#52c41a' } }
-        ]
+        data: successRateData
       }
     ]
   }
@@ -591,13 +901,43 @@ const initPortSuccessChart = () => {
 const initPortResponseChart = () => {
   if (!portResponseChart.value) return
   
+  // 销毁已存在的实例
+  if (portResponseChartInstance) {
+    portResponseChartInstance.dispose()
+    portResponseChartInstance = null
+  }
+  
   portResponseChartInstance = echarts.init(portResponseChart.value)
+  
+  // 检查数据是否存在
+  if (!chartData.value.portAnalysis.portResponse.ports.length) {
+    const option = {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'center',
+        textStyle: {
+          color: '#999',
+          fontSize: 14
+        }
+      }
+    }
+    portResponseChartInstance.setOption(option)
+    return
+  }
   
   const option = {
     tooltip: {
       trigger: 'axis',
       axisPointer: {
         type: 'shadow'
+      },
+      formatter: function(params) {
+        let result = `端口: ${params[0].axisValue}<br/>`
+        params.forEach(param => {
+          result += `${param.marker}${param.seriesName}: ${param.value}ms<br/>`
+        })
+        return result
       }
     },
     legend: {
@@ -611,7 +951,7 @@ const initPortResponseChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['80', '443', '3306', '8080', '22', '21', '25', '53']
+      data: chartData.value.portAnalysis.portResponse.ports
     },
     yAxis: {
       type: 'value',
@@ -623,13 +963,13 @@ const initPortResponseChart = () => {
       {
         name: '平均响应时间',
         type: 'bar',
-        data: [45, 120, 85, 25, 180, 220, 150, 35],
+        data: chartData.value.portAnalysis.portResponse.avgTimes,
         itemStyle: { color: '#1890ff' }
       },
       {
         name: '最大响应时间',
         type: 'bar',
-        data: [120, 350, 280, 80, 500, 800, 450, 120],
+        data: chartData.value.portAnalysis.portResponse.maxTimes,
         itemStyle: { color: '#ff7a45' }
       }
     ]
@@ -642,7 +982,39 @@ const initPortResponseChart = () => {
 const initErrorAnalysisChart = () => {
   if (!errorAnalysisChart.value) return
   
+  // 销毁已存在的实例
+  if (errorAnalysisChartInstance) {
+    errorAnalysisChartInstance.dispose()
+    errorAnalysisChartInstance = null
+  }
+  
   errorAnalysisChartInstance = echarts.init(errorAnalysisChart.value)
+  
+  // 检查数据是否存在
+  if (!chartData.value.portAnalysis.errorAnalysis.length) {
+    const option = {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'center',
+        textStyle: {
+          color: '#999',
+          fontSize: 14
+        }
+      }
+    }
+    errorAnalysisChartInstance.setOption(option)
+    return
+  }
+  
+  // 为错误类型设置颜色
+  const errorData = chartData.value.portAnalysis.errorAnalysis.map((item, index) => {
+    const colors = ['#ff4d4f', '#ff7a45', '#faad14', '#722ed1', '#d9d9d9']
+    return {
+      ...item,
+      itemStyle: { color: colors[index % colors.length] }
+    }
+  })
   
   const option = {
     tooltip: {
@@ -658,13 +1030,7 @@ const initErrorAnalysisChart = () => {
         name: '连接错误类型',
         type: 'pie',
         radius: '50%',
-        data: [
-          { value: 45, name: '连接超时', itemStyle: { color: '#ff4d4f' } },
-          { value: 25, name: '连接拒绝', itemStyle: { color: '#ff7a45' } },
-          { value: 15, name: '网络不可达', itemStyle: { color: '#faad14' } },
-          { value: 10, name: '主机不可达', itemStyle: { color: '#722ed1' } },
-          { value: 5, name: '其他错误', itemStyle: { color: '#d9d9d9' } }
-        ],
+        data: errorData,
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
@@ -697,8 +1063,17 @@ const handleResize = () => {
   errorAnalysisChartInstance?.resize()
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // 获取TCP任务列表
+  await fetchTcpTasks()
+  
+  // 获取报表数据
+  await fetchTcpReportData()
+  
+  // 初始化所有图表
   initAllCharts()
+  
+  // 添加窗口大小变化监听
   window.addEventListener('resize', handleResize)
 })
 

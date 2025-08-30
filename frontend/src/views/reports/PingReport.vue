@@ -112,6 +112,7 @@
           <a-table
             :columns="taskColumns"
             :data-source="taskTableData"
+            :loading="loading"
             :pagination="{
               current: currentPage,
               pageSize: pageSize,
@@ -152,9 +153,6 @@
                   <a-button type="link" size="small" @click="viewTaskDetail(record)">
                     查看详情
                   </a-button>
-                  <a-button type="link" size="small" @click="viewTaskTrend(record)">
-                    趋势分析
-                  </a-button>
                 </a-space>
               </template>
             </template>
@@ -168,7 +166,10 @@
 <script setup>
 import { ref, onMounted, h, nextTick } from 'vue'
 import { message } from 'ant-design-vue'
+import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
+import { getPingReport } from '@/api/reports'
+import request from '@/utils/request'
 import {
   SyncOutlined,
   DownloadOutlined,
@@ -183,6 +184,17 @@ const selectedTimeRange = ref('1d')
 const selectedTask = ref('all')
 const selectedRegion = ref('all')
 const activeLatencyTab = ref('latency-distribution')
+
+// 加载状态
+const loading = ref(false)
+
+// 图表数据存储
+const chartData = ref({
+  latencyTrend: [],
+  packetLossDistribution: [],
+  taskList: [],
+  performanceMetrics: {}
+})
 
 // 分页
 const currentPage = ref(1)
@@ -204,19 +216,14 @@ let jitterAnalysisChartInstance = null
 let geographicChartInstance = null
 
 // Ping任务列表
-const pingTasks = ref([
-  { id: 1, name: 'Ping百度' },
-  { id: 2, name: 'Ping谷歌DNS' },
-  { id: 3, name: 'Ping阿里DNS' },
-  { id: 4, name: 'Ping本地网关' }
-])
+const pingTasks = ref([])
 
 // Ping关键指标
 const pingMetrics = ref([
   {
     key: 'avgLatency',
     title: '平均延迟',
-    value: 28.5,
+    value: 0,
     suffix: 'ms',
     precision: 1,
     color: '#1890ff',
@@ -225,7 +232,7 @@ const pingMetrics = ref([
   {
     key: 'packetLoss',
     title: '平均丢包率',
-    value: 1.2,
+    value: 0,
     suffix: '%',
     precision: 1,
     color: '#ff4d4f',
@@ -234,7 +241,7 @@ const pingMetrics = ref([
   {
     key: 'jitter',
     title: '平均抖动',
-    value: 12.8,
+    value: 0,
     suffix: 'ms',
     precision: 1,
     color: '#faad14',
@@ -243,13 +250,54 @@ const pingMetrics = ref([
   {
     key: 'availability',
     title: '可用性',
-    value: 98.8,
+    value: 0,
     suffix: '%',
     precision: 1,
     color: '#52c41a',
     icon: ClockCircleOutlined
   }
 ])
+
+// 获取Ping任务列表
+const fetchPingTasks = async () => {
+  try {
+    const response = await request.get('/tasks', {
+      params: { task_type: 'ping' }
+    })
+    // 处理API返回格式: {code: 0, data: {list: [...], total: N}, message: ""}
+    if (response && response.code === 0 && response.data) {
+      if (Array.isArray(response.data.list)) {
+        // v1 API格式: data.list
+        pingTasks.value = response.data.list.map(task => ({
+          id: task.id,
+          name: task.name
+        }))
+      } else if (Array.isArray(response.data)) {
+        // v2 API格式: data直接是数组
+        pingTasks.value = response.data.map(task => ({
+          id: task.id,
+          name: task.name
+        }))
+      } else {
+        console.warn('Ping任务数据格式不正确:', response)
+        pingTasks.value = []
+      }
+    } else if (response.data && response.data.tasks && Array.isArray(response.data.tasks)) {
+      // 兼容旧格式 {data: {tasks: [...]}}
+      pingTasks.value = response.data.tasks.map(task => ({
+        id: task.id,
+        name: task.name
+      }))
+    } else {
+      console.warn('Ping任务数据格式不正确:', response)
+      pingTasks.value = []
+    }
+  } catch (error) {
+    console.error('获取Ping任务列表失败:', error)
+    message.error('获取Ping任务列表失败')
+    pingTasks.value = []
+  }
+}
 
 // 表格列定义
 const taskColumns = [
@@ -311,64 +359,148 @@ const taskColumns = [
 ]
 
 // 表格数据
-const taskTableData = ref([
-  {
-    key: '1',
-    taskName: 'Ping百度',
-    target: 'www.baidu.com',
-    region: '国内',
-    avgLatency: 25,
-    packetLoss: 0.5,
-    jitter: 8,
-    totalTests: 2880,
-    lastTestTime: '2024-01-15 14:30:25'
-  },
-  {
-    key: '2',
-    taskName: 'Ping谷歌DNS',
-    target: '8.8.8.8',
-    region: '海外',
-    avgLatency: 180,
-    packetLoss: 2.1,
-    jitter: 25,
-    totalTests: 1440,
-    lastTestTime: '2024-01-15 14:29:45'
-  },
-  {
-    key: '3',
-    taskName: 'Ping阿里DNS',
-    target: '223.5.5.5',
-    region: '国内',
-    avgLatency: 18,
-    packetLoss: 0.2,
-    jitter: 5,
-    totalTests: 2160,
-    lastTestTime: '2024-01-15 14:28:15'
-  },
-  {
-    key: '4',
-    taskName: 'Ping本地网关',
-    target: '192.168.1.1',
-    region: '本地',
-    avgLatency: 2,
-    packetLoss: 0.0,
-    jitter: 1,
-    totalTests: 1800,
-    lastTestTime: '2024-01-15 14:27:30'
+const taskTableData = ref([])
+
+// 获取Ping报表数据
+const fetchPingReportData = async () => {
+  try {
+    loading.value = true
+    const params = {
+      time_range: selectedTimeRange.value,
+      task_id: selectedTask.value === 'all' ? undefined : selectedTask.value,
+      region: selectedRegion.value === 'all' ? undefined : selectedRegion.value
+    }
+    
+    const response = await getPingReport(params)
+    
+    // 处理新的API响应格式 {code: 0, data: {...}}
+    let reportData = null
+    if (response && response.code === 0 && response.data) {
+      reportData = response.data
+    } else if (response && response.data) {
+      // 兼容旧格式
+      reportData = response.data
+    }
+    
+    if (reportData) {
+      // 更新关键指标 - 映射API字段到前端期望的字段
+      const metrics = reportData.metrics || {}
+      pingMetrics.value.forEach(metric => {
+        switch (metric.key) {
+          case 'avgLatency':
+            metric.value = metrics.avg_latency || 0
+            break
+          case 'packetLoss':
+            metric.value = metrics.packet_loss_rate || 0
+            break
+          case 'jitter':
+            metric.value = metrics.jitter || 0
+            break
+          case 'availability':
+            metric.value = metrics.success_rate || 0
+            break
+          default:
+            if (metrics[metric.key] !== undefined) {
+              metric.value = metrics[metric.key]
+            }
+        }
+      })
+      
+      // 更新表格数据
+      if (reportData.task_list) {
+        taskTableData.value = reportData.task_list.map((task, index) => ({
+          key: task.task_id || task.id || index.toString(),
+          taskName: task.task_name || task.name,
+          target: task.target_host || task.target,
+          region: task.region,
+          avgLatency: task.avg_latency || 0,
+          packetLoss: task.packet_loss_rate || 0,
+          jitter: task.jitter || 0,
+          totalTests: task.total_pings || task.total_tests || 0,
+          lastTestTime: task.last_execution_time
+        }))
+        totalTasks.value = reportData.total_tasks || taskTableData.value.length
+      }
+      
+      // 更新图表数据 - 转换API数据格式到图表期望格式
+       const latencyTrendData = (reportData.latency_trend || []).map(item => ({
+         time: item.time || item.timestamp,
+         avgLatency: item.avg_latency || 0,
+         minLatency: item.min_latency || 0,
+         maxLatency: item.max_latency || 0,
+         successRate: item.success_rate || 0
+       }))
+       
+       // 基于latency_trend数据计算丢包率分布
+       const packetLossData = (reportData.latency_trend || []).map(item => ({
+         time: item.time || item.timestamp,
+         packetLoss: (100 - (item.success_rate || 0))
+       }))
+       
+       // 处理延迟分布数据
+       const performanceMetrics = {
+         ...reportData.performance_metrics,
+         latencyDistribution: reportData.latency_distribution || reportData.performance_metrics?.latency_distribution || [
+           { range: '0-20ms', value: 0 },
+           { range: '20-50ms', value: 0 },
+           { range: '50-100ms', value: 0 },
+           { range: '100-200ms', value: 0 },
+           { range: '>200ms', value: 0 }
+         ]
+       }
+       
+       chartData.value = {
+         latencyTrend: latencyTrendData,
+         packetLossDistribution: packetLossData,
+         taskList: reportData.task_list || [],
+         performanceMetrics: performanceMetrics
+       }
+      
+      // 更新图表
+      updateChartData()
+    } else {
+      console.warn('Ping报表数据格式不正确:', response)
+    }
+  } catch (error) {
+    console.error('获取Ping报表数据失败:', error)
+    message.error('获取Ping报表数据失败')
+  } finally {
+    loading.value = false
   }
-])
+}
+
+// 更新图表数据
+const updateChartData = () => {
+  nextTick(() => {
+    if (latencyTrendChartInstance) {
+      initLatencyTrendChart()
+    }
+    if (packetLossChartInstance) {
+      initPacketLossChart()
+    }
+    if (latencyDistributionChartInstance) {
+      initLatencyDistributionChart()
+    }
+    if (jitterAnalysisChartInstance) {
+      initJitterAnalysisChart()
+    }
+    if (geographicChartInstance) {
+      initGeographicChart()
+    }
+  })
+}
 
 // 方法
 const handleTimeRangeChange = (value) => {
-  refreshData()
+  fetchPingReportData()
 }
 
 const handleTaskChange = (value) => {
-  refreshData()
+  fetchPingReportData()
 }
 
 const handleRegionChange = (value) => {
-  refreshData()
+  fetchPingReportData()
 }
 
 const handleLatencyTabChange = (key) => {
@@ -381,14 +513,11 @@ const handleLatencyTabChange = (key) => {
 const handleTableChange = (pagination) => {
   currentPage.value = pagination.current
   pageSize.value = pagination.pageSize
-  refreshData()
+  fetchPingReportData()
 }
 
 const refreshData = async () => {
-  message.loading('正在刷新数据...', 1)
-  // 这里应该调用API获取最新数据
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  initAllCharts()
+  await fetchPingReportData()
   message.success('数据刷新完成')
 }
 
@@ -402,8 +531,15 @@ const exportReport = async () => {
   }
 }
 
+const router = useRouter()
+
 const viewTaskDetail = (record) => {
-  message.info(`查看任务详情: ${record.taskName}`)
+  // 跳转到Ping任务结果列表页面
+  if (record.key) {
+    router.push(`/task-management/ping-result/${record.key}`)
+  } else {
+    message.error('任务ID不存在，无法查看详情')
+  }
 }
 
 const viewTaskTrend = (record) => {
@@ -414,13 +550,49 @@ const viewTaskTrend = (record) => {
 const initLatencyTrendChart = () => {
   if (!latencyTrendChart.value) return
   
+  // 销毁已存在的实例
+  if (latencyTrendChartInstance) {
+    latencyTrendChartInstance.dispose()
+    latencyTrendChartInstance = null
+  }
+  
   latencyTrendChartInstance = echarts.init(latencyTrendChart.value)
+  
+  const trendData = chartData.value.latencyTrend || []
+  
+  if (trendData.length === 0) {
+    const option = {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'middle',
+        textStyle: {
+          color: '#999',
+          fontSize: 14
+        }
+      }
+    }
+    latencyTrendChartInstance.setOption(option)
+    return
+  }
+  
+  const timeLabels = trendData.map(item => item.time || item.timestamp)
+  const avgLatencyData = trendData.map(item => item.avgLatency || 0)
+  const minLatencyData = trendData.map(item => item.minLatency || 0)
+  const maxLatencyData = trendData.map(item => item.maxLatency || 0)
   
   const option = {
     tooltip: {
       trigger: 'axis',
       axisPointer: {
         type: 'cross'
+      },
+      formatter: function(params) {
+        let result = `时间: ${params[0].axisValue}<br/>`
+        params.forEach(param => {
+          result += `${param.seriesName}: ${param.value}ms<br/>`
+        })
+        return result
       }
     },
     legend: {
@@ -434,7 +606,7 @@ const initLatencyTrendChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00']
+      data: timeLabels
     },
     yAxis: {
       type: 'value',
@@ -446,7 +618,7 @@ const initLatencyTrendChart = () => {
       {
         name: '平均延迟',
         type: 'line',
-        data: [28, 25, 32, 30, 35, 29, 27],
+        data: avgLatencyData,
         smooth: true,
         itemStyle: { color: '#1890ff' },
         areaStyle: {
@@ -466,7 +638,7 @@ const initLatencyTrendChart = () => {
       {
         name: '最小延迟',
         type: 'line',
-        data: [15, 12, 18, 16, 20, 14, 13],
+        data: minLatencyData,
         smooth: true,
         itemStyle: { color: '#52c41a' },
         lineStyle: { type: 'dashed' }
@@ -474,7 +646,7 @@ const initLatencyTrendChart = () => {
       {
         name: '最大延迟',
         type: 'line',
-        data: [45, 42, 58, 52, 68, 48, 46],
+        data: maxLatencyData,
         smooth: true,
         itemStyle: { color: '#ff4d4f' },
         lineStyle: { type: 'dashed' }
@@ -489,13 +661,53 @@ const initLatencyTrendChart = () => {
 const initPacketLossChart = () => {
   if (!packetLossChart.value) return
   
+  // 销毁已存在的实例
+  if (packetLossChartInstance) {
+    packetLossChartInstance.dispose()
+    packetLossChartInstance = null
+  }
+  
   packetLossChartInstance = echarts.init(packetLossChart.value)
+  
+  const lossData = chartData.value.packetLossDistribution || []
+  
+  if (lossData.length === 0) {
+    const option = {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'middle',
+        textStyle: {
+          color: '#999',
+          fontSize: 14
+        }
+      }
+    }
+    packetLossChartInstance.setOption(option)
+    return
+  }
+  
+  const timeLabels = lossData.map(item => item.time || item.timestamp)
+  const packetLossData = lossData.map(item => {
+    const value = item.packetLoss || 0
+    let color = '#52c41a' // 绿色：正常
+    if (value > 3) {
+      color = '#ff4d4f' // 红色：严重
+    } else if (value > 1) {
+      color = '#faad14' // 黄色：警告
+    }
+    return { value, itemStyle: { color } }
+  })
   
   const option = {
     tooltip: {
       trigger: 'axis',
       axisPointer: {
         type: 'shadow'
+      },
+      formatter: function(params) {
+        const param = params[0]
+        return `时间: ${param.axisValue}<br/>丢包率: ${param.value}%`
       }
     },
     legend: {
@@ -509,12 +721,11 @@ const initPacketLossChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00']
+      data: timeLabels
     },
     yAxis: {
       type: 'value',
       min: 0,
-      max: 5,
       axisLabel: {
         formatter: '{value}%'
       }
@@ -523,15 +734,7 @@ const initPacketLossChart = () => {
       {
         name: '丢包率',
         type: 'bar',
-        data: [
-          { value: 1.2, itemStyle: { color: '#52c41a' } },
-          { value: 0.8, itemStyle: { color: '#52c41a' } },
-          { value: 2.1, itemStyle: { color: '#faad14' } },
-          { value: 1.5, itemStyle: { color: '#52c41a' } },
-          { value: 3.2, itemStyle: { color: '#ff7a45' } },
-          { value: 1.0, itemStyle: { color: '#52c41a' } },
-          { value: 0.9, itemStyle: { color: '#52c41a' } }
-        ]
+        data: packetLossData
       }
     ]
   }
@@ -558,7 +761,50 @@ const initLatencyChart = (type) => {
 const initLatencyDistributionChart = () => {
   if (!latencyDistributionChart.value) return
   
+  // 销毁已存在的实例
+  if (latencyDistributionChartInstance) {
+    latencyDistributionChartInstance.dispose()
+    latencyDistributionChartInstance = null
+  }
+  
   latencyDistributionChartInstance = echarts.init(latencyDistributionChart.value)
+  
+  const distributionData = chartData.value.performanceMetrics?.latencyDistribution || []
+  
+  if (distributionData.length === 0) {
+    const option = {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'middle',
+        textStyle: {
+          color: '#999',
+          fontSize: 14
+        }
+      }
+    }
+    latencyDistributionChartInstance.setOption(option)
+    return
+  }
+  
+  const pieData = distributionData.map(item => {
+    const range = item.range || item.name
+    let color = '#52c41a'
+    if (range.includes('200')) {
+      color = '#ff4d4f'
+    } else if (range.includes('100')) {
+      color = '#ff7a45'
+    } else if (range.includes('50')) {
+      color = '#faad14'
+    } else if (range.includes('20')) {
+      color = '#1890ff'
+    }
+    return {
+      value: item.value || item.count,
+      name: range,
+      itemStyle: { color }
+    }
+  })
   
   const option = {
     tooltip: {
@@ -575,13 +821,7 @@ const initLatencyDistributionChart = () => {
         type: 'pie',
         radius: ['40%', '70%'],
         avoidLabelOverlap: false,
-        data: [
-          { value: 35, name: '0-20ms', itemStyle: { color: '#52c41a' } },
-          { value: 30, name: '20-50ms', itemStyle: { color: '#1890ff' } },
-          { value: 20, name: '50-100ms', itemStyle: { color: '#faad14' } },
-          { value: 10, name: '100-200ms', itemStyle: { color: '#ff7a45' } },
-          { value: 5, name: '>200ms', itemStyle: { color: '#ff4d4f' } }
-        ],
+        data: pieData,
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
@@ -607,13 +847,49 @@ const initLatencyDistributionChart = () => {
 const initJitterAnalysisChart = () => {
   if (!jitterAnalysisChart.value) return
   
+  // 销毁已存在的实例
+  if (jitterAnalysisChartInstance) {
+    jitterAnalysisChartInstance.dispose()
+    jitterAnalysisChartInstance = null
+  }
+  
   jitterAnalysisChartInstance = echarts.init(jitterAnalysisChart.value)
+  
+  const jitterData = chartData.value.performanceMetrics?.jitterAnalysis || []
+  
+  if (jitterData.length === 0) {
+    const option = {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'middle',
+        textStyle: {
+          color: '#999',
+          fontSize: 14
+        }
+      }
+    }
+    jitterAnalysisChartInstance.setOption(option)
+    return
+  }
+  
+  const timeLabels = jitterData.map(item => item.time || item.timestamp)
+  const jitterValues = jitterData.map(item => item.jitter || 0)
+  const threshold = 20 // 抖动阈值
+  const thresholdData = new Array(timeLabels.length).fill(threshold)
   
   const option = {
     tooltip: {
       trigger: 'axis',
       axisPointer: {
         type: 'cross'
+      },
+      formatter: function(params) {
+        let result = `时间: ${params[0].axisValue}<br/>`
+        params.forEach(param => {
+          result += `${param.seriesName}: ${param.value}ms<br/>`
+        })
+        return result
       }
     },
     legend: {
@@ -627,7 +903,7 @@ const initJitterAnalysisChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00']
+      data: timeLabels
     },
     yAxis: {
       type: 'value',
@@ -639,7 +915,7 @@ const initJitterAnalysisChart = () => {
       {
         name: '抖动值',
         type: 'line',
-        data: [12, 8, 18, 15, 25, 10, 9],
+        data: jitterValues,
         smooth: true,
         itemStyle: { color: '#faad14' },
         areaStyle: {
@@ -659,7 +935,7 @@ const initJitterAnalysisChart = () => {
       {
         name: '抖动阈值',
         type: 'line',
-        data: [20, 20, 20, 20, 20, 20, 20],
+        data: thresholdData,
         lineStyle: {
           type: 'dashed',
           color: '#ff4d4f'
@@ -676,13 +952,49 @@ const initJitterAnalysisChart = () => {
 const initGeographicChart = () => {
   if (!geographicChart.value) return
   
+  // 销毁已存在的实例
+  if (geographicChartInstance) {
+    geographicChartInstance.dispose()
+    geographicChartInstance = null
+  }
+  
   geographicChartInstance = echarts.init(geographicChart.value)
+  
+  const geographicData = chartData.value.performanceMetrics?.geographicAnalysis || []
+  
+  if (geographicData.length === 0) {
+    const option = {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'middle',
+        textStyle: {
+          color: '#999',
+          fontSize: 14
+        }
+      }
+    }
+    geographicChartInstance.setOption(option)
+    return
+  }
+  
+  const regions = geographicData.map(item => item.region || item.name)
+  const latencyData = geographicData.map(item => item.avgLatency || 0)
+  const packetLossData = geographicData.map(item => item.packetLoss || 0)
   
   const option = {
     tooltip: {
       trigger: 'axis',
       axisPointer: {
         type: 'shadow'
+      },
+      formatter: function(params) {
+        let result = `地区: ${params[0].axisValue}<br/>`
+        params.forEach(param => {
+          const unit = param.seriesName === '平均延迟' ? 'ms' : '%'
+          result += `${param.seriesName}: ${param.value}${unit}<br/>`
+        })
+        return result
       }
     },
     legend: {
@@ -696,7 +1008,7 @@ const initGeographicChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['本地网关', '国内DNS', '国内网站', '亚洲服务器', '欧洲服务器', '美洲服务器']
+      data: regions
     },
     yAxis: [
       {
@@ -721,14 +1033,14 @@ const initGeographicChart = () => {
         name: '平均延迟',
         type: 'bar',
         yAxisIndex: 0,
-        data: [2, 18, 25, 120, 180, 220],
+        data: latencyData,
         itemStyle: { color: '#1890ff' }
       },
       {
         name: '丢包率',
         type: 'line',
         yAxisIndex: 1,
-        data: [0.0, 0.2, 0.5, 1.8, 3.2, 4.5],
+        data: packetLossData,
         itemStyle: { color: '#ff4d4f' }
       }
     ]
@@ -755,8 +1067,9 @@ const handleResize = () => {
   geographicChartInstance?.resize()
 }
 
-onMounted(() => {
-  initAllCharts()
+onMounted(async () => {
+  await fetchPingTasks()
+  await fetchPingReportData()
   window.addEventListener('resize', handleResize)
 })
 

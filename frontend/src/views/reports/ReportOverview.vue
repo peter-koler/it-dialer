@@ -96,12 +96,12 @@
             size="small"
           >
             <template #renderItem="{ item, index }">
-              <a-list-item>
+              <a-list-item class="clickable-list-item" @click="navigateToTaskDetail(item.taskId, item.originalTaskType)">
                 <a-list-item-meta>
                   <template #title>
                     <a-space>
                       <a-tag :color="getTopRankColor(index)">{{ index + 1 }}</a-tag>
-                      <span>{{ item.taskName }}</span>
+                      <span class="task-name-link">{{ item.taskName }}</span>
                       <a-tag :color="getTaskTypeColor(item.taskType)">{{ item.taskType }}</a-tag>
                     </a-space>
                   </template>
@@ -130,12 +130,12 @@
             size="small"
           >
             <template #renderItem="{ item, index }">
-              <a-list-item>
+              <a-list-item class="clickable-list-item" @click="navigateToTaskDetail(item.taskId, item.originalTaskType)">
                 <a-list-item-meta>
                   <template #title>
                     <a-space>
                       <a-tag color="red">{{ index + 1 }}</a-tag>
-                      <span>{{ item.taskName }}</span>
+                      <span class="task-name-link">{{ item.taskName }}</span>
                       <a-tag :color="getTaskTypeColor(item.taskType)">{{ item.taskType }}</a-tag>
                     </a-space>
                   </template>
@@ -164,6 +164,7 @@
 import { ref, onMounted, h, nextTick } from 'vue'
 import { message } from 'ant-design-vue'
 import * as echarts from 'echarts'
+import { useRouter } from 'vue-router'
 import {
   SyncOutlined,
   DownloadOutlined,
@@ -172,6 +173,10 @@ import {
   ClockCircleOutlined,
   WarningOutlined
 } from '@ant-design/icons-vue'
+import { getReportOverview } from '@/api/reports'
+
+// 路由实例
+const router = useRouter()
 
 // 时间范围选项
 const timeRangeOptions = [
@@ -198,11 +203,25 @@ let responseTimeChartInstance = null
 let packetLossChartInstance = null
 let statusCodeChartInstance = null
 
+// 新增：趋势与饼图所需数据
+const trendXAxis = ref([])
+const typeTrends = ref({ tcp: [], ping: [], http: [], api: [] })
+const pieSeriesData = ref([])
+
+// 新增：性能指标数据
+const performanceData = ref({
+  tcp_connection_time: { min: 0, avg: 0, max: 0, data: [] },
+  ping_rtt: { min: 0, avg: 0, max: 0, data: [] },
+  http_response_time: { min: 0, avg: 0, max: 0, data: [] },
+  api_response_time: { min: 0, avg: 0, max: 0, data: [] },
+  ping_packet_loss: { min: 0, avg: 0, max: 0, data: [] }
+})
+
 // 总体统计数据
 const overviewStats = ref([
   {
     title: 'TCP任务成功率',
-    value: 95.8,
+    value: 0,
     suffix: '%',
     color: '#52c41a',
     icon: CheckCircleOutlined,
@@ -210,7 +229,7 @@ const overviewStats = ref([
   },
   {
     title: 'Ping任务成功率',
-    value: 98.2,
+    value: 0,
     suffix: '%',
     color: '#52c41a',
     icon: CheckCircleOutlined,
@@ -218,7 +237,7 @@ const overviewStats = ref([
   },
   {
     title: 'HTTP任务成功率',
-    value: 92.5,
+    value: 0,
     suffix: '%',
     color: '#faad14',
     icon: WarningOutlined,
@@ -226,7 +245,7 @@ const overviewStats = ref([
   },
   {
     title: 'API任务成功率',
-    value: 89.7,
+    value: 0,
     suffix: '%',
     color: '#faad14',
     icon: WarningOutlined,
@@ -234,22 +253,10 @@ const overviewStats = ref([
   }
 ])
 
-// TOP榜单数据
-const topAvailabilityTasks = ref([
-  { taskName: 'Ping百度', taskType: 'Ping', target: 'www.baidu.com', successRate: 99.8 },
-  { taskName: 'TCP本地测试', taskType: 'TCP', target: '127.0.0.1:8080', successRate: 98.5 },
-  { taskName: 'HTTP健康检查', taskType: 'HTTP', target: 'https://api.example.com/health', successRate: 97.2 },
-  { taskName: 'API登录接口', taskType: 'API', target: '/api/v1/login', successRate: 96.8 },
-  { taskName: 'Ping谷歌DNS', taskType: 'Ping', target: '8.8.8.8', successRate: 96.5 }
-])
+// TOP榜单数据改为由接口填充
+const topAvailabilityTasks = ref([])
 
-const topFailureTasks = ref([
-  { taskName: 'TCP远程连接', taskType: 'TCP', target: 'remote.server.com:3306', failureRate: 15.2 },
-  { taskName: 'API支付接口', taskType: 'API', target: '/api/v1/payment', failureRate: 12.8 },
-  { taskName: 'HTTP文件下载', taskType: 'HTTP', target: 'https://cdn.example.com/file.zip', failureRate: 10.5 },
-  { taskName: 'Ping国外服务器', taskType: 'Ping', target: 'overseas.server.com', failureRate: 8.7 },
-  { taskName: 'TCP数据库连接', taskType: 'TCP', target: 'db.server.com:5432', failureRate: 7.3 }
-])
+const topFailureTasks = ref([])
 
 // 方法
 const handleTimeRangeChange = (value) => {
@@ -265,11 +272,99 @@ const handlePerformanceTabChange = (key) => {
 }
 
 const refreshData = async () => {
-  message.loading('正在刷新数据...', 1)
-  // 这里应该调用API获取最新数据
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  initAllCharts()
-  message.success('数据刷新完成')
+  try {
+    message.loading('正在刷新数据...', 0.8)
+    const res = await getReportOverview({ time_range: selectedTimeRange.value })
+    if (res && res.code === 0 && res.data) {
+      const data = res.data
+      // 1) 任务类型成功率映射
+      const rates = { tcp: 0, ping: 0, http: 0, api: 0 }
+      ;(data.task_type_stats || []).forEach(item => {
+        if (item && item.type in rates) {
+          rates[item.type] = item.success_rate || 0
+        }
+      })
+      // 更新四个概览卡片
+      overviewStats.value = overviewStats.value.map(s => ({
+        ...s,
+        value: rates[s.type] ?? 0
+      }))
+
+      // 2) 饼图数据
+      pieSeriesData.value = [
+        { value: rates.tcp, name: 'TCP任务', itemStyle: { color: '#1890ff' } },
+        { value: rates.ping, name: 'Ping任务', itemStyle: { color: '#52c41a' } },
+        { value: rates.http, name: 'HTTP任务', itemStyle: { color: '#faad14' } },
+        { value: rates.api, name: 'API任务', itemStyle: { color: '#722ed1' } }
+      ]
+
+      // 3) 成功率趋势（多折线）
+      const tTrends = data.type_success_trends || {}
+      trendXAxis.value = (tTrends.tcp || []).map(i => i.time)
+      typeTrends.value = {
+        tcp: (tTrends.tcp || []).map(i => i.success_rate),
+        ping: (tTrends.ping || []).map(i => i.success_rate),
+        http: (tTrends.http || []).map(i => i.success_rate),
+        api: (tTrends.api || []).map(i => i.success_rate)
+      }
+
+      // 4) TOP榜单
+      const formatType = (t) => ({ tcp: 'TCP', ping: 'Ping', http: 'HTTP', api: 'API' }[t] || t)
+      topAvailabilityTasks.value = (data.top_tasks || []).map(r => ({
+        taskId: r.task_id,
+        taskName: r.task_name,
+        taskType: formatType(r.task_type),
+        originalTaskType: r.task_type,
+        target: r.target,
+        successRate: r.success_rate
+      }))
+      topFailureTasks.value = (data.worst_tasks || []).map(r => ({
+        taskId: r.task_id,
+        taskName: r.task_name,
+        taskType: formatType(r.task_type),
+        originalTaskType: r.task_type,
+        target: r.target,
+        failureRate: r.failure_rate
+      }))
+
+      // 5) 性能指标数据 - 适配后端返回的数据结构
+      if (data.performance_stats) {
+        const perfStats = data.performance_stats
+        const responseStats = perfStats.response_time_stats || {}
+        const packetStats = perfStats.packet_loss_stats || {}
+        
+        // 将后端的[min, avg, max]格式转换为前端期望的格式
+        const convertStats = (stats) => {
+          if (Array.isArray(stats) && stats.length >= 3) {
+            return {
+              min: stats[0] || 0,
+              avg: stats[1] || 0, 
+              max: stats[2] || 0,
+              data: [stats[1] || 0] // 使用平均值作为数据点
+            }
+          }
+          return { min: 0, avg: 0, max: 0, data: [0] }
+        }
+        
+        performanceData.value = {
+          tcp_connection_time: convertStats(responseStats.tcp_connect),
+          ping_rtt: convertStats(responseStats.ping_latency),
+          http_response_time: convertStats(responseStats.http_response),
+          api_response_time: convertStats(responseStats.api_response),
+          ping_packet_loss: convertStats(packetStats.ping_packet_loss)
+        }
+      }
+
+      // 初始化/更新图表
+      initAllCharts()
+      message.success('数据刷新完成')
+    } else {
+      throw new Error(res?.message || '获取报表总览失败')
+    }
+  } catch (error) {
+    console.error('刷新数据失败:', error)
+    message.error(error.message || '刷新数据失败')
+  }
 }
 
 const exportReport = async () => {
@@ -297,6 +392,34 @@ const getTaskTypeColor = (type) => {
   return colors[type] || 'default'
 }
 
+// 跳转到任务详情页面
+const navigateToTaskDetail = (taskId, taskType) => {
+  if (!taskId) {
+    message.warning('任务ID不存在')
+    return
+  }
+  
+  // 根据任务类型跳转到不同的详情页面
+  switch (taskType?.toLowerCase()) {
+    case 'api':
+      router.push(`/api-monitoring/result/${taskId}`)
+      break
+    case 'http':
+      router.push(`/task-management/http-result/${taskId}`)
+      break
+    case 'ping':
+      router.push(`/task-management/ping-result/${taskId}`)
+      break
+    case 'tcp':
+      router.push(`/task-management/tcp-result/${taskId}`)
+      break
+    default:
+      // 默认跳转到任务管理列表页面
+      router.push('/task-management/list')
+      break
+  }
+}
+
 // 初始化成功率趋势图
 const initSuccessRateChart = () => {
   if (!successRateChart.value) return
@@ -306,60 +429,22 @@ const initSuccessRateChart = () => {
   const option = {
     tooltip: {
       trigger: 'axis',
-      axisPointer: {
-        type: 'cross'
-      }
+      axisPointer: { type: 'cross' }
     },
-    legend: {
-      data: ['TCP', 'Ping', 'HTTP', 'API']
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'category',
-      data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00']
-    },
+    legend: { data: ['TCP', 'Ping', 'HTTP', 'API'] },
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: { type: 'category', data: trendXAxis.value },
     yAxis: {
       type: 'value',
-      min: 80,
+      min: 0,
       max: 100,
-      axisLabel: {
-        formatter: '{value}%'
-      }
+      axisLabel: { formatter: '{value}%' }
     },
     series: [
-      {
-        name: 'TCP',
-        type: 'line',
-        data: [95, 94, 96, 95, 97, 96, 95],
-        smooth: true,
-        itemStyle: { color: '#1890ff' }
-      },
-      {
-        name: 'Ping',
-        type: 'line',
-        data: [98, 97, 99, 98, 98, 99, 98],
-        smooth: true,
-        itemStyle: { color: '#52c41a' }
-      },
-      {
-        name: 'HTTP',
-        type: 'line',
-        data: [92, 91, 94, 93, 92, 93, 92],
-        smooth: true,
-        itemStyle: { color: '#faad14' }
-      },
-      {
-        name: 'API',
-        type: 'line',
-        data: [89, 88, 91, 90, 89, 90, 89],
-        smooth: true,
-        itemStyle: { color: '#722ed1' }
-      }
+      { name: 'TCP', type: 'line', data: typeTrends.value.tcp, smooth: true, itemStyle: { color: '#1890ff' } },
+      { name: 'Ping', type: 'line', data: typeTrends.value.ping, smooth: true, itemStyle: { color: '#52c41a' } },
+      { name: 'HTTP', type: 'line', data: typeTrends.value.http, smooth: true, itemStyle: { color: '#faad14' } },
+      { name: 'API', type: 'line', data: typeTrends.value.api, smooth: true, itemStyle: { color: '#722ed1' } }
     ]
   }
   
@@ -373,32 +458,15 @@ const initSuccessRatePieChart = () => {
   successRatePieChartInstance = echarts.init(successRatePieChart.value)
   
   const option = {
-    tooltip: {
-      trigger: 'item',
-      formatter: '{a} <br/>{b}: {c}% ({d}%)'
-    },
-    legend: {
-      orient: 'vertical',
-      left: 'left'
-    },
+    tooltip: { trigger: 'item', formatter: '{a} <br/>{b}: {c}% ({d}%)' },
+    legend: { orient: 'vertical', left: 'left' },
     series: [
       {
         name: '成功率',
         type: 'pie',
         radius: '50%',
-        data: [
-          { value: 95.8, name: 'TCP任务', itemStyle: { color: '#1890ff' } },
-          { value: 98.2, name: 'Ping任务', itemStyle: { color: '#52c41a' } },
-          { value: 92.5, name: 'HTTP任务', itemStyle: { color: '#faad14' } },
-          { value: 89.7, name: 'API任务', itemStyle: { color: '#722ed1' } }
-        ],
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
-        }
+        data: pieSeriesData.value,
+        emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } }
       }
     ]
   }
@@ -427,6 +495,18 @@ const initResponseTimeChart = () => {
   
   responseTimeChartInstance = echarts.init(responseTimeChart.value)
   
+  // 生成时间轴数据，如果没有数据则使用默认时间点
+  const timeLabels = trendXAxis.value.length > 0 
+    ? trendXAxis.value.map(time => {
+        const date = new Date(time)
+        // 检查日期是否有效
+        if (isNaN(date.getTime())) {
+          return time // 如果无法解析，直接返回原始时间字符串
+        }
+        return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+      })
+    : ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00']
+  
   const option = {
     tooltip: {
       trigger: 'axis',
@@ -445,7 +525,7 @@ const initResponseTimeChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00']
+      data: timeLabels
     },
     yAxis: {
       type: 'value',
@@ -457,28 +537,36 @@ const initResponseTimeChart = () => {
       {
         name: 'TCP连接时间',
         type: 'line',
-        data: [50, 45, 55, 48, 52, 49, 51],
+        data: performanceData.value.tcp_connection_time.data.length > 0 
+          ? performanceData.value.tcp_connection_time.data 
+          : [performanceData.value.tcp_connection_time.avg || 0],
         smooth: true,
         itemStyle: { color: '#1890ff' }
       },
       {
         name: 'Ping延迟',
         type: 'line',
-        data: [20, 18, 22, 19, 21, 20, 19],
+        data: performanceData.value.ping_rtt.data.length > 0 
+          ? performanceData.value.ping_rtt.data 
+          : [performanceData.value.ping_rtt.avg || 0],
         smooth: true,
         itemStyle: { color: '#52c41a' }
       },
       {
         name: 'HTTP响应时间',
         type: 'line',
-        data: [200, 180, 220, 195, 205, 190, 200],
+        data: performanceData.value.http_response_time.data.length > 0 
+          ? performanceData.value.http_response_time.data 
+          : [performanceData.value.http_response_time.avg || 0],
         smooth: true,
         itemStyle: { color: '#faad14' }
       },
       {
         name: 'API响应时间',
         type: 'line',
-        data: [350, 320, 380, 340, 360, 330, 350],
+        data: performanceData.value.api_response_time.data.length > 0 
+          ? performanceData.value.api_response_time.data 
+          : [performanceData.value.api_response_time.avg || 0],
         smooth: true,
         itemStyle: { color: '#722ed1' }
       }
@@ -493,6 +581,21 @@ const initPacketLossChart = () => {
   if (!packetLossChart.value) return
   
   packetLossChartInstance = echarts.init(packetLossChart.value)
+  
+  // 生成时间轴数据，如果没有数据则使用默认时间点
+  const timeLabels = trendXAxis.value.length > 0 
+    ? trendXAxis.value.map(time => {
+        const date = new Date(time)
+        return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+      })
+    : ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00']
+  
+  // 动态计算Y轴最大值
+  const maxPacketLoss = Math.max(
+    ...performanceData.value.ping_packet_loss.data,
+    performanceData.value.ping_packet_loss.max || 0
+  )
+  const yAxisMax = Math.max(5, Math.ceil(maxPacketLoss * 1.2))
   
   const option = {
     tooltip: {
@@ -512,12 +615,12 @@ const initPacketLossChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00']
+      data: timeLabels
     },
     yAxis: {
       type: 'value',
       min: 0,
-      max: 5,
+      max: yAxisMax,
       axisLabel: {
         formatter: '{value}%'
       }
@@ -526,7 +629,9 @@ const initPacketLossChart = () => {
       {
         name: 'Ping丢包率',
         type: 'bar',
-        data: [0.5, 0.2, 0.8, 0.3, 0.6, 0.4, 0.5],
+        data: performanceData.value.ping_packet_loss.data.length > 0 
+          ? performanceData.value.ping_packet_loss.data 
+          : [performanceData.value.ping_packet_loss.avg || 0],
         itemStyle: { color: '#ff4d4f' }
       }
     ]
@@ -595,7 +700,7 @@ const handleResize = () => {
 }
 
 onMounted(() => {
-  initAllCharts()
+  refreshData()
   window.addEventListener('resize', handleResize)
 })
 
@@ -665,5 +770,23 @@ onBeforeUnmount(cleanup)
 :deep(.ant-list-item-meta-description) {
   color: rgba(0, 0, 0, 0.45);
   font-size: 12px;
+}
+
+.clickable-list-item {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.clickable-list-item:hover {
+  background-color: #f5f5f5;
+}
+
+.task-name-link {
+  color: #1890ff;
+  transition: color 0.2s;
+}
+
+.task-name-link:hover {
+  color: #40a9ff;
 }
 </style>

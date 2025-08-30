@@ -70,7 +70,7 @@
     
     <!-- 变量编辑模态框 -->
     <a-modal
-      v-model:visible="modalVisible"
+      v-model:open="modalVisible"
       :title="editingVariable ? '编辑变量' : '新增变量'"
       @ok="handleModalOk"
       @cancel="handleModalCancel"

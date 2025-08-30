@@ -26,7 +26,7 @@ def create_app():
             r"/api/*": {
                 "origins": "*",
                 "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-                "allow_headers": ["Content-Type", "Authorization", "x-tenant-id"]
+                "allow_headers": ["Content-Type", "Authorization", "X-Tenant-ID", "x-tenant-id"]
             }
         })
     else:
@@ -35,7 +35,7 @@ def create_app():
             r"/api/*": {
                 "origins": Config.ALLOWED_ORIGINS,
                 "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-                "allow_headers": ["Content-Type", "Authorization", "x-tenant-id"]
+                "allow_headers": ["Content-Type", "Authorization", "X-Tenant-ID", "x-tenant-id"]
             }
         })
     

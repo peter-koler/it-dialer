@@ -91,7 +91,7 @@ export const deleteSystemVariable = (id) => {
 
       <!-- 添加/编辑变量的模态框 -->
       <a-modal
-        v-model:visible="modalVisible"
+        v-model:open="modalVisible"
         :title="modalTitle"
         @ok="handleModalOk"
         @cancel="handleModalCancel"

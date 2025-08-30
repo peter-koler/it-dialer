@@ -61,6 +61,21 @@ class AlertMatcher:
                 except json.JSONDecodeError:
                     details = {}
             
+            # 对于API任务，steps数据可能嵌套在details.details中
+            if task.type == 'api' and isinstance(details, dict):
+                if 'details' in details and isinstance(details['details'], dict):
+                    nested_details = details['details']
+                    if 'steps' in nested_details:
+                        details = nested_details
+                        self.logger.info(f"使用嵌套的details结构，找到 {len(details['steps'])} 个步骤")
+            
+            # 添加调试日志
+            self.logger.info(f"任务类型: {task.type}")
+            self.logger.info(f"details结构: {type(details)}")
+            self.logger.info(f"details中是否包含steps: {'steps' in details}")
+            if 'steps' in details:
+                self.logger.info(f"steps数量: {len(details['steps'])}")
+            
             # 检查API任务的步骤数据
             if task.type == 'api' and 'steps' in details:
                 api_alerts = self._check_api_steps_alerts(
@@ -145,19 +160,26 @@ class AlertMatcher:
         
         # 获取任务配置中的步骤定义
         task_config = task.get_config() or {}
-        api_steps = task_config.get('apiSteps', [])
+        api_steps = task_config.get('steps', [])
+        
+        self.logger.info(f"开始检查API步骤告警 - 步骤数量: {len(steps)}, 配置步骤数量: {len(api_steps)}")
         
         for step in steps:
             step_id = step.get('step_id', '')
+            self.logger.info(f"处理步骤: {step_id}")
             
             # 从任务配置中找到对应的步骤定义
             step_config = None
             for api_step in api_steps:
-                if api_step.get('id') == step_id:
+                config_step_id = api_step.get('step_id')
+                self.logger.info(f"比较步骤ID: 执行结果={step_id}, 配置={config_step_id}")
+                if config_step_id == step_id:
                     step_config = api_step
+                    self.logger.info(f"找到匹配的步骤配置: {step_id}")
                     break
             
             if not step_config:
+                self.logger.info(f"未找到步骤 {step_id} 的配置，跳过告警检查")
                 continue
                 
             # 检查状态码告警

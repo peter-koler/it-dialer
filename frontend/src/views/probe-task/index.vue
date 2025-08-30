@@ -40,10 +40,10 @@
     
     <!-- 任务模态框组件 -->
     <EnhancedTaskModal
-      :visible="modalVisible"
+      :open="modalVisible"
       :editing-task="editingTask"
       :confirm-loading="confirmLoading"
-      @update:visible="handleModalVisibleUpdate"
+      @update:open="handleModalVisibleUpdate"
       @ok="handleModalOk"
       @cancel="handleModalCancel"
     />

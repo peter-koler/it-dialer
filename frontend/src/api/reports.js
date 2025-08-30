@@ -9,6 +9,15 @@ export function getReportList(params) {
   })
 }
 
+// 报表总览（v2）
+export function getReportOverview(params) {
+  return request({
+    url: '/reports/overview',
+    method: 'get',
+    params
+  })
+}
+
 // 创建报表
 export function createReport(data) {
   return request({
@@ -110,5 +119,41 @@ export function toggleSubscriptionStatus(subscriptionId) {
   return request({
     url: `/subscriptions/${subscriptionId}/toggle`,
     method: 'post'
+  })
+}
+
+// 获取TCP专项报表数据
+export function getTcpReport(params) {
+  return request({
+    url: '/reports/tcp',
+    method: 'get',
+    params
+  })
+}
+
+// 获取HTTP专项报表数据
+export function getHttpReport(params) {
+  return request({
+    url: '/reports/http',
+    method: 'get',
+    params
+  })
+}
+
+// 获取API专项报表数据
+export function getApiReport(params) {
+  return request({
+    url: '/reports/api',
+    method: 'get',
+    params
+  })
+}
+
+// 获取Ping专项报表数据
+export function getPingReport(params) {
+  return request({
+    url: '/reports/ping',
+    method: 'get',
+    params
   })
 }

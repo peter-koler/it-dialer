@@ -310,11 +310,11 @@ const saveTask = async () => {
     }
     
     const response = await request.put(`/tasks/${taskId}`, taskData)
-    if (response.data.code === 0) {
+    if (response.code === 0) {
       message.success('任务更新成功')
       router.push('/probe-config/task')
     } else {
-      message.error(response.data.message || '任务更新失败')
+      message.error(response.message || '任务更新失败')
     }
   } catch (error) {
     console.error('更新任务失败:', error)

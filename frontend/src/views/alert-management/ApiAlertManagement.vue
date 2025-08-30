@@ -366,6 +366,12 @@ const formatTime = (time) => {
 const loadAlerts = async () => {
   loading.value = true
   try {
+    // 检查认证状态
+    const token = localStorage.getItem('access_token')
+    const tenant = localStorage.getItem('current_tenant')
+    console.log('认证令牌:', token ? '已存在' : '不存在')
+    console.log('租户信息:', tenant)
+    
     const params = {
       page: pagination.current,
       per_page: pagination.pageSize,
@@ -380,12 +386,61 @@ const loadAlerts = async () => {
       params.end_time = filters.timeRange[1].toISOString()
     }
     
+    console.log('请求参数:', params)
     const response = await getAlerts(params, '/api-alerts')
-    if (response.data.code === 0) {
-      alertList.value = response.data.alerts || response.data.list || []
-      pagination.total = response.data.total || 0
+    console.log('API响应:', response)
+    console.log('响应状态:', response.status)
+    console.log('响应数据结构:', typeof response.data, Object.keys(response.data || {}))
+    
+    // 尝试多种数据结构解析方式
+    let rawList = []
+    let total = 0
+    
+    if (response.data) {
+      // 方式1: response.data.data.list (当前使用的)
+      if (response.data.data && response.data.data.list) {
+        rawList = response.data.data.list
+        total = response.data.data.total || 0
+        console.log('使用数据结构: response.data.data.list')
+      }
+      // 方式2: response.data.list (备用)
+      else if (response.data.list) {
+        rawList = response.data.list
+        total = response.data.total || 0
+        console.log('使用数据结构: response.data.list')
+      }
+      // 方式3: 直接是数组
+      else if (Array.isArray(response.data)) {
+        rawList = response.data
+        total = response.data.length
+        console.log('使用数据结构: response.data (数组)')
+      }
+    }
+    
+    console.log('原始告警数据:', rawList)
+    console.log('原始数据长度:', rawList.length)
+    
+    alertList.value = rawList.map((alert, index) => ({
+      id: alert.id || `alert_${index}`,
+      taskName: alert.task_name || alert.title || '未知任务',
+      triggerTime: alert.trigger_time || alert.created_at || '-',
+      level: alert.alert_level,
+      status: alert.status || 'pending',
+      content: alert.content || alert.title || '-',
+      agent_area: alert.agent_area,
+      alert_type: alert.alert_type,
+      snapshot: alert.snapshot_data
+    }))
+    
+    pagination.total = total
+    console.log('转换后的告警数据:', alertList.value)
+    console.log('告警数据长度:', alertList.value.length)
+    console.log('分页总数:', pagination.total)
+    
+    if (alertList.value.length === 0) {
+      message.warning('当前没有告警数据')
     } else {
-      message.error(response.data.message || '获取告警数据失败')
+      message.success(`成功加载 ${alertList.value.length} 条告警数据`)
     }
   } catch (error) {
     message.error('获取告警数据失败: ' + error.message)

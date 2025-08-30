@@ -113,6 +113,7 @@
           <a-table
             :columns="taskColumns"
             :data-source="taskTableData"
+            :loading="loading"
             :pagination="{
               current: currentPage,
               pageSize: pageSize,
@@ -168,13 +169,16 @@
 <script setup>
 import { ref, onMounted, h, nextTick } from 'vue'
 import { message } from 'ant-design-vue'
+import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
+import { getHttpReport } from '@/api/reports'
+import request from '@/utils/request'
 import {
   SyncOutlined,
   DownloadOutlined,
-  GlobalOutlined,
-  ClockCircleOutlined,
   CheckCircleOutlined,
+  ClockCircleOutlined,
+  GlobalOutlined,
   WarningOutlined
 } from '@ant-design/icons-vue'
 
@@ -183,6 +187,17 @@ const selectedTimeRange = ref('1d')
 const selectedTask = ref('all')
 const selectedStatusCode = ref('all')
 const activePerformanceTab = ref('response-breakdown')
+
+// 加载状态
+const loading = ref(false)
+
+// 图表数据存储
+const chartData = ref({
+  responseTimeTrend: [],
+  statusCodeDistribution: [],
+  taskList: [],
+  performanceMetrics: {}
+})
 
 // 分页
 const currentPage = ref(1)
@@ -204,19 +219,14 @@ let throughputChartInstance = null
 let errorAnalysisChartInstance = null
 
 // HTTP任务列表
-const httpTasks = ref([
-  { id: 1, name: 'HTTP健康检查' },
-  { id: 2, name: 'HTTP API测试' },
-  { id: 3, name: 'HTTP文件下载' },
-  { id: 4, name: 'HTTP登录页面' }
-])
+const httpTasks = ref([])
 
 // HTTP关键指标
 const httpMetrics = ref([
   {
     key: 'successRate',
     title: 'HTTP成功率',
-    value: 92.5,
+    value: 0,
     suffix: '%',
     precision: 1,
     color: '#52c41a',
@@ -225,7 +235,7 @@ const httpMetrics = ref([
   {
     key: 'avgResponseTime',
     title: '平均响应时间',
-    value: 285.6,
+    value: 0,
     suffix: 'ms',
     precision: 1,
     color: '#1890ff',
@@ -234,7 +244,7 @@ const httpMetrics = ref([
   {
     key: 'throughput',
     title: '平均吞吐量',
-    value: 156.8,
+    value: 0,
     suffix: 'req/s',
     precision: 1,
     color: '#722ed1',
@@ -243,13 +253,81 @@ const httpMetrics = ref([
   {
     key: 'errorRate',
     title: 'HTTP错误率',
-    value: 7.5,
+    value: 0,
     suffix: '%',
     precision: 1,
     color: '#ff4d4f',
     icon: WarningOutlined
   }
 ])
+
+// 获取HTTP任务列表
+const fetchHttpTasks = async () => {
+  try {
+    const response = await request.get('/tasks', {
+      params: { task_type: 'http' }
+    })
+    // 处理API返回格式: {code: 0, data: {list: [...], total: N}, message: ""}
+    if (response && response.code === 0 && response.data) {
+      if (Array.isArray(response.data.list)) {
+        // v1 API格式: data.list
+        httpTasks.value = response.data.list.map(task => ({
+          id: task.id,
+          name: task.name
+        }))
+      } else if (Array.isArray(response.data)) {
+        // v2 API格式: data直接是数组
+        httpTasks.value = response.data.map(task => ({
+          id: task.id,
+          name: task.name
+        }))
+      } else {
+        console.warn('HTTP任务数据格式不正确:', response)
+        httpTasks.value = []
+      }
+    } else if (response.data && response.data.tasks && Array.isArray(response.data.tasks)) {
+      // 兼容旧格式 {data: {tasks: [...]}}
+      httpTasks.value = response.data.tasks.map(task => ({
+        id: task.id,
+        name: task.name
+      }))
+    } else {
+      console.warn('HTTP任务数据格式不正确:', response)
+      httpTasks.value = []
+    }
+  } catch (error) {
+    console.error('获取HTTP任务列表失败:', error)
+    message.error('获取HTTP任务列表失败')
+    httpTasks.value = []
+  }
+}
+
+// 获取HTTP指标数据
+const fetchHttpMetrics = async () => {
+  try {
+    const params = {
+      time_range: selectedTimeRange.value
+    }
+    if (selectedTask.value !== 'all') {
+      params.task_id = selectedTask.value
+    }
+    if (selectedStatusCode.value !== 'all') {
+      params.status_code = selectedStatusCode.value
+    }
+    
+    const response = await getHttpReport(params)
+    if (response.data && response.data.metrics) {
+      const metrics = response.data.metrics
+      httpMetrics.value[0].value = metrics.success_rate || 0
+      httpMetrics.value[1].value = metrics.avg_response_time || 0
+      httpMetrics.value[2].value = metrics.throughput || 0
+      httpMetrics.value[3].value = metrics.error_rate || 0
+    }
+  } catch (error) {
+    console.error('获取HTTP指标数据失败:', error)
+    message.error('获取HTTP指标数据失败')
+  }
+}
 
 // 表格列定义
 const taskColumns = [
@@ -312,64 +390,139 @@ const taskColumns = [
 ]
 
 // 表格数据
-const taskTableData = ref([
-  {
-    key: '1',
-    taskName: 'HTTP健康检查',
-    url: 'https://api.example.com/health',
-    method: 'GET',
-    successRate: 97.2,
-    avgResponseTime: 150,
-    mainStatusCode: '200',
-    totalRequests: 2880,
-    lastTestTime: '2024-01-15 14:30:25'
-  },
-  {
-    key: '2',
-    taskName: 'HTTP API测试',
-    url: 'https://api.example.com/v1/users',
-    method: 'POST',
-    successRate: 89.5,
-    avgResponseTime: 320,
-    mainStatusCode: '201',
-    totalRequests: 1440,
-    lastTestTime: '2024-01-15 14:29:45'
-  },
-  {
-    key: '3',
-    taskName: 'HTTP文件下载',
-    url: 'https://cdn.example.com/file.zip',
-    method: 'GET',
-    successRate: 85.3,
-    avgResponseTime: 1200,
-    mainStatusCode: '200',
-    totalRequests: 720,
-    lastTestTime: '2024-01-15 14:28:15'
-  },
-  {
-    key: '4',
-    taskName: 'HTTP登录页面',
-    url: 'https://www.example.com/login',
-    method: 'GET',
-    successRate: 94.8,
-    avgResponseTime: 280,
-    mainStatusCode: '200',
-    totalRequests: 1800,
-    lastTestTime: '2024-01-15 14:27:30'
+const taskTableData = ref([])
+
+// 获取HTTP报表数据
+const fetchHttpReportData = async () => {
+  loading.value = true
+  try {
+    const params = {
+      time_range: selectedTimeRange.value
+    }
+    if (selectedTask.value !== 'all') {
+      params.task_id = selectedTask.value
+    }
+    if (selectedStatusCode.value !== 'all') {
+      params.status_code = selectedStatusCode.value
+    }
+    
+    const response = await request.get('/reports/http', { params })
+    
+    // 处理新的API响应格式 {code: 0, data: {...}}
+    let reportData = null
+    if (response && response.code === 0 && response.data) {
+      reportData = response.data
+    } else if (response && response.data) {
+      // 兼容旧格式
+      reportData = response.data
+    }
+    
+    if (reportData) {
+      const data = reportData
+      
+      // 更新指标数据
+      if (data.metrics) {
+        const metrics = data.metrics
+        httpMetrics.value[0].value = metrics.success_rate || 0
+        httpMetrics.value[1].value = metrics.avg_response_time || 0
+        httpMetrics.value[2].value = metrics.total_requests || 0  // v2 API返回total_requests而不是throughput
+        httpMetrics.value[3].value = metrics.failure_rate || 0   // v2 API返回failure_rate而不是error_rate
+      }
+      
+      // 更新表格数据
+      if (data.task_list) {
+        taskTableData.value = data.task_list.map((task, index) => ({
+          key: task.task_id || index.toString(),
+          taskName: task.task_name || task.name,
+          url: task.target_url || '-',  // v2 API返回target_url
+          method: task.method || 'GET',
+          successRate: task.success_rate || 0,
+          avgResponseTime: task.avg_response_time || 0,
+          mainStatusCode: task.main_status_code || '200',
+          totalRequests: task.total_requests || 0,
+          lastTestTime: task.last_execution_time || '-'  // v2 API返回last_execution_time
+        }))
+        totalTasks.value = taskTableData.value.length
+      }
+      
+      // 更新图表数据
+      updateChartData(data)
+      
+      // 重新初始化图表
+      nextTick(() => {
+        initAllCharts()
+      })
+    } else {
+      console.warn('HTTP报表数据格式不正确:', response)
+    }
+  } catch (error) {
+    console.error('获取HTTP报表数据失败:', error)
+    message.error('获取HTTP报表数据失败')
+  } finally {
+    loading.value = false
   }
-])
+}
+
+// 更新图表数据
+const updateChartData = (data) => {
+  // v2 API返回response_time_trend而不是trend_data
+  if (data.response_time_trend) {
+    chartData.value.responseTimeTrend = data.response_time_trend
+  }
+  // 从response_time_trend中提取状态码分布数据
+  if (data.response_time_trend) {
+    // 简化处理：从趋势数据中生成状态码分布
+    const statusCodes = { '200': 0, '404': 0, '500': 0, 'others': 0 }
+    data.response_time_trend.forEach(item => {
+      statusCodes['200'] += item.success || 0
+      statusCodes['500'] += (item.total - item.success) || 0
+    })
+    chartData.value.statusCodeDistribution = Object.entries(statusCodes).map(([code, count]) => ({
+      status_code: code,
+      count: count
+    }))
+  }
+  if (data.task_list) {
+    chartData.value.taskList = data.task_list
+  }
+  // 从metrics中生成性能指标数据
+  if (data.metrics) {
+    chartData.value.performanceMetrics = {
+      response_time: data.metrics.avg_response_time || 0,
+      success_rate: data.metrics.success_rate || 0,
+      total_requests: data.metrics.total_requests || 0,
+      // 响应时间分解数据
+      responseBreakdown: data.response_breakdown || data.performance_breakdown || [
+        { task_name: '示例任务', dns_time: 10, tcp_time: 20, ssl_time: 30, request_time: 5, wait_time: 100, download_time: 50 }
+      ],
+      // 吞吐量分析数据
+      throughputAnalysis: data.throughput_analysis || (data.response_time_trend || []).map(item => ({
+        time: item.time || item.timestamp,
+        requests_per_second: item.total || 0,
+        responses_per_second: item.success || 0,
+        errors_per_second: (item.total - item.success) || 0
+      })),
+      // 错误分析数据
+      errorAnalysis: data.error_analysis || [
+        { error_type: '连接超时', count: 0 },
+        { error_type: '服务器错误', count: 0 },
+        { error_type: '网络错误', count: 0 }
+      ]
+    }
+  }
+}
 
 // 方法
 const handleTimeRangeChange = (value) => {
-  refreshData()
+  fetchHttpReportData()
 }
 
 const handleTaskChange = (value) => {
-  refreshData()
+  fetchHttpReportData()
 }
 
 const handleStatusCodeChange = (value) => {
-  refreshData()
+  fetchHttpReportData()
 }
 
 const handlePerformanceTabChange = (key) => {
@@ -382,14 +535,11 @@ const handlePerformanceTabChange = (key) => {
 const handleTableChange = (pagination) => {
   currentPage.value = pagination.current
   pageSize.value = pagination.pageSize
-  refreshData()
+  fetchHttpReportData()
 }
 
 const refreshData = async () => {
-  message.loading('正在刷新数据...', 1)
-  // 这里应该调用API获取最新数据
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  initAllCharts()
+  await fetchHttpReportData()
   message.success('数据刷新完成')
 }
 
@@ -403,8 +553,15 @@ const exportReport = async () => {
   }
 }
 
+const router = useRouter()
+
 const viewTaskDetail = (record) => {
-  message.info(`查看任务详情: ${record.taskName}`)
+  // 跳转到HTTP任务结果列表页面
+  if (record.key) {
+    router.push(`/task-management/http-result/${record.key}`)
+  } else {
+    message.error('任务ID不存在，无法查看详情')
+  }
 }
 
 const viewTaskTrend = (record) => {
@@ -425,11 +582,41 @@ const initResponseTimeChart = () => {
   
   responseTimeChartInstance = echarts.init(responseTimeChart.value)
   
+  const trendData = chartData.value.responseTimeTrend || []
+  
+  if (trendData.length === 0) {
+    const option = {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'center',
+        textStyle: {
+          color: '#999',
+          fontSize: 14
+        }
+      }
+    }
+    responseTimeChartInstance.setOption(option)
+    return
+  }
+  
+  const timeLabels = trendData.map(item => item.time_label || item.time)
+  const avgResponseTimes = trendData.map(item => item.avg_response_time || 0)
+  const p95ResponseTimes = trendData.map(item => item.p95_response_time || 0)
+  const p99ResponseTimes = trendData.map(item => item.p99_response_time || 0)
+  
   const option = {
     tooltip: {
       trigger: 'axis',
       axisPointer: {
         type: 'cross'
+      },
+      formatter: function(params) {
+        let result = params[0].axisValue + '<br/>'
+        params.forEach(param => {
+          result += param.marker + param.seriesName + ': ' + param.value + 'ms<br/>'
+        })
+        return result
       }
     },
     legend: {
@@ -443,7 +630,7 @@ const initResponseTimeChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00']
+      data: timeLabels
     },
     yAxis: {
       type: 'value',
@@ -455,7 +642,7 @@ const initResponseTimeChart = () => {
       {
         name: '平均响应时间',
         type: 'line',
-        data: [280, 250, 320, 300, 350, 290, 270],
+        data: avgResponseTimes,
         smooth: true,
         itemStyle: { color: '#1890ff' },
         areaStyle: {
@@ -475,7 +662,7 @@ const initResponseTimeChart = () => {
       {
         name: '95%分位数',
         type: 'line',
-        data: [450, 420, 520, 480, 580, 460, 440],
+        data: p95ResponseTimes,
         smooth: true,
         itemStyle: { color: '#faad14' },
         lineStyle: { type: 'dashed' }
@@ -483,7 +670,7 @@ const initResponseTimeChart = () => {
       {
         name: '99%分位数',
         type: 'line',
-        data: [680, 650, 780, 720, 850, 690, 670],
+        data: p99ResponseTimes,
         smooth: true,
         itemStyle: { color: '#ff4d4f' },
         lineStyle: { type: 'dashed' }
@@ -500,6 +687,30 @@ const initStatusCodeChart = () => {
   
   statusCodeChartInstance = echarts.init(statusCodeChart.value)
   
+  const statusCodeData = chartData.value.statusCodeDistribution || []
+  
+  if (statusCodeData.length === 0) {
+    const option = {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'center',
+        textStyle: {
+          color: '#999',
+          fontSize: 14
+        }
+      }
+    }
+    statusCodeChartInstance.setOption(option)
+    return
+  }
+  
+  const pieData = statusCodeData.map(item => ({
+    value: item.count || item.value,
+    name: item.status_code || item.name,
+    itemStyle: { color: getStatusCodeColor(item.status_code || item.name) }
+  }))
+  
   const option = {
     tooltip: {
       trigger: 'item',
@@ -514,14 +725,7 @@ const initStatusCodeChart = () => {
         name: 'HTTP状态码',
         type: 'pie',
         radius: '50%',
-        data: [
-          { value: 85, name: '200 OK', itemStyle: { color: '#52c41a' } },
-          { value: 5, name: '201 Created', itemStyle: { color: '#1890ff' } },
-          { value: 3, name: '301 Moved', itemStyle: { color: '#722ed1' } },
-          { value: 4, name: '404 Not Found', itemStyle: { color: '#faad14' } },
-          { value: 2, name: '500 Server Error', itemStyle: { color: '#ff4d4f' } },
-          { value: 1, name: '其他', itemStyle: { color: '#d9d9d9' } }
-        ],
+        data: pieData,
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
@@ -555,7 +759,39 @@ const initPerformanceChart = (type) => {
 const initResponseBreakdownChart = () => {
   if (!responseBreakdownChart.value) return
   
+  // 销毁已存在的实例
+  if (responseBreakdownChartInstance) {
+    responseBreakdownChartInstance.dispose()
+    responseBreakdownChartInstance = null
+  }
+  
   responseBreakdownChartInstance = echarts.init(responseBreakdownChart.value)
+  
+  // 检查数据是否存在
+  const breakdownData = chartData.value.performanceMetrics?.responseBreakdown || []
+  if (!breakdownData.length) {
+    const option = {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'center',
+        textStyle: {
+          color: '#999',
+          fontSize: 14
+        }
+      }
+    }
+    responseBreakdownChartInstance.setOption(option)
+    return
+  }
+  
+  const taskNames = breakdownData.map(item => item.task_name || item.name)
+  const dnsData = breakdownData.map(item => item.dns_time || 0)
+  const tcpData = breakdownData.map(item => item.tcp_time || 0)
+  const sslData = breakdownData.map(item => item.ssl_time || 0)
+  const requestData = breakdownData.map(item => item.request_time || 0)
+  const waitData = breakdownData.map(item => item.wait_time || 0)
+  const downloadData = breakdownData.map(item => item.download_time || 0)
   
   const option = {
     tooltip: {
@@ -575,7 +811,7 @@ const initResponseBreakdownChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['健康检查', 'API测试', '文件下载', '登录页面']
+      data: taskNames
     },
     yAxis: {
       type: 'value',
@@ -588,42 +824,42 @@ const initResponseBreakdownChart = () => {
         name: 'DNS解析',
         type: 'bar',
         stack: 'total',
-        data: [15, 18, 12, 16],
+        data: dnsData,
         itemStyle: { color: '#ff7a45' }
       },
       {
         name: 'TCP连接',
         type: 'bar',
         stack: 'total',
-        data: [25, 30, 28, 26],
+        data: tcpData,
         itemStyle: { color: '#1890ff' }
       },
       {
         name: 'SSL握手',
         type: 'bar',
         stack: 'total',
-        data: [35, 40, 38, 36],
+        data: sslData,
         itemStyle: { color: '#722ed1' }
       },
       {
         name: '请求发送',
         type: 'bar',
         stack: 'total',
-        data: [5, 8, 6, 7],
+        data: requestData,
         itemStyle: { color: '#faad14' }
       },
       {
         name: '等待响应',
         type: 'bar',
         stack: 'total',
-        data: [45, 120, 800, 150],
+        data: waitData,
         itemStyle: { color: '#52c41a' }
       },
       {
         name: '内容下载',
         type: 'bar',
         stack: 'total',
-        data: [25, 104, 318, 45],
+        data: downloadData,
         itemStyle: { color: '#13c2c2' }
       }
     ]
@@ -636,7 +872,36 @@ const initResponseBreakdownChart = () => {
 const initThroughputChart = () => {
   if (!throughputChart.value) return
   
+  // 销毁已存在的实例
+  if (throughputChartInstance) {
+    throughputChartInstance.dispose()
+    throughputChartInstance = null
+  }
+  
   throughputChartInstance = echarts.init(throughputChart.value)
+  
+  // 检查数据是否存在
+  const throughputData = chartData.value.performanceMetrics?.throughputAnalysis || []
+  if (!throughputData.length) {
+    const option = {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'center',
+        textStyle: {
+          color: '#999',
+          fontSize: 14
+        }
+      }
+    }
+    throughputChartInstance.setOption(option)
+    return
+  }
+  
+  const timeLabels = throughputData.map(item => item.time || item.timestamp)
+  const requestData = throughputData.map(item => item.requests_per_second || 0)
+  const responseData = throughputData.map(item => item.responses_per_second || 0)
+  const errorData = throughputData.map(item => item.errors_per_second || 0)
   
   const option = {
     tooltip: {
@@ -656,7 +921,7 @@ const initThroughputChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00']
+      data: timeLabels
     },
     yAxis: {
       type: 'value',
@@ -668,21 +933,21 @@ const initThroughputChart = () => {
       {
         name: '请求数/秒',
         type: 'line',
-        data: [150, 120, 180, 200, 220, 160, 140],
+        data: requestData,
         smooth: true,
         itemStyle: { color: '#1890ff' }
       },
       {
         name: '响应数/秒',
         type: 'line',
-        data: [145, 115, 175, 185, 200, 150, 135],
+        data: responseData,
         smooth: true,
         itemStyle: { color: '#52c41a' }
       },
       {
         name: '错误数/秒',
         type: 'line',
-        data: [5, 5, 5, 15, 20, 10, 5],
+        data: errorData,
         smooth: true,
         itemStyle: { color: '#ff4d4f' }
       }
@@ -696,7 +961,40 @@ const initThroughputChart = () => {
 const initErrorAnalysisChart = () => {
   if (!errorAnalysisChart.value) return
   
+  // 销毁已存在的实例
+  if (errorAnalysisChartInstance) {
+    errorAnalysisChartInstance.dispose()
+    errorAnalysisChartInstance = null
+  }
+  
   errorAnalysisChartInstance = echarts.init(errorAnalysisChart.value)
+  
+  // 检查数据是否存在
+  const errorData = chartData.value.performanceMetrics?.errorAnalysis || []
+  if (!errorData.length) {
+    const option = {
+      title: {
+        text: '暂无数据',
+        left: 'center',
+        top: 'center',
+        textStyle: {
+          color: '#999',
+          fontSize: 14
+        }
+      }
+    }
+    errorAnalysisChartInstance.setOption(option)
+    return
+  }
+  
+  const pieData = errorData.map((item, index) => {
+    const colors = ['#ff4d4f', '#faad14', '#ff7a45', '#722ed1', '#eb2f96', '#d9d9d9']
+    return {
+      value: item.count || item.value,
+      name: item.error_type || item.name,
+      itemStyle: { color: colors[index % colors.length] }
+    }
+  })
   
   const option = {
     tooltip: {
@@ -712,14 +1010,7 @@ const initErrorAnalysisChart = () => {
         name: 'HTTP错误类型',
         type: 'pie',
         radius: '50%',
-        data: [
-          { value: 40, name: '连接超时', itemStyle: { color: '#ff4d4f' } },
-          { value: 25, name: '404未找到', itemStyle: { color: '#faad14' } },
-          { value: 15, name: '500服务器错误', itemStyle: { color: '#ff7a45' } },
-          { value: 10, name: '403禁止访问', itemStyle: { color: '#722ed1' } },
-          { value: 6, name: '502网关错误', itemStyle: { color: '#eb2f96' } },
-          { value: 4, name: '其他错误', itemStyle: { color: '#d9d9d9' } }
-        ],
+        data: pieData,
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
@@ -752,8 +1043,9 @@ const handleResize = () => {
   errorAnalysisChartInstance?.resize()
 }
 
-onMounted(() => {
-  initAllCharts()
+onMounted(async () => {
+  await fetchHttpTasks()
+  await fetchHttpReportData()
   window.addEventListener('resize', handleResize)
 })
 

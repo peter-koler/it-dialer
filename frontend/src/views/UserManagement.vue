@@ -19,14 +19,14 @@
     </a-card>
     
     <UserModal 
-      :visible="modalVisible"
+      :open="modalVisible"
       :editing-user="editingUser"
       @ok="handleModalOk"
       @cancel="handleModalCancel"
     />
     
     <ResetPwdModal 
-      :visible="resetPwdModalVisible"
+      :open="resetPwdModalVisible"
       :user="currentUser"
       @ok="handleResetPasswordOk"
       @cancel="handleResetPasswordCancel"

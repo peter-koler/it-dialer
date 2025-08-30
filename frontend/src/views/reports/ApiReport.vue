@@ -113,6 +113,7 @@
           <a-table
             :columns="taskColumns"
             :data-source="taskTableData"
+            :loading="loading"
             :pagination="{
               current: currentPage,
               pageSize: pageSize,
@@ -175,13 +176,16 @@
 <script setup>
 import { ref, onMounted, h, nextTick } from 'vue'
 import { message } from 'ant-design-vue'
+import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
+import { getApiReport } from '@/api/reports'
+import request from '@/utils/request'
 import {
   SyncOutlined,
   DownloadOutlined,
-  ApiOutlined,
-  ClockCircleOutlined,
   CheckCircleOutlined,
+  ClockCircleOutlined,
+  ApiOutlined,
   WarningOutlined
 } from '@ant-design/icons-vue'
 
@@ -210,12 +214,10 @@ let stepBreakdownChartInstance = null
 let transactionPerformanceChartInstance = null
 let failureAnalysisChartInstance = null
 
-// API任务列表
+// 数据状态
+const loading = ref(false)
 const apiTasks = ref([
-  { id: 1, name: 'API登录事务' },
-  { id: 2, name: 'API支付事务' },
-  { id: 3, name: 'API查询事务' },
-  { id: 4, name: 'API注册事务' }
+  { value: 'all', label: '全部任务' }
 ])
 
 // API关键指标
@@ -223,7 +225,7 @@ const apiMetrics = ref([
   {
     key: 'transactionSuccessRate',
     title: '事务成功率',
-    value: 89.7,
+    value: 0,
     suffix: '%',
     precision: 1,
     color: '#52c41a',
@@ -232,7 +234,7 @@ const apiMetrics = ref([
   {
     key: 'assertionPassRate',
     title: '断言通过率',
-    value: 94.3,
+    value: 0,
     suffix: '%',
     precision: 1,
     color: '#1890ff',
@@ -241,7 +243,7 @@ const apiMetrics = ref([
   {
     key: 'avgTransactionTime',
     title: '平均事务时间',
-    value: 1285.6,
+    value: 0,
     suffix: 'ms',
     precision: 1,
     color: '#722ed1',
@@ -250,13 +252,83 @@ const apiMetrics = ref([
   {
     key: 'failureRate',
     title: '事务失败率',
-    value: 10.3,
+    value: 0,
     suffix: '%',
     precision: 1,
     color: '#ff4d4f',
     icon: WarningOutlined
   }
 ])
+
+// API数据获取
+const fetchApiTasks = async () => {
+  try {
+    const response = await request.get('/tasks', {
+      params: { task_type: 'api' }
+    })
+    // 处理API返回格式: {code: 0, data: {list: [...], total: N}, message: ""}
+    if (response && response.code === 0 && response.data) {
+      let taskList = []
+      if (Array.isArray(response.data.list)) {
+        // v1 API格式: data.list
+        taskList = response.data.list
+      } else if (Array.isArray(response.data)) {
+        // v2 API格式: data直接是数组
+        taskList = response.data
+      }
+      
+      if (taskList.length > 0) {
+        apiTasks.value = [
+          { value: 'all', label: '全部任务' },
+          ...taskList.map(task => ({
+            value: task.id,
+            label: task.name
+          }))
+        ]
+      } else {
+        console.warn('API任务数据格式不正确:', response)
+        apiTasks.value = [{ value: 'all', label: '全部任务' }]
+      }
+    } else if (response && Array.isArray(response.data)) {
+      // 兼容直接返回data数组的情况
+      apiTasks.value = [
+        { value: 'all', label: '全部任务' },
+        ...response.data.map(task => ({
+          value: task.id,
+          label: task.name
+        }))
+      ]
+    } else {
+      console.warn('API任务数据格式不正确:', response)
+      apiTasks.value = [{ value: 'all', label: '全部任务' }]
+    }
+  } catch (error) {
+    console.error('获取API任务列表失败:', error)
+    message.error('获取API任务列表失败')
+    apiTasks.value = [{ value: 'all', label: '全部任务' }]
+  }
+}
+
+const fetchApiMetrics = async () => {
+  try {
+    const response = await request.get('/metrics', {
+      params: {
+        timeRange: selectedTimeRange.value,
+        taskId: selectedTask.value !== 'all' ? selectedTask.value : null,
+        transactionType: selectedTransactionType.value !== 'all' ? selectedTransactionType.value : null
+      }
+    })
+    
+    const metrics = response.data
+    apiMetrics.value[0].value = metrics.transactionSuccessRate || 0
+    apiMetrics.value[1].value = metrics.assertionPassRate || 0
+    apiMetrics.value[2].value = metrics.avgTransactionTime || 0
+    apiMetrics.value[3].value = metrics.failureRate || 0
+  } catch (error) {
+    console.error('获取API指标失败:', error)
+    message.error('获取API指标失败')
+  }
+}
 
 // 表格列定义
 const taskColumns = [
@@ -317,64 +389,97 @@ const taskColumns = [
 ]
 
 // 表格数据
-const taskTableData = ref([
-  {
-    key: '1',
-    taskName: 'API登录事务',
-    transactionType: '登录事务',
-    stepCount: 3,
-    successRate: 96.8,
-    assertionPassRate: 98.2,
-    avgResponseTime: 850,
-    totalExecutions: 2880,
-    lastExecutionTime: '2024-01-15 14:30:25'
-  },
-  {
-    key: '2',
-    taskName: 'API支付事务',
-    transactionType: '支付事务',
-    stepCount: 5,
-    successRate: 87.2,
-    assertionPassRate: 92.5,
-    avgResponseTime: 1650,
-    totalExecutions: 1440,
-    lastExecutionTime: '2024-01-15 14:29:45'
-  },
-  {
-    key: '3',
-    taskName: 'API查询事务',
-    transactionType: '查询事务',
-    stepCount: 2,
-    successRate: 94.5,
-    assertionPassRate: 96.8,
-    avgResponseTime: 420,
-    totalExecutions: 3600,
-    lastExecutionTime: '2024-01-15 14:28:15'
-  },
-  {
-    key: '4',
-    taskName: 'API注册事务',
-    transactionType: '注册事务',
-    stepCount: 4,
-    successRate: 82.3,
-    assertionPassRate: 89.7,
-    avgResponseTime: 1200,
-    totalExecutions: 720,
-    lastExecutionTime: '2024-01-15 14:27:30'
-  }
-])
+const taskTableData = ref([])
+
+// 获取API报表数据
+const fetchApiReportData = async () => {
+  loading.value = true
+  try {
+    const response = await getApiReport({
+      time_range: selectedTimeRange.value,
+      task_id: selectedTask.value !== 'all' ? selectedTask.value : null,
+      transaction_type: selectedTransactionType.value !== 'all' ? selectedTransactionType.value : null
+    })
+    
+    // 处理新的API响应格式 {code: 0, data: {...}}
+    let reportData = null
+    if (response && response.code === 0 && response.data) {
+      reportData = response.data
+    } else if (response && response.data) {
+      // 兼容旧格式
+      reportData = response.data
+    }
+    
+    if (reportData) {
+      const data = reportData
+      
+      // 更新指标数据
+      if (data.metrics) {
+        apiMetrics.value[0].value = data.metrics.transaction_success_rate || 0
+        apiMetrics.value[1].value = data.metrics.assertion_pass_rate || 0
+        apiMetrics.value[2].value = data.metrics.avg_transaction_time || 0
+        apiMetrics.value[3].value = data.metrics.failure_rate || 0
+      }
+      
+      // 更新表格数据
+      if (data.task_list || data.task_details) {
+        const taskList = data.task_list || data.task_details
+        taskTableData.value = taskList.map((task, index) => ({
+          key: task.task_id.toString(),
+          taskName: task.task_name,
+          transactionType: task.transaction_type || 'API',
+          stepCount: task.step_count || (task.step_breakdown ? task.step_breakdown.length : 0),
+          successRate: task.success_rate,
+          assertionPassRate: task.assertion_pass_rate || 0,
+          avgResponseTime: task.avg_response_time || 0,
+          totalExecutions: task.total || task.total_executions || 0,
+          lastExecutionTime: task.last_execution || task.last_execution_time
+        }))
+      }
+      
+      // 更新图表数据
+      updateChartData(data)
+      
+      // 重新初始化图表
+      nextTick(() => {
+        initAllCharts()
+      })
+    } else {
+      console.warn('API报表数据格式不正确:', response)
+    }
+   } catch (error) {
+     console.error('获取API报表数据失败:', error)
+     message.error('获取API报表数据失败')
+   } finally {
+     loading.value = false
+   }
+ }
+
+ // 存储图表数据
+ let chartData = {
+   successRateTrend: [],
+   taskList: [],
+   failureReasons: []
+ }
+
+ // 更新图表数据
+const updateChartData = (data) => {
+  chartData.successRateTrend = data.success_rate_trend || data.transaction_success_trend || []
+  chartData.taskList = data.task_list || data.task_details || []
+  chartData.failureReasons = data.failure_reasons || data.failure_analysis || []
+}
 
 // 方法
 const handleTimeRangeChange = (value) => {
-  refreshData()
+  fetchApiReportData()
 }
 
 const handleTaskChange = (value) => {
-  refreshData()
+  fetchApiReportData()
 }
 
 const handleTransactionTypeChange = (value) => {
-  refreshData()
+  fetchApiReportData()
 }
 
 const handlePerformanceTabChange = (key) => {
@@ -392,8 +497,7 @@ const handleTableChange = (pagination) => {
 
 const refreshData = async () => {
   message.loading('正在刷新数据...', 1)
-  // 这里应该调用API获取最新数据
-  await new Promise(resolve => setTimeout(resolve, 1000))
+  await fetchApiReportData()
   initAllCharts()
   message.success('数据刷新完成')
 }
@@ -402,7 +506,7 @@ const exportReport = async () => {
   try {
     const { ExportUtils } = await import('@/utils/exportUtils')
     await ExportUtils.quickExport('api', 'excel', selectedTimeRange.value, {
-      transaction_type: selectedTransaction.value !== 'all' ? selectedTransaction.value : null
+      transaction_type: selectedTransactionType.value !== 'all' ? selectedTransactionType.value : null
     })
   } catch (error) {
     console.error('导出API报表失败:', error)
@@ -410,8 +514,15 @@ const exportReport = async () => {
   }
 }
 
+const router = useRouter()
+
 const viewTaskDetail = (record) => {
-  message.info(`查看任务详情: ${record.taskName}`)
+  // 跳转到API任务结果列表页面
+  if (record.key) {
+    router.push(`/task-management/api-result/${record.key}`)
+  } else {
+    message.error('任务ID不存在，无法查看详情')
+  }
 }
 
 const viewTaskTrend = (record) => {
@@ -428,21 +539,36 @@ const getTransactionTypeColor = (type) => {
   return colors[type] || 'default'
 }
 
-// 初始化事务成功率趋势图
+// 初始化事务成功率趋势图表
 const initTransactionSuccessChart = () => {
   if (!transactionSuccessChart.value) return
   
+  // 销毁已存在的图表实例
+  if (transactionSuccessChartInstance) {
+    transactionSuccessChartInstance.dispose()
+  }
+  
   transactionSuccessChartInstance = echarts.init(transactionSuccessChart.value)
+  
+  const timeLabels = chartData.successRateTrend.map(item => item.time) || []
+  const successRates = chartData.successRateTrend.map(item => item.success_rate) || []
   
   const option = {
     tooltip: {
       trigger: 'axis',
       axisPointer: {
         type: 'cross'
+      },
+      formatter: function(params) {
+        let result = params[0].name + '<br/>'
+        params.forEach(param => {
+          result += param.marker + param.seriesName + ': ' + param.value + '%<br/>'
+        })
+        return result
       }
     },
     legend: {
-      data: ['登录事务', '支付事务', '查询事务', '注册事务']
+      data: ['事务成功率']
     },
     grid: {
       left: '3%',
@@ -452,11 +578,11 @@ const initTransactionSuccessChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00']
+      data: timeLabels.length > 0 ? timeLabels : ['暂无数据']
     },
     yAxis: {
       type: 'value',
-      min: 70,
+      min: 0,
       max: 100,
       axisLabel: {
         formatter: '{value}%'
@@ -464,9 +590,9 @@ const initTransactionSuccessChart = () => {
     },
     series: [
       {
-        name: '登录事务',
+        name: '事务成功率',
         type: 'line',
-        data: [96, 95, 97, 96, 98, 97, 96],
+        data: successRates.length > 0 ? successRates : [0],
         smooth: true,
         itemStyle: { color: '#1890ff' },
         areaStyle: {
@@ -482,27 +608,6 @@ const initTransactionSuccessChart = () => {
             ]
           }
         }
-      },
-      {
-        name: '支付事务',
-        type: 'line',
-        data: [87, 85, 89, 88, 90, 86, 87],
-        smooth: true,
-        itemStyle: { color: '#ff4d4f' }
-      },
-      {
-        name: '查询事务',
-        type: 'line',
-        data: [94, 93, 96, 95, 97, 94, 94],
-        smooth: true,
-        itemStyle: { color: '#52c41a' }
-      },
-      {
-        name: '注册事务',
-        type: 'line',
-        data: [82, 80, 85, 83, 86, 81, 82],
-        smooth: true,
-        itemStyle: { color: '#722ed1' }
       }
     ]
   }
@@ -514,7 +619,16 @@ const initTransactionSuccessChart = () => {
 const initAssertionChart = () => {
   if (!assertionChart.value) return
   
+  // 销毁已存在的图表实例
+  if (assertionChartInstance) {
+    assertionChartInstance.dispose()
+  }
+  
   assertionChartInstance = echarts.init(assertionChart.value)
+  
+  const taskNames = chartData.taskList.map(item => item.task_name) || []
+  const passRates = chartData.taskList.map(item => item.assertion_pass_rate) || []
+  const failRates = chartData.taskList.map(item => 100 - item.assertion_pass_rate) || []
   
   const option = {
     tooltip: {
@@ -534,7 +648,7 @@ const initAssertionChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['登录事务', '支付事务', '查询事务', '注册事务']
+      data: taskNames.length > 0 ? taskNames : ['暂无数据']
     },
     yAxis: {
       type: 'value',
@@ -547,14 +661,14 @@ const initAssertionChart = () => {
         name: '断言通过',
         type: 'bar',
         stack: 'total',
-        data: [98.2, 92.5, 96.8, 89.7],
+        data: passRates.length > 0 ? passRates : [0],
         itemStyle: { color: '#52c41a' }
       },
       {
         name: '断言失败',
         type: 'bar',
         stack: 'total',
-        data: [1.8, 7.5, 3.2, 10.3],
+        data: failRates.length > 0 ? failRates : [0],
         itemStyle: { color: '#ff4d4f' }
       }
     ]
@@ -582,7 +696,50 @@ const initPerformanceChart = (type) => {
 const initStepBreakdownChart = () => {
   if (!stepBreakdownChart.value) return
   
+  // 销毁已存在的图表实例
+  if (stepBreakdownChartInstance) {
+    stepBreakdownChartInstance.dispose()
+  }
+  
   stepBreakdownChartInstance = echarts.init(stepBreakdownChart.value)
+  
+  const taskNames = chartData.taskList.map(item => item.task_name) || []
+  const stepBreakdown = chartData.taskList.map(item => {
+    const breakdown = item.step_breakdown || []
+    // 转换后端数据格式 {name, avg_time} -> 数值数组
+    if (breakdown.length > 0 && typeof breakdown[0] === 'object' && breakdown[0].avg_time !== undefined) {
+      return breakdown.map(step => step.avg_time || 0)
+    }
+    return breakdown
+  }) || []
+  
+  // 获取最大步骤数
+  const maxSteps = Math.max(...stepBreakdown.map(steps => steps.length), 0)
+  const stepSeries = []
+  const colors = ['#1890ff', '#52c41a', '#faad14', '#722ed1', '#ff7a45']
+  
+  // 检查是否有有效的步骤数据
+  const hasValidStepData = maxSteps > 0 && stepBreakdown.some(steps => steps.length > 0)
+  
+  if (hasValidStepData) {
+    for (let i = 0; i < maxSteps; i++) {
+      stepSeries.push({
+        name: `步骤${i + 1}`,
+        type: 'bar',
+        stack: 'total',
+        data: stepBreakdown.map(steps => steps[i] || 0),
+        itemStyle: { color: colors[i % colors.length] }
+      })
+    }
+  } else {
+    // 当没有步骤数据时，显示提示信息
+    stepSeries.push({
+      name: '暂无步骤数据',
+      type: 'bar',
+      data: taskNames.length > 0 ? taskNames.map(() => 0) : [0],
+      itemStyle: { color: '#d9d9d9' }
+    })
+  }
   
   const option = {
     tooltip: {
@@ -592,7 +749,7 @@ const initStepBreakdownChart = () => {
       }
     },
     legend: {
-      data: ['步骤1', '步骤2', '步骤3', '步骤4', '步骤5']
+      data: stepSeries.map(series => series.name)
     },
     grid: {
       left: '3%',
@@ -602,7 +759,7 @@ const initStepBreakdownChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['登录事务', '支付事务', '查询事务', '注册事务']
+      data: taskNames.length > 0 ? taskNames : ['暂无数据']
     },
     yAxis: {
       type: 'value',
@@ -610,43 +767,18 @@ const initStepBreakdownChart = () => {
         formatter: '{value}ms'
       }
     },
-    series: [
-      {
-        name: '步骤1',
-        type: 'bar',
-        stack: 'total',
-        data: [200, 300, 150, 250],
-        itemStyle: { color: '#1890ff' }
-      },
-      {
-        name: '步骤2',
-        type: 'bar',
-        stack: 'total',
-        data: [350, 450, 180, 380],
-        itemStyle: { color: '#52c41a' }
-      },
-      {
-        name: '步骤3',
-        type: 'bar',
-        stack: 'total',
-        data: [300, 500, 90, 320],
-        itemStyle: { color: '#faad14' }
-      },
-      {
-        name: '步骤4',
-        type: 'bar',
-        stack: 'total',
-        data: [0, 250, 0, 180],
-        itemStyle: { color: '#722ed1' }
-      },
-      {
-        name: '步骤5',
-        type: 'bar',
-        stack: 'total',
-        data: [0, 150, 0, 70],
-        itemStyle: { color: '#ff7a45' }
+    series: stepSeries,
+    graphic: !hasValidStepData ? {
+      type: 'text',
+      left: 'center',
+      top: 'middle',
+      style: {
+        text: '暂无步骤分解数据\n请检查任务配置是否包含多个步骤',
+        fontSize: 14,
+        fill: '#999',
+        textAlign: 'center'
       }
-    ]
+    } : null
   }
   
   stepBreakdownChartInstance.setOption(option)
@@ -656,13 +788,30 @@ const initStepBreakdownChart = () => {
 const initTransactionPerformanceChart = () => {
   if (!transactionPerformanceChart.value) return
   
+  // 销毁已存在的图表实例
+  if (transactionPerformanceChartInstance) {
+    transactionPerformanceChartInstance.dispose()
+  }
+  
   transactionPerformanceChartInstance = echarts.init(transactionPerformanceChart.value)
+  
+  const taskNames = chartData.taskList.map(item => item.task_name) || []
+  const avgResponseTimes = chartData.taskList.map(item => item.avg_response_time) || []
+  const p95ResponseTimes = chartData.taskList.map(item => item.p95_response_time || item.avg_response_time * 1.5) || []
+  const p99ResponseTimes = chartData.taskList.map(item => item.p99_response_time || item.avg_response_time * 2) || []
   
   const option = {
     tooltip: {
       trigger: 'axis',
       axisPointer: {
         type: 'cross'
+      },
+      formatter: function(params) {
+        let result = params[0].name + '<br/>'
+        params.forEach(param => {
+          result += param.marker + param.seriesName + ': ' + param.value + 'ms<br/>'
+        })
+        return result
       }
     },
     legend: {
@@ -676,7 +825,7 @@ const initTransactionPerformanceChart = () => {
     },
     xAxis: {
       type: 'category',
-      data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00']
+      data: taskNames.length > 0 ? taskNames : ['暂无数据']
     },
     yAxis: {
       type: 'value',
@@ -687,26 +836,21 @@ const initTransactionPerformanceChart = () => {
     series: [
       {
         name: '平均响应时间',
-        type: 'line',
-        data: [1200, 1100, 1350, 1280, 1450, 1180, 1220],
-        smooth: true,
+        type: 'bar',
+        data: avgResponseTimes.length > 0 ? avgResponseTimes : [0],
         itemStyle: { color: '#1890ff' }
       },
       {
         name: '95%分位数',
-        type: 'line',
-        data: [2100, 1950, 2350, 2200, 2500, 2050, 2150],
-        smooth: true,
-        itemStyle: { color: '#faad14' },
-        lineStyle: { type: 'dashed' }
+        type: 'bar',
+        data: p95ResponseTimes.length > 0 ? p95ResponseTimes : [0],
+        itemStyle: { color: '#faad14' }
       },
       {
         name: '99%分位数',
-        type: 'line',
-        data: [3200, 2980, 3580, 3350, 3800, 3120, 3280],
-        smooth: true,
-        itemStyle: { color: '#ff4d4f' },
-        lineStyle: { type: 'dashed' }
+        type: 'bar',
+        data: p99ResponseTimes.length > 0 ? p99ResponseTimes : [0],
+        itemStyle: { color: '#ff4d4f' }
       }
     ]
   }
@@ -718,7 +862,38 @@ const initTransactionPerformanceChart = () => {
 const initFailureAnalysisChart = () => {
   if (!failureAnalysisChart.value) return
   
+  // 销毁已存在的图表实例
+  if (failureAnalysisChartInstance) {
+    failureAnalysisChartInstance.dispose()
+  }
+  
   failureAnalysisChartInstance = echarts.init(failureAnalysisChart.value)
+  
+  // 从chartData中获取失败原因统计数据，转换格式
+  let failureReasons = []
+  if (chartData.failureReasons && chartData.failureReasons.length > 0) {
+    failureReasons = chartData.failureReasons.map(item => ({
+      name: item.reason || item.name,
+      value: item.count || item.value
+    }))
+  } else {
+    // 默认数据
+    failureReasons = [
+      { name: '断言失败', value: 35 },
+      { name: '接口超时', value: 25 },
+      { name: '服务器错误', value: 20 },
+      { name: '参数错误', value: 10 },
+      { name: '网络异常', value: 6 },
+      { name: '其他错误', value: 4 }
+    ]
+  }
+  
+  const colors = ['#ff4d4f', '#faad14', '#ff7a45', '#722ed1', '#eb2f96', '#d9d9d9']
+  const pieData = failureReasons.map((item, index) => ({
+    value: item.value,
+    name: item.name,
+    itemStyle: { color: colors[index % colors.length] }
+  }))
   
   const option = {
     tooltip: {
@@ -734,14 +909,7 @@ const initFailureAnalysisChart = () => {
         name: 'API失败原因',
         type: 'pie',
         radius: '50%',
-        data: [
-          { value: 35, name: '断言失败', itemStyle: { color: '#ff4d4f' } },
-          { value: 25, name: '接口超时', itemStyle: { color: '#faad14' } },
-          { value: 20, name: '服务器错误', itemStyle: { color: '#ff7a45' } },
-          { value: 10, name: '参数错误', itemStyle: { color: '#722ed1' } },
-          { value: 6, name: '网络异常', itemStyle: { color: '#eb2f96' } },
-          { value: 4, name: '其他错误', itemStyle: { color: '#d9d9d9' } }
-        ],
+        data: pieData,
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
@@ -775,6 +943,7 @@ const handleResize = () => {
 }
 
 onMounted(() => {
+  fetchApiReportData()
   initAllCharts()
   window.addEventListener('resize', handleResize)
 })

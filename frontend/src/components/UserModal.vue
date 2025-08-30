@@ -1,7 +1,7 @@
 <template>
   <a-modal
-    :visible="visible"
-    :title="editingUser ? '编辑用户' : '新增用户'"
+    :open="visible"
+    :title="user ? '编辑用户' : '新增用户'"
     @ok="handleOk"
     @cancel="handleCancel"
   >

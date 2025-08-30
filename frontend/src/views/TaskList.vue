@@ -142,7 +142,7 @@ onMounted(() => {
 
     <!-- 详情模态框 -->
     <a-modal
-      v-model:visible="detailModalVisible"
+      v-model:open="detailModalVisible"
       title="任务详情"
       width="90%"
       @cancel="handleDetailCancel"
@@ -226,7 +226,7 @@ onMounted(() => {
 
     <!-- 拨测点详情模态框 -->
     <a-modal
-      v-model:visible="probeDetailVisible"
+      v-model:open="probeDetailVisible"
       :title="`拨测点详情 - ${selectedProbe?.location || ''}`"
       width="80%"
       @cancel="handleProbeDetailCancel"

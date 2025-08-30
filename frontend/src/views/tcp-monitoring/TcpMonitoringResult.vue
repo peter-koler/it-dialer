@@ -390,7 +390,7 @@ const fetchTaskDetails = async () => {
   try {
     const response = await getTask(taskId)
     
-    if (response && response.data.code === 0) {
+    if (response && response.code === 0) {
       task.value = response.data
     } else {
       console.warn('未获取到任务详情数据')

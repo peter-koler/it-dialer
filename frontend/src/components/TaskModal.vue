@@ -1,6 +1,6 @@
 <template>
   <a-modal
-    v-model:visible="modalVisible"
+    v-model:open="modalVisible"
     :title="editingTask ? '编辑任务' : '新增任务'"
     @ok="handleModalOk"
     @cancel="handleModalCancel"

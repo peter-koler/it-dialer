@@ -3,7 +3,10 @@ import axios from 'axios'
 // 需要使用v2 API的路径列表（支持租户隔离的功能）
 const V2_API_PATHS = [
   '/tasks',           // 拨测任务列表查询
-  '/tenants'          // 租户相关API
+  '/tenants',          // 租户相关API
+  '/reports',          // 报表相关API（总览、专项报表）
+  '/results',          // 结果数据API（支持租户隔离）
+  '/api-alerts'        // API告警管理（支持租户隔离）
 ]
 
 // API版本选择函数
