@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>报表总览API调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #1890ff;
+        }
+        button {
+            background: #1890ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #40a9ff;
+        }
+        .log-area {
+            background: #f6f6f6;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .success { color: #52c41a; }
+        .error { color: #ff4d4f; }
+        .info { color: #1890ff; }
+        .warning { color: #faad14; }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #e8e8e8;
+            padding: 8px;
+            text-align: left;
+        }
+        .data-table th {
+            background: #fafafa;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>报表总览API调试工具</h1>
+        <p>用于调试报表总览页面性能数据显示问题</p>
+
+        <!-- 登录测试 -->
+        <div class="test-section">
+            <h3>1. 登录测试</h3>
+            <button onclick="testLogin()">测试登录</button>
+            <div id="loginLog" class="log-area"></div>
+        </div>
+
+        <!-- 报表总览API测试 -->
+        <div class="test-section">
+            <h3>2. 报表总览API测试</h3>
+            <label>时间范围：</label>
+            <select id="timeRange">
+                <option value="1h">1小时</option>
+                <option value="1d" selected>1天</option>
+                <option value="7d">7天</option>
+                <option value="30d">30天</option>
+            </select>
+            <button onclick="testReportOverview()">测试报表总览API</button>
+            <div id="reportLog" class="log-area"></div>
+        </div>
+
+        <!-- 性能数据分析 -->
+        <div class="test-section">
+            <h3>3. 性能数据结构分析</h3>
+            <div id="performanceAnalysis"></div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = null;
+        let tenantId = null;
+
+        function log(elementId, message, type = 'info') {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type;
+            logElement.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearLog(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        // 测试登录
+        async function testLogin() {
+            clearLog('loginLog');
+            log('loginLog', '开始登录测试...', 'info');
+            
+            try {
+                const response = await fetch('http://localhost:5001/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'ceshi2',
+                        password: '123456'
+                    })
+                });
+
+                const data = await response.json();
+                log('loginLog', `登录响应: ${JSON.stringify(data, null, 2)}`, 'info');
+
+                if (data.code === 0 && data.data) {
+                    authToken = data.data.access_token;
+                    tenantId = data.data.tenant_id;
+                    log('loginLog', '登录成功！', 'success');
+                    log('loginLog', `Token: ${authToken}`, 'success');
+                    log('loginLog', `Tenant ID: ${tenantId}`, 'success');
+                } else {
+                    log('loginLog', `登录失败: ${data.message || '未知错误'}`, 'error');
+                }
+            } catch (error) {
+                log('loginLog', `登录请求失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 测试报表总览API
+        async function testReportOverview() {
+            clearLog('reportLog');
+            
+            if (!authToken) {
+                log('reportLog', '请先登录！', 'error');
+                return;
+            }
+
+            const timeRange = document.getElementById('timeRange').value;
+            log('reportLog', `开始测试报表总览API (时间范围: ${timeRange})...`, 'info');
+            
+            try {
+                const response = await fetch(`http://localhost:5001/v2/reports/overview?time_range=${timeRange}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'X-Tenant-ID': tenantId,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                log('reportLog', `API响应状态: ${response.status}`, 'info');
+                log('reportLog', `完整响应数据: ${JSON.stringify(data, null, 2)}`, 'info');
+
+                if (data.code === 0 && data.data) {
+                    log('reportLog', '报表总览API调用成功！', 'success');
+                    analyzePerformanceData(data.data);
+                } else {
+                    log('reportLog', `API调用失败: ${data.message || '未知错误'}`, 'error');
+                }
+            } catch (error) {
+                log('reportLog', `API请求失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 分析性能数据结构
+        function analyzePerformanceData(data) {
+            const analysisDiv = document.getElementById('performanceAnalysis');
+            let html = '<h4>性能数据结构分析</h4>';
+            
+            // 检查performance_stats字段
+            if (data.performance_stats) {
+                html += '<h5 class="success">✓ performance_stats 字段存在</h5>';
+                html += `<pre>${JSON.stringify(data.performance_stats, null, 2)}</pre>`;
+                
+                const perfStats = data.performance_stats;
+                
+                // 检查response_time_stats
+                if (perfStats.response_time_stats) {
+                    html += '<h5 class="success">✓ response_time_stats 字段存在</h5>';
+                    html += '<table class="data-table">';
+                    html += '<tr><th>指标</th><th>数据</th><th>格式</th><th>状态</th></tr>';
+                    
+                    const responseStats = perfStats.response_time_stats;
+                    ['tcp_connect', 'ping_latency', 'http_response', 'api_response'].forEach(key => {
+                        const value = responseStats[key];
+                        const isArray = Array.isArray(value);
+                        const hasThreeElements = isArray && value.length >= 3;
+                        const status = hasThreeElements ? '✓ 正常' : '✗ 异常';
+                        const statusClass = hasThreeElements ? 'success' : 'error';
+                        
+                        html += `<tr>`;
+                        html += `<td>${key}</td>`;
+                        html += `<td>${JSON.stringify(value)}</td>`;
+                        html += `<td>${isArray ? `数组[${value.length}]` : typeof value}</td>`;
+                        html += `<td class="${statusClass}">${status}</td>`;
+                        html += `</tr>`;
+                    });
+                    html += '</table>';
+                } else {
+                    html += '<h5 class="error">✗ response_time_stats 字段不存在</h5>';
+                }
+                
+                // 检查packet_loss_stats
+                if (perfStats.packet_loss_stats) {
+                    html += '<h5 class="success">✓ packet_loss_stats 字段存在</h5>';
+                    html += '<table class="data-table">';
+                    html += '<tr><th>指标</th><th>数据</th><th>格式</th><th>状态</th></tr>';
+                    
+                    const packetStats = perfStats.packet_loss_stats;
+                    ['ping_packet_loss'].forEach(key => {
+                        const value = packetStats[key];
+                        const isArray = Array.isArray(value);
+                        const hasThreeElements = isArray && value.length >= 3;
+                        const status = hasThreeElements ? '✓ 正常' : '✗ 异常';
+                        const statusClass = hasThreeElements ? 'success' : 'error';
+                        
+                        html += `<tr>`;
+                        html += `<td>${key}</td>`;
+                        html += `<td>${JSON.stringify(value)}</td>`;
+                        html += `<td>${isArray ? `数组[${value.length}]` : typeof value}</td>`;
+                        html += `<td class="${statusClass}">${status}</td>`;
+                        html += `</tr>`;
+                    });
+                    html += '</table>';
+                } else {
+                    html += '<h5 class="error">✗ packet_loss_stats 字段不存在</h5>';
+                }
+            } else {
+                html += '<h5 class="error">✗ performance_stats 字段不存在</h5>';
+                html += '<p class="warning">这可能是导致延迟性能对比面板没有数据的原因！</p>';
+            }
+            
+            // 显示其他可用字段
+            html += '<h5>其他可用字段:</h5>';
+            html += '<ul>';
+            Object.keys(data).forEach(key => {
+                if (key !== 'performance_stats') {
+                    html += `<li><strong>${key}</strong>: ${typeof data[key]}</li>`;
+                }
+            });
+            html += '</ul>';
+            
+            analysisDiv.innerHTML = html;
+        }
+
+        // 页面加载完成后自动登录
+        window.onload = function() {
+            setTimeout(testLogin, 500);
+        };
+    </script>
+</body>
+</html>

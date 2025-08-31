@@ -43,14 +43,18 @@ def _format_time_label(dt: datetime, time_range: str) -> str:
 def _calculate_performance_stats(tenant_id: str, start_time: datetime, end_time: datetime):
     """计算性能指标统计"""
     try:
+        # 计算时间间隔
+        time_range = request.args.get('time_range', '1d', type=str)
+        _, _, interval = _calc_time_range(time_range)
+        
         # 查询所有结果数据
         results = db.session.query(Result, Task.type).join(
             Task, Result.task_id == Task.id
         ).filter(
             Task.tenant_id == tenant_id,
             Result.created_at >= start_time,
-            Result.created_at <= end_time,
-            Result.status == 'success'  # 只统计成功的结果
+            Result.created_at <= end_time
+            # 移除status过滤，包含所有结果来统计丢包率
         ).all()
         
         # 初始化统计数据
@@ -59,6 +63,9 @@ def _calculate_performance_stats(tenant_id: str, start_time: datetime, end_time:
         http_times = []
         api_times = []
         packet_losses = []
+        
+        # 按时间分组的丢包率数据
+        time_grouped_packet_loss = {}
         
         # 解析每个结果的details字段
         for result, task_type in results:
@@ -70,33 +77,48 @@ def _calculate_performance_stats(tenant_id: str, start_time: datetime, end_time:
                 
                 # 根据任务类型提取相应的性能指标
                 if task_type == 'tcp':
-                    # TCP连接时间
-                    connect_time = details.get('connect_time') or details.get('response_time') or result.response_time
-                    if connect_time and connect_time > 0:
-                        tcp_times.append(float(connect_time))
+                    # TCP连接时间 - 只统计成功的结果
+                    if result.status == 'success':
+                        connect_time = details.get('connect_time') or details.get('response_time') or result.response_time
+                        if connect_time and connect_time > 0:
+                            tcp_times.append(float(connect_time))
                         
                 elif task_type == 'ping':
-                    # Ping延迟时间
-                    rtt_avg = details.get('rtt_avg') or details.get('execution_time') or result.response_time
-                    if rtt_avg and rtt_avg > 0:
-                        ping_times.append(float(rtt_avg))
+                    # Ping延迟时间 - 只统计成功的结果
+                    if result.status == 'success':
+                        rtt_avg = details.get('rtt_avg') or details.get('execution_time') or result.response_time
+                        if rtt_avg and rtt_avg > 0:
+                            ping_times.append(float(rtt_avg))
                     
-                    # 丢包率
+                    # 丢包率 - 统计所有结果（包括失败的）
                     packet_loss = details.get('packet_loss')
                     if packet_loss is not None:
                         packet_losses.append(float(packet_loss))
+                        # 按时间分组 - 将结果时间对齐到时间间隔
+                        result_time = result.created_at
+                        # 计算该结果应该归属的时间段
+                        time_diff = result_time - start_time
+                        interval_count = int(time_diff.total_seconds() // interval.total_seconds())
+                        aligned_time = start_time + interval * interval_count
+                        time_key = _format_time_label(aligned_time, time_range)
+                        
+                        if time_key not in time_grouped_packet_loss:
+                            time_grouped_packet_loss[time_key] = []
+                        time_grouped_packet_loss[time_key].append(float(packet_loss))
                         
                 elif task_type == 'http':
-                    # HTTP响应时间
-                    response_time = details.get('response_time') or result.response_time
-                    if response_time and response_time > 0:
-                        http_times.append(float(response_time))
+                    # HTTP响应时间 - 只统计成功的结果
+                    if result.status == 'success':
+                        response_time = details.get('response_time') or result.response_time
+                        if response_time and response_time > 0:
+                            http_times.append(float(response_time))
                         
                 elif task_type == 'api':
-                    # API响应时间
-                    total_time = details.get('total_time') or details.get('response_time') or result.response_time
-                    if total_time and total_time > 0:
-                        api_times.append(float(total_time))
+                    # API响应时间 - 只统计成功的结果
+                    if result.status == 'success':
+                        total_time = details.get('total_time') or details.get('response_time') or result.response_time
+                        if total_time and total_time > 0:
+                            api_times.append(float(total_time))
                         
             except (json.JSONDecodeError, ValueError, TypeError):
                 continue
@@ -111,8 +133,23 @@ def _calculate_performance_stats(tenant_id: str, start_time: datetime, end_time:
                 round(max(data_list), 2)
             ]
         
-        # 计算平均丢包率
+        # 生成时间序列的丢包率数据
+        packet_loss_time_series = []
+        current = start_time
+        while current < end_time:
+            time_key = _format_time_label(current, time_range)
+            if time_key in time_grouped_packet_loss:
+                # 计算该时间段的平均丢包率
+                avg_loss = sum(time_grouped_packet_loss[time_key]) / len(time_grouped_packet_loss[time_key])
+                packet_loss_time_series.append(round(avg_loss, 2))
+            else:
+                packet_loss_time_series.append(0)
+            current += interval
+        
+        # 计算整体平均丢包率
         avg_packet_loss = round(sum(packet_losses) / len(packet_losses), 2) if packet_losses else 0
+        min_packet_loss = round(min(packet_losses), 2) if packet_losses else 0
+        max_packet_loss = round(max(packet_losses), 2) if packet_losses else 0
         
         return {
             'response_time_stats': {
@@ -122,7 +159,8 @@ def _calculate_performance_stats(tenant_id: str, start_time: datetime, end_time:
                 'api_response': calc_stats(api_times)
             },
             'packet_loss_stats': {
-                'ping_packet_loss': [avg_packet_loss, avg_packet_loss, avg_packet_loss]  # 保持格式一致
+                'ping_packet_loss': [min_packet_loss, avg_packet_loss, max_packet_loss],
+                'ping_packet_loss_data': packet_loss_time_series  # 新增时间序列数据
             }
         }
         
@@ -138,7 +176,8 @@ def _calculate_performance_stats(tenant_id: str, start_time: datetime, end_time:
                 'api_response': [0, 0, 0]
             },
             'packet_loss_stats': {
-                'ping_packet_loss': [0, 0, 0]
+                'ping_packet_loss': [0, 0, 0],
+                'ping_packet_loss_data': []
             }
         }
 
@@ -362,6 +401,173 @@ def get_report_overview_v2():
             'data': None,
             'message': f'获取报表总览数据失败: {str(e)}'
         }), 500
+
+
+def _generate_port_analysis(tenant_id: str, start_time: datetime, end_time: datetime, task_id: int = None, port: str = None):
+    """生成端口分析数据"""
+    try:
+        # 构建基础查询
+        base_query = db.session.query(Result, Task).join(Task, Result.task_id == Task.id).filter(
+            Task.type == 'tcp',
+            Task.tenant_id == tenant_id,
+            Result.created_at >= start_time,
+            Result.created_at <= end_time
+        )
+        
+        if task_id:
+            base_query = base_query.filter(Task.id == task_id)
+        
+        if port:
+            base_query = base_query.filter(Task.target.like(f'%:{port}'))
+        
+        # 调试信息
+        all_results = base_query.all()
+        print(f"Debug TCP Port Analysis: Found {len(all_results)} results for tenant {tenant_id}")
+        for result, task in all_results[:5]:  # 只打印前5个结果
+            print(f"Debug: Task {task.name} ({task.target}) - Status: {result.status}, Details: {result.details}")
+        
+        # 按端口统计数据
+        port_stats = {}
+        error_stats = {}
+        
+        for result, task in base_query.all():
+            # 提取端口号
+            target_port = 'unknown'
+            if ':' in task.target:
+                target_port = task.target.split(':')[-1]
+            
+            if target_port not in port_stats:
+                port_stats[target_port] = {
+                    'total': 0,
+                    'success': 0,
+                    'response_times': []
+                }
+            
+            port_stats[target_port]['total'] += 1
+            
+            if result.status == 'success':
+                port_stats[target_port]['success'] += 1
+                
+                # 提取响应时间
+                if result.details:
+                    try:
+                        details = json.loads(result.details) if isinstance(result.details, str) else result.details
+                        connect_time = details.get('connect_time') or details.get('response_time') or result.response_time
+                        if connect_time and connect_time > 0:
+                            port_stats[target_port]['response_times'].append(float(connect_time))
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+            else:
+                # 统计错误类型
+                error_message = 'Connection Failed'
+                if result.details:
+                    try:
+                        details = json.loads(result.details) if isinstance(result.details, str) else result.details
+                        error_message = details.get('message', 'Connection Failed')
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+                
+                error_type = error_message
+                if 'timeout' in error_type.lower():
+                    error_type = 'Connection Timeout'
+                elif 'refused' in error_type.lower():
+                    error_type = 'Connection Refused'
+                elif 'unreachable' in error_type.lower():
+                    error_type = 'Host Unreachable'
+                else:
+                    error_type = 'Other Error'
+                
+                if error_type not in error_stats:
+                    error_stats[error_type] = 0
+                error_stats[error_type] += 1
+        
+        # 生成端口成功率数据
+        port_success = []
+        for port_num, stats in port_stats.items():
+            success_rate = (stats['success'] / stats['total'] * 100) if stats['total'] > 0 else 0
+            port_success.append({
+                'port': port_num,
+                'success_rate': round(success_rate, 2),
+                'total': stats['total'],
+                'success': stats['success']
+            })
+        
+        # 生成端口响应时间数据
+        port_response = []
+        for port_num, stats in port_stats.items():
+            if stats['response_times']:
+                avg_time = sum(stats['response_times']) / len(stats['response_times'])
+                max_time = max(stats['response_times'])
+                port_response.append({
+                    'port': port_num,
+                    'avg_time': round(avg_time, 2),
+                    'max_time': round(max_time, 2),
+                    'min_time': round(min(stats['response_times']), 2)
+                })
+            else:
+                port_response.append({
+                    'port': port_num,
+                    'avg_time': 0,
+                    'max_time': 0,
+                    'min_time': 0
+                })
+        
+        # 生成错误分析数据
+        error_analysis = []
+        total_errors = sum(error_stats.values())
+        for error_type, count in error_stats.items():
+            percentage = (count / total_errors * 100) if total_errors > 0 else 0
+            error_analysis.append({
+                'name': error_type,
+                'value': count,
+                'percentage': round(percentage, 2)
+            })
+        
+        return {
+            'port_success': port_success,
+            'port_response': port_response,
+            'error_analysis': error_analysis
+        }
+        
+    except Exception as e:
+        print(f'Error generating port analysis: {str(e)}')
+        return {
+            'port_success': [],
+            'port_response': [],
+            'error_analysis': []
+        }
+
+
+def _generate_connection_time_distribution(connection_times: list):
+    """生成连接时间分布数据"""
+    try:
+        if not connection_times:
+            return []
+        
+        # 定义时间范围
+        ranges = [
+            {'range': '0-50ms', 'min': 0, 'max': 50},
+            {'range': '50-100ms', 'min': 50, 'max': 100},
+            {'range': '100-200ms', 'min': 100, 'max': 200},
+            {'range': '200-500ms', 'min': 200, 'max': 500},
+            {'range': '500ms+', 'min': 500, 'max': float('inf')}
+        ]
+        
+        distribution = []
+        for range_info in ranges:
+            count = sum(1 for time in connection_times 
+                       if range_info['min'] <= time < range_info['max'])
+            distribution.append({
+                'range': range_info['range'],
+                'count': count,
+                'percentage': round((count / len(connection_times) * 100), 2) if connection_times else 0
+            })
+        
+        return distribution
+        
+    except Exception as e:
+        print(f'Error generating connection time distribution: {str(e)}')
+        return []
 
 
 @v2_bp.route('/reports/<int:report_id>/export', methods=['POST'])
@@ -647,7 +853,18 @@ def get_api_report_v2():
             task_success_rate = (task_success / task_total * 100) if task_total > 0 else 0
             
             # 计算任务的性能分析数据
-            task_response_times = [r.response_time for r in task_results.all() if r.response_time is not None]
+            task_response_times = []
+            for result in task_results.all():
+                if result.response_time is not None:
+                    task_response_times.append(result.response_time)
+                elif result.details:
+                    try:
+                        details = json.loads(result.details) if isinstance(result.details, str) else result.details
+                        if 'response_time' in details and details['response_time'] is not None:
+                            task_response_times.append(details['response_time'])
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+            
             task_avg_time = sum(task_response_times) / len(task_response_times) if task_response_times else 0
             
             # 计算P95和P99响应时间
@@ -677,8 +894,30 @@ def get_api_report_v2():
                                 task_assertion_passed += 1
                         
                         # 收集步骤分解数据
-                        if 'step_breakdown' in details and isinstance(details['step_breakdown'], list):
-                            step_breakdown_data.extend(details['step_breakdown'])
+                        print(f"Debug: Processing result for task {task.name}, details structure: {type(details)}")
+                        # 检查 details.details.steps 结构
+                        if 'details' in details and isinstance(details['details'], dict):
+                            inner_details = details['details']
+                            print(f"Debug: Found inner_details, checking for steps: {'steps' in inner_details}")
+                            if 'steps' in inner_details and isinstance(inner_details['steps'], list):
+                                print(f"Debug: Found {len(inner_details['steps'])} steps in inner_details")
+                                for step in inner_details['steps']:
+                                    if isinstance(step, dict) and 'name' in step and 'response_time' in step:
+                                        print(f"Debug: Adding step {step['name']} with time {step['response_time']}")
+                                        step_breakdown_data.append({
+                                            'name': step['name'],
+                                            'time': step['response_time']
+                                        })
+                        # 也检查直接的 details.steps 结构（向后兼容）
+                        elif 'steps' in details and isinstance(details['steps'], list):
+                            print(f"Debug: Found {len(details['steps'])} steps in direct details")
+                            for step in details['steps']:
+                                if isinstance(step, dict) and 'name' in step and 'response_time' in step:
+                                    print(f"Debug: Adding step {step['name']} with time {step['response_time']}")
+                                    step_breakdown_data.append({
+                                        'name': step['name'],
+                                        'time': step['response_time']
+                                    })
                     except (json.JSONDecodeError, TypeError):
                         pass
             
@@ -686,6 +925,7 @@ def get_api_report_v2():
             
             # 处理步骤分解数据
             step_summary = []
+            print(f"Debug: Task {task.name} collected step_breakdown_data: {step_breakdown_data}")
             if step_breakdown_data:
                 step_dict = {}
                 for step in step_breakdown_data:
@@ -702,6 +942,7 @@ def get_api_report_v2():
                         'name': step_name,
                         'avg_time': round(avg_time, 2)
                     })
+            print(f"Debug: Task {task.name} final step_summary: {step_summary}")
             
             # 获取最后执行时间
             last_result = task_results.order_by(Result.created_at.desc()).first()
@@ -769,6 +1010,9 @@ def get_api_report_v2():
                 'percentage': round(percentage, 2)
             })
         
+        # 生成性能分析数据
+        performance_analysis = _generate_performance_analysis_v2(task_list)
+        
         return jsonify({
             'code': 0,
             'data': {
@@ -784,6 +1028,7 @@ def get_api_report_v2():
                 'transaction_success_trend': trend_data,
                 'failure_analysis': failure_analysis,
                 'task_details': task_list,
+                'performance_analysis': performance_analysis,
                 'total_tasks': len(task_list)
             },
             'message': 'success'
@@ -797,6 +1042,73 @@ def get_api_report_v2():
             'data': None,
             'message': f'获取API专项报表数据失败: {str(e)}'
         }), 500
+
+
+def _generate_performance_analysis_v2(task_list):
+    """生成API性能分析数据 - v2版本"""
+    if not task_list:
+        return {
+            'step_breakdown': [],
+            'transaction_performance': [],
+            'performance_summary': {
+                'avg_response_time': 0,
+                'p95_response_time': 0,
+                'p99_response_time': 0,
+                'total_transactions': 0
+            }
+        }
+    
+    # 步骤分解数据
+    step_breakdown_data = []
+    transaction_performance_data = []
+    
+    total_avg_time = 0
+    total_p95_time = 0
+    total_p99_time = 0
+    total_transactions = 0
+    
+    for task in task_list:
+        # 步骤分解数据
+        print(f"Debug: Task {task['task_name']} step_breakdown: {task.get('step_breakdown')}")
+        if task.get('step_breakdown'):
+            step_breakdown_data.append({
+                'task_name': task['task_name'],
+                'task_id': task['task_id'],
+                'steps': task['step_breakdown']
+            })
+        
+        # 事务性能对比数据
+        transaction_performance_data.append({
+            'task_name': task['task_name'],
+            'task_id': task['task_id'],
+            'avg_response_time': task.get('avg_response_time', 0),
+            'p95_response_time': task.get('p95_response_time', 0),
+            'p99_response_time': task.get('p99_response_time', 0),
+            'success_rate': task.get('success_rate', 0),
+            'assertion_pass_rate': task.get('assertion_pass_rate', 0),
+            'total_requests': task.get('total_executions', 0)
+        })
+        
+        # 累计统计
+        total_executions = task.get('total_executions', 0)
+        total_avg_time += task.get('avg_response_time', 0) * total_executions
+        total_p95_time += task.get('p95_response_time', 0) * total_executions
+        total_p99_time += task.get('p99_response_time', 0) * total_executions
+        total_transactions += total_executions
+    
+    # 计算总体性能指标
+    performance_summary = {
+        'avg_response_time': round(total_avg_time / total_transactions, 2) if total_transactions > 0 else 0,
+        'p95_response_time': round(total_p95_time / total_transactions, 2) if total_transactions > 0 else 0,
+        'p99_response_time': round(total_p99_time / total_transactions, 2) if total_transactions > 0 else 0,
+        'total_transactions': total_transactions
+    }
+    
+    return {
+        'step_breakdown': step_breakdown_data,
+        'transaction_performance': transaction_performance_data,
+        'performance_summary': performance_summary
+    }
 
 
 @v2_bp.route('/reports/http', methods=['GET'])
@@ -1010,7 +1322,7 @@ def get_ping_report_v2():
             period_success = period_query.filter(Result.status == 'success').count()
             period_rate = (period_success / period_total * 100) if period_total > 0 else 0
             
-            # 计算该时段的平均延迟
+            # 计算该时段的延迟统计
             period_latencies = []
             for result, task in period_query.all():
                 if result.details:
@@ -1023,11 +1335,15 @@ def get_ping_report_v2():
                         pass
             
             period_avg_latency = sum(period_latencies) / len(period_latencies) if period_latencies else 0
+            period_min_latency = min(period_latencies) if period_latencies else 0
+            period_max_latency = max(period_latencies) if period_latencies else 0
             
             trend_data.append({
                 'time': _format_time_label(current, time_range),
                 'success_rate': round(period_rate, 2),
                 'avg_latency': round(period_avg_latency, 2),
+                'min_latency': round(period_min_latency, 2),
+                'max_latency': round(period_max_latency, 2),
                 'total': period_total,
                 'success': period_success
             })
@@ -1080,6 +1396,66 @@ def get_ping_report_v2():
                 'last_execution_time': last_execution
             })
         
+        # 计算延迟分布统计
+        latency_distribution = [
+            {'range': '0-20ms', 'value': 0},
+            {'range': '20-50ms', 'value': 0},
+            {'range': '50-100ms', 'value': 0},
+            {'range': '100-200ms', 'value': 0},
+            {'range': '>200ms', 'value': 0}
+        ]
+        
+        for latency in latencies:
+            if latency <= 20:
+                latency_distribution[0]['value'] += 1
+            elif latency <= 50:
+                latency_distribution[1]['value'] += 1
+            elif latency <= 100:
+                latency_distribution[2]['value'] += 1
+            elif latency <= 200:
+                latency_distribution[3]['value'] += 1
+            else:
+                latency_distribution[4]['value'] += 1
+        
+        # 计算抖动数据（基于延迟变化）
+        jitter_data = []
+        if len(latencies) > 1:
+            for i in range(1, len(latencies)):
+                jitter = abs(latencies[i] - latencies[i-1])
+                jitter_data.append(jitter)
+        
+        avg_jitter = sum(jitter_data) / len(jitter_data) if jitter_data else 0
+        
+        # 地理位置分析数据（基于agent_area）
+        geographic_data = {}
+        for result, task in base_query.all():
+            area = result.agent_area or '未知'
+            if area not in geographic_data:
+                geographic_data[area] = {'latencies': [], 'packet_losses': []}
+            
+            if result.details:
+                try:
+                    details = json.loads(result.details) if isinstance(result.details, str) else result.details
+                    rtt_avg = details.get('rtt_avg') or details.get('execution_time') or result.response_time
+                    if rtt_avg and rtt_avg > 0:
+                        geographic_data[area]['latencies'].append(float(rtt_avg))
+                    
+                    packet_loss = details.get('packet_loss')
+                    if packet_loss is not None:
+                        geographic_data[area]['packet_losses'].append(float(packet_loss))
+                except (json.JSONDecodeError, TypeError):
+                    pass
+        
+        geographic_analysis = []
+        for area, data in geographic_data.items():
+            avg_area_latency = sum(data['latencies']) / len(data['latencies']) if data['latencies'] else 0
+            avg_area_packet_loss = sum(data['packet_losses']) / len(data['packet_losses']) if data['packet_losses'] else 0
+            geographic_analysis.append({
+                'region': area,
+                'avg_latency': round(avg_area_latency, 2),
+                'packet_loss': round(avg_area_packet_loss, 2)
+            })
+        
         return jsonify({
             'code': 0,
             'data': {
@@ -1087,9 +1463,16 @@ def get_ping_report_v2():
                     'success_rate': round(success_rate, 2),
                     'avg_latency': round(avg_latency, 2),
                     'packet_loss_rate': round(packet_loss_rate, 2),
-                    'total_pings': total_pings
+                    'total_pings': total_pings,
+                    'jitter': round(avg_jitter, 2)
                 },
                 'latency_trend': trend_data,
+                'latency_distribution': latency_distribution,
+                'performance_metrics': {
+                    'latency_distribution': latency_distribution,
+                    'jitter_analysis': jitter_data[:50] if jitter_data else [],  # 限制数据量
+                    'geographic_analysis': geographic_analysis
+                },
                 'task_list': task_list,
                 'total_tasks': len(task_list)
             },
@@ -1243,6 +1626,12 @@ def get_tcp_report_v2():
                 'last_execution_time': last_execution
             })
         
+        # 生成端口分析数据
+        port_analysis = _generate_port_analysis(tenant_id, start_time, end_time, task_id, port)
+        
+        # 生成连接时间分布数据
+        connection_time_distribution = _generate_connection_time_distribution(connection_times)
+        
         return jsonify({
             'code': 0,
             'data': {
@@ -1253,6 +1642,8 @@ def get_tcp_report_v2():
                     'failure_rate': round(100 - success_rate, 2)
                 },
                 'connect_time_trend': trend_data,
+                'connection_time_distribution': connection_time_distribution,
+                'port_analysis': port_analysis,
                 'task_list': task_list,
                 'total_tasks': len(task_list)
             },

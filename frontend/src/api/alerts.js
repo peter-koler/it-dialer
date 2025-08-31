@@ -59,7 +59,7 @@ v1Request.interceptors.response.use(
  * @returns {Promise}
  */
 export function getAlerts(params, customUrl = '/alerts') {
-  return request({
+  return v1Request({
     url: customUrl,
     method: 'get',
     params

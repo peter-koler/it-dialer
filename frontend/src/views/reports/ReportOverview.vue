@@ -336,14 +336,22 @@ const refreshData = async () => {
         // 将后端的[min, avg, max]格式转换为前端期望的格式
         const convertStats = (stats) => {
           if (Array.isArray(stats) && stats.length >= 3) {
+            // 生成与时间轴对应的数据点，使用平均值填充
+            const dataPoints = trendXAxis.value.length > 0 
+              ? new Array(trendXAxis.value.length).fill(stats[1] || 0)
+              : [stats[1] || 0]
             return {
               min: stats[0] || 0,
               avg: stats[1] || 0, 
               max: stats[2] || 0,
-              data: [stats[1] || 0] // 使用平均值作为数据点
+              data: dataPoints
             }
           }
-          return { min: 0, avg: 0, max: 0, data: [0] }
+          // 如果没有数据，生成与时间轴对应的零值数据点
+          const zeroPoints = trendXAxis.value.length > 0 
+            ? new Array(trendXAxis.value.length).fill(0)
+            : [0]
+          return { min: 0, avg: 0, max: 0, data: zeroPoints }
         }
         
         performanceData.value = {
@@ -351,8 +359,18 @@ const refreshData = async () => {
           ping_rtt: convertStats(responseStats.ping_latency),
           http_response_time: convertStats(responseStats.http_response),
           api_response_time: convertStats(responseStats.api_response),
-          ping_packet_loss: convertStats(packetStats.ping_packet_loss)
+          ping_packet_loss: {
+            min: packetStats.ping_packet_loss ? packetStats.ping_packet_loss[0] || 0 : 0,
+            avg: packetStats.ping_packet_loss ? packetStats.ping_packet_loss[1] || 0 : 0,
+            max: packetStats.ping_packet_loss ? packetStats.ping_packet_loss[2] || 0 : 0,
+            data: packetStats.ping_packet_loss_data || []
+          }
         }
+        
+        console.log('性能数据处理结果:', performanceData.value)
+        console.log('时间轴数据:', trendXAxis.value)
+        console.log('原始后端数据:', data.performance_stats)
+        console.log('丢包率原始数据:', packetStats.ping_packet_loss)
       }
 
       // 初始化/更新图表
@@ -537,36 +555,28 @@ const initResponseTimeChart = () => {
       {
         name: 'TCP连接时间',
         type: 'line',
-        data: performanceData.value.tcp_connection_time.data.length > 0 
-          ? performanceData.value.tcp_connection_time.data 
-          : [performanceData.value.tcp_connection_time.avg || 0],
+        data: performanceData.value.tcp_connection_time.data || [],
         smooth: true,
         itemStyle: { color: '#1890ff' }
       },
       {
         name: 'Ping延迟',
         type: 'line',
-        data: performanceData.value.ping_rtt.data.length > 0 
-          ? performanceData.value.ping_rtt.data 
-          : [performanceData.value.ping_rtt.avg || 0],
+        data: performanceData.value.ping_rtt.data || [],
         smooth: true,
         itemStyle: { color: '#52c41a' }
       },
       {
         name: 'HTTP响应时间',
         type: 'line',
-        data: performanceData.value.http_response_time.data.length > 0 
-          ? performanceData.value.http_response_time.data 
-          : [performanceData.value.http_response_time.avg || 0],
+        data: performanceData.value.http_response_time.data || [],
         smooth: true,
         itemStyle: { color: '#faad14' }
       },
       {
         name: 'API响应时间',
         type: 'line',
-        data: performanceData.value.api_response_time.data.length > 0 
-          ? performanceData.value.api_response_time.data 
-          : [performanceData.value.api_response_time.avg || 0],
+        data: performanceData.value.api_response_time.data || [],
         smooth: true,
         itemStyle: { color: '#722ed1' }
       }
@@ -586,16 +596,20 @@ const initPacketLossChart = () => {
   const timeLabels = trendXAxis.value.length > 0 
     ? trendXAxis.value.map(time => {
         const date = new Date(time)
+        // 检查日期是否有效
+        if (isNaN(date.getTime())) {
+          return time // 如果无法解析，直接返回原始时间字符串
+        }
         return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
       })
     : ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00']
   
   // 动态计算Y轴最大值
-  const maxPacketLoss = Math.max(
-    ...performanceData.value.ping_packet_loss.data,
-    performanceData.value.ping_packet_loss.max || 0
-  )
-  const yAxisMax = Math.max(5, Math.ceil(maxPacketLoss * 1.2))
+  const packetLossData = performanceData.value.ping_packet_loss.data || []
+  const maxPacketLoss = packetLossData.length > 0 
+    ? Math.max(...packetLossData, performanceData.value.ping_packet_loss.max || 0)
+    : performanceData.value.ping_packet_loss.max || 0
+  const yAxisMax = Math.max(5, Math.ceil((maxPacketLoss || 0) * 1.2))
   
   const option = {
     tooltip: {
@@ -629,9 +643,7 @@ const initPacketLossChart = () => {
       {
         name: 'Ping丢包率',
         type: 'bar',
-        data: performanceData.value.ping_packet_loss.data.length > 0 
-          ? performanceData.value.ping_packet_loss.data 
-          : [performanceData.value.ping_packet_loss.avg || 0],
+        data: performanceData.value.ping_packet_loss.data || [],
         itemStyle: { color: '#ff4d4f' }
       }
     ]

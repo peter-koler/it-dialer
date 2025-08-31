@@ -6,9 +6,9 @@
     <a-card class="filter-card" :bordered="false">
       <a-row :gutter="16" align="middle">
         <a-col :span="4">
-          <a-space>
-            <span>时间范围：</span>
-            <a-select v-model:value="selectedTimeRange" style="width: 120px;" @change="handleTimeRangeChange">
+          <a-space >
+            <span style="min-width: 80px; display: inline-block;">时间范围：</span>
+            <a-select v-model:value="selectedTimeRange" style="width: 80px;" @change="handleTimeRangeChange">
               <a-select-option value="1h">1小时</a-select-option>
               <a-select-option value="1d">1天</a-select-option>
               <a-select-option value="7d">7天</a-select-option>
@@ -18,8 +18,8 @@
         </a-col>
         <a-col :span="4">
           <a-space>
-            <span>任务筛选：</span>
-            <a-select v-model:value="selectedTask" style="width: 150px;" @change="handleTaskChange">
+            <span style="min-width: 80px; display: inline-block;">任务筛选：</span>
+            <a-select v-model:value="selectedTask" style="width: 80px;" @change="handleTaskChange">
               <a-select-option value="all">全部任务</a-select-option>
               <a-select-option v-for="task in tcpTasks" :key="task.id" :value="task.id">
                 {{ task.name }}
@@ -29,8 +29,8 @@
         </a-col>
         <a-col :span="4">
           <a-space>
-            <span>端口筛选：</span>
-            <a-select v-model:value="selectedPort" style="width: 120px;" @change="handlePortChange">
+            <span style="min-width: 80px; display: inline-block;">端口筛选：</span>
+            <a-select v-model:value="selectedPort" style="width: 80px;" @change="handlePortChange">
               <a-select-option value="all">全部端口</a-select-option>
               <a-select-option value="80">80</a-select-option>
               <a-select-option value="443">443</a-select-option>

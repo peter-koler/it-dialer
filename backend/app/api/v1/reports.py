@@ -6,7 +6,7 @@ from app.models.task import Task
 from app.models.node import Node
 from app.utils.auth_decorators import token_required
 from app.utils.tenant_context import get_current_tenant_id, filter_by_tenant
-from sqlalchemy import func, and_, or_
+from sqlalchemy import func, and_, or_, case
 from datetime import datetime, timedelta
 import json
 import traceback
@@ -58,7 +58,7 @@ def get_report_overview():
         task_type_stats = db.session.query(
             Task.type,
             func.count(Result.id).label('total'),
-            func.sum(func.case([(Result.status == 'success', 1)], else_=0)).label('success')
+            func.sum(case((Result.status == 'success', 1), else_=0)).label('success')
         ).join(Result, Task.id == Result.task_id).filter(
             Result.created_at >= start_time,
             Result.created_at <= end_time
@@ -110,14 +110,14 @@ def get_report_overview():
             Task.name,
             Task.type,
             func.count(Result.id).label('total'),
-            func.sum(func.case([(Result.status == 'success', 1)], else_=0)).label('success')
+            func.sum(case((Result.status == 'success', 1), else_=0)).label('success')
         ).join(Result, Task.id == Result.task_id).filter(
             Result.created_at >= start_time,
             Result.created_at <= end_time
         ).group_by(Task.id, Task.name, Task.type).having(
             func.count(Result.id) >= 10  # 至少有10次执行记录
         ).order_by(
-            (func.sum(func.case([(Result.status == 'success', 1)], else_=0)) * 100.0 / func.count(Result.id)).desc()
+            (func.sum(case((Result.status == 'success', 1), else_=0)) * 100.0 / func.count(Result.id)).desc()
         ).limit(10).all()
         
         top_tasks_data = []
@@ -138,14 +138,14 @@ def get_report_overview():
             Task.name,
             Task.type,
             func.count(Result.id).label('total'),
-            func.sum(func.case([(Result.status == 'success', 1)], else_=0)).label('success')
+            func.sum(case((Result.status == 'success', 1), else_=0)).label('success')
         ).join(Result, Task.id == Result.task_id).filter(
             Result.created_at >= start_time,
             Result.created_at <= end_time
         ).group_by(Task.id, Task.name, Task.type).having(
             func.count(Result.id) >= 10  # 至少有10次执行记录
         ).order_by(
-            (func.sum(func.case([(Result.status == 'success', 1)], else_=0)) * 100.0 / func.count(Result.id)).asc()
+            (func.sum(case((Result.status == 'success', 1), else_=0)) * 100.0 / func.count(Result.id)).asc()
         ).limit(10).all()
         
         worst_tasks_data = []
@@ -279,7 +279,7 @@ def get_tcp_report():
         port_stats = db.session.query(
             Task.target,
             func.count(Result.id).label('total'),
-            func.sum(func.case([(Result.status == 'success', 1)], else_=0)).label('success')
+            func.sum(case((Result.status == 'success', 1), else_=0)).label('success')
         ).join(Result, Task.id == Result.task_id).filter(
             Task.type == 'tcp',
             Result.created_at >= start_time,
@@ -310,7 +310,7 @@ def get_tcp_report():
             Task.name,
             Task.target,
             func.count(Result.id).label('total'),
-            func.sum(func.case([(Result.status == 'success', 1)], else_=0)).label('success'),
+            func.sum(case((Result.status == 'success', 1), else_=0)).label('success'),
             func.max(Result.created_at).label('last_execution')
         ).join(Result, Task.id == Result.task_id).filter(
             Task.type == 'tcp',
@@ -477,7 +477,7 @@ def get_ping_report():
         location_stats = db.session.query(
             Result.agent_area,
             func.count(Result.id).label('total'),
-            func.sum(func.case([(Result.status == 'success', 1)], else_=0)).label('success')
+            func.sum(case((Result.status == 'success', 1), else_=0)).label('success')
         ).join(Task, Result.task_id == Task.id).filter(
             Task.type == 'ping',
             Result.created_at >= start_time,
@@ -505,7 +505,7 @@ def get_ping_report():
             Task.name,
             Task.target,
             func.count(Result.id).label('total'),
-            func.sum(func.case([(Result.status == 'success', 1)], else_=0)).label('success'),
+            func.sum(case((Result.status == 'success', 1), else_=0)).label('success'),
             func.max(Result.created_at).label('last_execution')
         ).join(Result, Task.id == Result.task_id).filter(
             Task.type == 'ping',
@@ -690,7 +690,7 @@ def get_http_report():
             Task.name,
             Task.target,
             func.count(Result.id).label('total'),
-            func.sum(func.case([(Result.status == 'success', 1)], else_=0)).label('success'),
+            func.sum(case((Result.status == 'success', 1), else_=0)).label('success'),
             func.max(Result.created_at).label('last_execution')
         ).join(Result, Task.id == Result.task_id).filter(
             Task.type == 'http',
@@ -790,9 +790,9 @@ def get_api_report():
             
             results = base_query.all()
             for result in results:
-                if result.result_data:
+                if result.details:
                     try:
-                        data = json.loads(result.result_data) if isinstance(result.result_data, str) else result.result_data
+                        data = json.loads(result.details) if isinstance(result.details, str) else result.details
                         if 'assertion_passed' in data and data['assertion_passed']:
                             assertion_passes += 1
                         if 'transaction_time' in data:
@@ -825,9 +825,9 @@ def get_api_report():
             for result in period_results:
                 if result.status == 'success':
                     period_success += 1
-                if result.result_data:
+                if result.details:
                     try:
-                        data = json.loads(result.result_data) if isinstance(result.result_data, str) else result.result_data
+                        data = json.loads(result.details) if isinstance(result.details, str) else result.details
                         if 'assertion_passed' in data and data['assertion_passed']:
                             period_assertion_passes += 1
                     except:
@@ -857,9 +857,9 @@ def get_api_report():
         
         failed_results = base_query.filter(Result.status != 'success').all()
         for result in failed_results:
-            if result.result_data:
+            if result.details:
                 try:
-                    data = json.loads(result.result_data) if isinstance(result.result_data, str) else result.result_data
+                    data = json.loads(result.details) if isinstance(result.details, str) else result.details
                     if 'error_type' in data:
                         error_type = data['error_type']
                         if error_type in failure_reasons:
@@ -887,7 +887,7 @@ def get_api_report():
             Task.name,
             Task.target,
             func.count(Result.id).label('total'),
-            func.sum(func.case([(Result.status == 'success', 1)], else_=0)).label('success'),
+            func.sum(case((Result.status == 'success', 1), else_=0)).label('success'),
             func.max(Result.created_at).label('last_execution')
         ).join(Result, Task.id == Result.task_id).filter(
             Task.type == 'api',
@@ -913,9 +913,9 @@ def get_api_report():
             step_breakdown_data = []
             
             for result in task_results:
-                if result.result_data:
+                if result.details:
                     try:
-                        data = json.loads(result.result_data) if isinstance(result.result_data, str) else result.result_data
+                        data = json.loads(result.details) if isinstance(result.details, str) else result.details
                         
                         # 收集响应时间
                         if 'response_time' in data:
@@ -928,7 +928,14 @@ def get_api_report():
                             assertion_passes += 1
                         
                         # 收集步骤分解数据
-                        if 'step_breakdown' in data and isinstance(data['step_breakdown'], list):
+                        if 'steps' in data and isinstance(data['steps'], list):
+                            for step in data['steps']:
+                                if isinstance(step, dict) and 'name' in step and 'response_time' in step:
+                                    step_breakdown_data.append({
+                                        'name': step['name'],
+                                        'time': step['response_time']
+                                    })
+                        elif 'step_breakdown' in data and isinstance(data['step_breakdown'], list):
                             step_breakdown_data.extend(data['step_breakdown'])
                     except:
                         pass
@@ -977,6 +984,9 @@ def get_api_report():
                 'last_execution': stat.last_execution.strftime('%Y-%m-%d %H:%M:%S') if stat.last_execution else None
             })
         
+        # 生成性能分析数据
+        performance_analysis = _generate_performance_analysis(task_details)
+        
         return jsonify({
             'code': 0,
             'data': {
@@ -991,7 +1001,8 @@ def get_api_report():
                 'failure_reasons': failure_analysis,
                 'transaction_success_trend': trend_data,
                 'failure_analysis': failure_analysis,
-                'task_details': task_details
+                'task_details': task_details,
+                'performance_analysis': performance_analysis
             },
             'message': 'success'
         })
@@ -1004,6 +1015,75 @@ def get_api_report():
             'data': None,
             'message': f'获取API报表数据失败: {str(e)}'
         }), 500
+
+
+def _generate_performance_analysis(task_details):
+    """生成API性能分析数据"""
+    if not task_details:
+        return {
+            'step_breakdown': [],
+            'transaction_performance': [],
+            'performance_summary': {
+                'avg_response_time': 0,
+                'p95_response_time': 0,
+                'p99_response_time': 0,
+                'total_transactions': 0
+            }
+        }
+    
+    # 步骤分解数据
+    step_breakdown_data = []
+    transaction_performance_data = []
+    
+    total_avg_time = 0
+    total_p95_time = 0
+    total_p99_time = 0
+    total_transactions = 0
+    
+    for task in task_details:
+        # 步骤分解数据
+        print(f"Debug V1: Task {task['task_name']} step_breakdown: {task.get('step_breakdown')}")
+        if task.get('step_breakdown'):
+            step_breakdown_data.append({
+                'task_name': task['task_name'],
+                'task_id': task['task_id'],
+                'steps': task['step_breakdown']
+            })
+            print(f"Debug V1: Added step_breakdown for task {task['task_name']}")
+        else:
+            print(f"Debug V1: No step_breakdown for task {task['task_name']}")
+        
+        # 事务性能对比数据
+        transaction_performance_data.append({
+            'task_name': task['task_name'],
+            'task_id': task['task_id'],
+            'avg_response_time': task.get('avg_response_time', 0),
+            'p95_response_time': task.get('p95_response_time', 0),
+            'p99_response_time': task.get('p99_response_time', 0),
+            'success_rate': task.get('success_rate', 0),
+            'assertion_pass_rate': task.get('assertion_pass_rate', 0),
+            'total_requests': task.get('total', 0)
+        })
+        
+        # 累计统计
+        total_avg_time += task.get('avg_response_time', 0) * task.get('total', 0)
+        total_p95_time += task.get('p95_response_time', 0) * task.get('total', 0)
+        total_p99_time += task.get('p99_response_time', 0) * task.get('total', 0)
+        total_transactions += task.get('total', 0)
+    
+    # 计算总体性能指标
+    performance_summary = {
+        'avg_response_time': round(total_avg_time / total_transactions, 2) if total_transactions > 0 else 0,
+        'p95_response_time': round(total_p95_time / total_transactions, 2) if total_transactions > 0 else 0,
+        'p99_response_time': round(total_p99_time / total_transactions, 2) if total_transactions > 0 else 0,
+        'total_transactions': total_transactions
+    }
+    
+    return {
+        'step_breakdown': step_breakdown_data,
+        'transaction_performance': transaction_performance_data,
+        'performance_summary': performance_summary
+    }
 
 
 @bp.route('/reports/<int:report_id>/export', methods=['POST'])

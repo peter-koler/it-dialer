@@ -136,7 +136,8 @@ const fetchAlerts = async (startTime = null, endTime = null) => {
     }
     
     const response = await getAlerts(params)
-    if (response.data.code === 0) {
+    console.log('TCP告警API响应:', response)
+    if (response.code === 0) {
       // 过滤当前任务的告警
       const allAlerts = response.data.alerts || []
       const taskAlerts = allAlerts.filter(alert => alert.task_id == props.taskId)

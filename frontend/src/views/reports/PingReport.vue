@@ -437,7 +437,7 @@ const fetchPingReportData = async () => {
          packetLoss: (100 - (item.success_rate || 0))
        }))
        
-       // 处理延迟分布数据
+       // 处理延迟分布数据和字段名转换
        const performanceMetrics = {
          ...reportData.performance_metrics,
          latencyDistribution: reportData.latency_distribution || reportData.performance_metrics?.latency_distribution || [
@@ -446,7 +446,10 @@ const fetchPingReportData = async () => {
            { range: '50-100ms', value: 0 },
            { range: '100-200ms', value: 0 },
            { range: '>200ms', value: 0 }
-         ]
+         ],
+         // 字段名转换：后端使用下划线命名，前端使用驼峰命名
+         jitterAnalysis: reportData.performance_metrics?.jitter_analysis || [],
+         geographicAnalysis: reportData.performance_metrics?.geographic_analysis || []
        }
        
        chartData.value = {
@@ -472,21 +475,9 @@ const fetchPingReportData = async () => {
 // 更新图表数据
 const updateChartData = () => {
   nextTick(() => {
-    if (latencyTrendChartInstance) {
-      initLatencyTrendChart()
-    }
-    if (packetLossChartInstance) {
-      initPacketLossChart()
-    }
-    if (latencyDistributionChartInstance) {
-      initLatencyDistributionChart()
-    }
-    if (jitterAnalysisChartInstance) {
-      initJitterAnalysisChart()
-    }
-    if (geographicChartInstance) {
-      initGeographicChart()
-    }
+    initLatencyTrendChart()
+    initPacketLossChart()
+    initLatencyChart(activeLatencyTab.value)
   })
 }
 
@@ -873,8 +864,17 @@ const initJitterAnalysisChart = () => {
     return
   }
   
-  const timeLabels = jitterData.map(item => item.time || item.timestamp)
-  const jitterValues = jitterData.map(item => item.jitter || 0)
+  // 处理API返回的数字数组格式
+  let timeLabels, jitterValues
+  if (Array.isArray(jitterData) && typeof jitterData[0] === 'number') {
+    // API返回的是数字数组，生成时间标签
+    timeLabels = jitterData.map((_, index) => `${index + 1}`)
+    jitterValues = jitterData
+  } else {
+    // 期望的对象数组格式
+    timeLabels = jitterData.map(item => item.time || item.timestamp)
+    jitterValues = jitterData.map(item => item.jitter || 0)
+  }
   const threshold = 20 // 抖动阈值
   const thresholdData = new Array(timeLabels.length).fill(threshold)
   
@@ -979,8 +979,8 @@ const initGeographicChart = () => {
   }
   
   const regions = geographicData.map(item => item.region || item.name)
-  const latencyData = geographicData.map(item => item.avgLatency || 0)
-  const packetLossData = geographicData.map(item => item.packetLoss || 0)
+  const latencyData = geographicData.map(item => item.avg_latency || item.avgLatency || 0)
+  const packetLossData = geographicData.map(item => item.packet_loss || item.packetLoss || 0)
   
   const option = {
     tooltip: {
@@ -1070,6 +1070,7 @@ const handleResize = () => {
 onMounted(async () => {
   await fetchPingTasks()
   await fetchPingReportData()
+  initAllCharts()
   window.addEventListener('resize', handleResize)
 })
 

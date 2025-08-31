@@ -395,7 +395,7 @@ import request from '@/utils/request'
 
 
 const props = defineProps({
-  visible: {
+  open: {
     type: Boolean,
     required: true
   },
@@ -409,7 +409,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:visible', 'ok', 'cancel'])
+const emit = defineEmits(['update:open', 'ok', 'cancel'])
 
 // 节点选项
 const nodeOptions = ref([])
@@ -417,10 +417,10 @@ const nodeOptions = ref([])
 // 使用计算属性来绑定modalVisible
 const modalVisible = computed({
   get() {
-    return props.visible
+    return props.open
   },
   set(value) {
-    emit('update:visible', value)
+    emit('update:open', value)
   }
 })
 
@@ -487,7 +487,7 @@ const fetchNodes = async () => {
 }
 
 // 监听模态框可见性变化
-watch(() => props.visible, (newVal) => {
+watch(() => props.open, (newVal) => {
   if (newVal) {
     // 获取节点列表
     fetchNodes()

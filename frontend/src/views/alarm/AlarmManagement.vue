@@ -396,9 +396,13 @@ const loadAlerts = async () => {
     }
     
     const response = await getAlerts(params, '/alerts')
-    if (response.data.code === 0) {
-      // 根据实际API响应结构，告警数据在response.data.alerts或response.data.list中
-      const alerts = response.data.alerts || response.data.list || []
+    console.log('告警API响应:', response)
+    
+    if (response.code === 0) {
+      // 根据实际API响应结构，告警数据在response.data.alerts中
+      const alerts = response.data.alerts || []
+      console.log('原始告警数据:', alerts)
+      
       alarmList.value = alerts.map(alert => ({
         id: alert.id,
         task_name: alert.task_name || alert.taskName,
@@ -411,8 +415,17 @@ const loadAlerts = async () => {
         resolved_at: alert.resolved_at,
         snapshot: alert.snapshot_data || alert.snapshot
       }))
+      
+      console.log('处理后的告警数据:', alarmList.value)
       pagination.total = response.data.pagination?.total || 0
+      
+      if (alerts.length === 0) {
+        message.info('暂无告警数据')
+      } else {
+        message.success(`成功加载 ${alerts.length} 条告警数据`)
+      }
     } else {
+      console.error('API返回错误:', response)
       message.error(response.message || '获取告警数据失败')
     }
   } catch (error) {
