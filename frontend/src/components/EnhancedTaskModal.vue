@@ -379,6 +379,73 @@
               </template>
             </div>
           </a-collapse-panel>
+          
+          <!-- 增强告警配置面板 -->
+          <a-collapse-panel key="2" header="增强告警配置">
+            <div style="padding: 16px;">
+              <!-- 增强告警配置卡片 -->
+              <a-card title="增强告警配置" size="small">
+                <template #extra>
+                  <a-switch v-model:checked="formState.alarmConfig.enhanced.enabled" size="small" />
+                </template>
+                
+                <a-row :gutter="16">
+                  <a-col :span="8">
+                    <a-form-item label="监测点数量阈值">
+                      <a-input-number 
+                        v-model:value="formState.alarmConfig.enhanced.min_points" 
+                        :disabled="!formState.alarmConfig.enhanced.enabled" 
+                        style="width: 100%;" 
+                        :min="1" 
+                        :max="100"
+                        placeholder="默认为1"
+                      />
+                      <div style="font-size: 12px; color: #999; margin-top: 4px;">至少需要多少个监测点异常才触发告警</div>
+                    </a-form-item>
+                  </a-col>
+                  
+                  <a-col :span="8">
+                    <a-form-item label="连续次数阈值">
+                      <a-input-number 
+                        v-model:value="formState.alarmConfig.enhanced.min_occurrences" 
+                        :disabled="!formState.alarmConfig.enhanced.enabled" 
+                        style="width: 100%;" 
+                        :min="1" 
+                        :max="100"
+                        placeholder="默认为1"
+                      />
+                      <div style="font-size: 12px; color: #999; margin-top: 4px;">监测点需要连续异常多少次才触发告警</div>
+                    </a-form-item>
+                  </a-col>
+                  
+                  <a-col :span="8">
+                    <a-form-item label="逻辑模式">
+                      <a-select 
+                        v-model:value="formState.alarmConfig.enhanced.trigger_mode" 
+                        :disabled="!formState.alarmConfig.enhanced.enabled" 
+                        style="width: 100%;"
+                      >
+                        <a-select-option value="AND">AND（且）</a-select-option>
+                        <a-select-option value="OR">OR（或）</a-select-option>
+                      </a-select>
+                      <div style="font-size: 12px; color: #999; margin-top: 4px;">监测点数量和连续次数的逻辑关系</div>
+                    </a-form-item>
+                  </a-col>
+                </a-row>
+                
+                <a-row style="margin-top: 16px;">
+                  <a-col :span="24">
+                    <div style="background: #f6f8fa; padding: 12px; border-radius: 6px; font-size: 13px; color: #586069;">
+                      <strong>配置说明：</strong><br/>
+                      • <strong>AND模式：</strong>需要同时满足监测点数量阈值和连续次数阈值才触发告警<br/>
+                      • <strong>OR模式：</strong>满足监测点数量阈值或连续次数阈值任一条件即触发告警<br/>
+                      • 留空或设为1表示使用默认的单点单次触发逻辑
+                    </div>
+                  </a-col>
+                </a-row>
+              </a-card>
+            </div>
+          </a-collapse-panel>
         </a-collapse>
       </a-form-item>
     </a-form>
@@ -441,6 +508,12 @@ const formState = reactive({
       status: { enabled: false, condition: '异常', level: 'warning' },
       packet_loss: { enabled: false, condition: 'gt', value: 10, level: 'warning' },
       execution_time: { enabled: false, condition: 'gt', value: 5000, level: 'warning' }
+    },
+    enhanced: {
+      enabled: false,
+      min_points: 1,
+      min_occurrences: 1,
+      trigger_mode: 'OR'
     }
   }
 })
@@ -504,6 +577,15 @@ watch(() => props.open, (newVal) => {
       // 填充告警配置
       if (props.editingTask.alarm_config) {
         formState.alarmConfig = JSON.parse(JSON.stringify(props.editingTask.alarm_config))
+        // 确保enhanced配置存在
+        if (!formState.alarmConfig.enhanced) {
+          formState.alarmConfig.enhanced = {
+            enabled: false,
+            min_points: 1,
+            min_occurrences: 1,
+            trigger_mode: 'OR'
+          }
+        }
       } else {
         // 如果没有，则重置为默认值
         if (props.editingTask.type === 'ping') {
@@ -513,6 +595,12 @@ watch(() => props.open, (newVal) => {
               status: { enabled: false, condition: '异常', level: 'warning' },
               packet_loss: { enabled: false, condition: 'gt', value: 10, level: 'warning' },
               execution_time: { enabled: false, condition: 'gt', value: 5000, level: 'warning' }
+            },
+            enhanced: {
+              enabled: false,
+              min_points: 1,
+              min_occurrences: 1,
+              trigger_mode: 'OR'
             }
           }
         } else if (props.editingTask.type === 'tcp') {
@@ -521,6 +609,12 @@ watch(() => props.open, (newVal) => {
             rules: {
               status: { enabled: false, condition: '异常', level: 'warning' },
               execution_time: { enabled: false, condition: 'gt', value: 5000, level: 'warning' }
+            },
+            enhanced: {
+              enabled: false,
+              min_points: 1,
+              min_occurrences: 1,
+              trigger_mode: 'OR'
             }
           }
         } else {
@@ -533,6 +627,12 @@ watch(() => props.open, (newVal) => {
               dns_ip: { enabled: false, expected_ips: [], level: 'warning' },
               packet_loss: { enabled: false, condition: 'gt', value: 10, level: 'warning' },
               execution_time: { enabled: false, condition: 'gt', value: 5000, level: 'warning' }
+            },
+            enhanced: {
+              enabled: false,
+              min_points: 1,
+              min_occurrences: 1,
+              trigger_mode: 'OR'
             }
           }
         }
@@ -568,6 +668,12 @@ watch(() => props.open, (newVal) => {
             status: { enabled: false, condition: '异常', level: 'warning' },
             packet_loss: { enabled: false, condition: 'gt', value: 10, level: 'warning' },
             execution_time: { enabled: false, condition: 'gt', value: 5000, level: 'warning' }
+          },
+          enhanced: {
+            enabled: false,
+            min_points: 1,
+            min_occurrences: 1,
+            trigger_mode: 'OR'
           }
         }
       } else if (formState.type === 'tcp') {
@@ -576,6 +682,12 @@ watch(() => props.open, (newVal) => {
           rules: {
             status: { enabled: false, condition: '异常', level: 'warning' },
             execution_time: { enabled: false, condition: 'gt', value: 5000, level: 'warning' }
+          },
+          enhanced: {
+            enabled: false,
+            min_points: 1,
+            min_occurrences: 1,
+            trigger_mode: 'OR'
           }
         }
       } else {
@@ -588,6 +700,12 @@ watch(() => props.open, (newVal) => {
             dns_ip: { enabled: false, expected_ips: [], level: 'warning' },
             packet_loss: { enabled: false, condition: 'gt', value: 10, level: 'warning' },
             execution_time: { enabled: false, condition: 'gt', value: 5000, level: 'warning' }
+          },
+          enhanced: {
+            enabled: false,
+            min_points: 1,
+            min_occurrences: 1,
+            trigger_mode: 'OR'
           }
         }
       }

@@ -59,6 +59,16 @@ v1Request.interceptors.response.use(
  * @returns {Promise}
  */
 export function getAlerts(params, customUrl = '/alerts') {
+  // 如果使用自定义URL（如/api-alerts），使用通用request以支持版本路由
+  if (customUrl !== '/alerts') {
+    return request({
+      url: customUrl,
+      method: 'get',
+      params
+    })
+  }
+  
+  // 默认使用v1 API
   return v1Request({
     url: customUrl,
     method: 'get',
@@ -109,11 +119,22 @@ export function updateAlertStatus(id, data) {
 }
 
 /**
- * 删除告警 - 使用v1 API
+ * 批量删除告警
  * @param {Array} ids - 告警ID数组
+ * @param {string} customUrl - 自定义API端点
  * @returns {Promise}
  */
-export function deleteAlerts(ids) {
+export function deleteAlerts(ids, customUrl = '/alerts') {
+  // 如果使用自定义URL（如/api-alerts），使用通用request以支持版本路由
+  if (customUrl !== '/alerts') {
+    return request({
+      url: `${customUrl}/batch`,
+      method: 'delete',
+      data: { alert_ids: ids }
+    })
+  }
+  
+  // 默认使用v1 API
   return v1Request({
     url: '/alerts/batch',
     method: 'delete',

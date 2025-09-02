@@ -18,6 +18,8 @@ class Alert(db.Model):
     threshold_value = db.Column(db.String(100), nullable=True)  # 阈值
     agent_id = db.Column(db.String(100), nullable=True)  # 触发告警的节点ID
     agent_area = db.Column(db.String(100), nullable=True)  # 触发告警的节点区域
+    trigger_type = db.Column(db.String(20), nullable=True)  # 触发类型(point_count/consecutive/both)
+    trigger_mode = db.Column(db.String(10), nullable=True)  # 触发模式(OR/AND)
     snapshot_data = db.Column(db.Text, nullable=True)  # JSON格式的快照数据
     assigned_to = db.Column(db.String(100), nullable=True)  # 分配给的用户
     resolved_by = db.Column(db.String(100), nullable=True)  # 处理人
@@ -47,6 +49,8 @@ class Alert(db.Model):
             'threshold_value': self.threshold_value,
             'agent_id': self.agent_id,
             'agent_area': self.agent_area,
+            'trigger_type': self.trigger_type,
+            'trigger_mode': self.trigger_mode,
             'assigned_to': self.assigned_to,
             'resolved_by': self.resolved_by,
             'resolved_at': self.resolved_at.isoformat() if self.resolved_at else None,
@@ -124,6 +128,9 @@ class AlertConfig(db.Model):
     alert_type = db.Column(db.String(50), nullable=False)  # status_code, response_time
     enabled = db.Column(db.Boolean, nullable=False, default=True)
     config = db.Column(db.Text, nullable=False)  # JSON配置
+    min_points = db.Column(db.Integer, nullable=False, default=1)  # 监测点数量阈值
+    min_occurrences = db.Column(db.Integer, nullable=False, default=1)  # 连续次数阈值
+    trigger_mode = db.Column(db.String(10), nullable=False, default='OR')  # 逻辑模式(OR/AND)
     tenant_id = db.Column(db.String(36), db.ForeignKey('tenants.id', ondelete='CASCADE'), 
                          nullable=True, comment='租户ID')
     is_deleted = db.Column(db.Boolean, default=False, nullable=False, comment='是否已删除')
@@ -142,6 +149,9 @@ class AlertConfig(db.Model):
             'step_id': self.step_id,
             'alert_type': self.alert_type,
             'enabled': self.enabled,
+            'min_points': self.min_points,
+            'min_occurrences': self.min_occurrences,
+            'trigger_mode': self.trigger_mode,
             'tenant_id': self.tenant_id,
             'is_deleted': self.is_deleted,
             'deleted_at': self.deleted_at.isoformat() if self.deleted_at else None,

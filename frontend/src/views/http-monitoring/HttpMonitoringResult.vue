@@ -450,7 +450,7 @@ const fetchAlerts = async (startTime = null, endTime = null) => {
       params.end = endTime
     }
     
-    const response = await getAlerts(params)
+    const response = await getAlerts(params, '/api-alerts')
     console.log('HTTP告警API响应:', response)
     
     if (response && response.code === 0) {

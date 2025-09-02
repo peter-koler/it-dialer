@@ -6,6 +6,7 @@ from app import db
 from app.models.alert import Alert, AlertConfig
 from app.models.task import Task
 from app.models.result import Result
+from app.services.alert_state_manager import AlertStateManager
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,6 +20,7 @@ class AlertMatcher:
     
     def __init__(self):
         self.logger = logger
+        self.state_manager = AlertStateManager()
     
     def process_result(self, result_data: Dict[str, Any], task: Task) -> List[Alert]:
         """
@@ -130,6 +132,24 @@ class AlertMatcher:
                 )
                 self.logger.info(f"TCP告警配置检查结果: {len(tcp_alarm_alerts)} 个告警")
                 alerts.extend(tcp_alarm_alerts)
+            
+            # 检查增强告警配置（支持监测点数量阈值、连续次数阈值和逻辑模式）
+            enhanced_alerts = []
+            for alert_config in alert_configs:
+                # 检查是否使用增强配置（非默认值）
+                if (alert_config.min_points > 1 or 
+                    alert_config.min_occurrences > 1 or 
+                    alert_config.trigger_mode != 'OR'):
+                    enhanced_alert = self._check_enhanced_alert(
+                        result_data,
+                        task,
+                        alert_config
+                    )
+                    if enhanced_alert:
+                        enhanced_alerts.append(enhanced_alert)
+            
+            self.logger.info(f"增强告警配置检查结果: {len(enhanced_alerts)} 个告警")
+            alerts.extend(enhanced_alerts)
             
             self.logger.info(f"总共生成 {len(alerts)} 个告警")
             for i, alert in enumerate(alerts):
@@ -1315,6 +1335,107 @@ class AlertMatcher:
         
         return alerts
     
+    def _check_enhanced_alert(self, result_data: Dict, task: Task, 
+                             alert_config: AlertConfig) -> Optional[Alert]:
+        """
+        检查增强告警配置
+        支持监测点数量阈值、连续次数阈值和逻辑模式
+        """
+        try:
+            # 获取监测点信息
+            agent_id = result_data.get('agent_id')
+            if not agent_id:
+                return None
+                
+            # 获取告警配置
+            config = alert_config.get_config()
+            min_points = alert_config.min_points
+            min_occurrences = alert_config.min_occurrences
+            trigger_mode = alert_config.trigger_mode
+            
+            # 判断是否异常
+            is_abnormal = self._is_result_abnormal(result_data, config, alert_config.alert_type)
+            
+            # 更新监测点状态
+            self.state_manager.update_point_state(
+                task_id=task.id,
+                step_id=alert_config.step_id,
+                alert_type=alert_config.alert_type,
+                agent_id=agent_id,
+                is_abnormal=is_abnormal
+            )
+            
+            # 检查是否满足告警条件
+            should_trigger = self.state_manager.should_trigger_alert(
+                task_id=task.id,
+                step_id=alert_config.step_id,
+                alert_type=alert_config.alert_type,
+                min_points=min_points,
+                min_occurrences=min_occurrences,
+                trigger_mode=trigger_mode
+            )
+            
+            if should_trigger:
+                # 生成告警
+                alert_level = config.get('level', 'warning')
+                title = f"{alert_config.alert_type}告警"
+                
+                # 获取异常监测点信息
+                abnormal_points = self.state_manager.get_abnormal_points(
+                    task_id=task.id,
+                    step_id=alert_config.step_id,
+                    alert_type=alert_config.alert_type
+                )
+                
+                content = f"任务 {task.name} 触发{alert_config.alert_type}告警。"
+                content += f"异常监测点数量: {len(abnormal_points)}/{min_points}, "
+                content += f"连续异常次数: {min_occurrences}, "
+                content += f"触发模式: {trigger_mode}"
+                
+                return self._create_alert(
+                    task=task,
+                    alert_type=alert_config.alert_type,
+                    alert_level=alert_level,
+                    title=title,
+                    content=content,
+                    step_id=alert_config.step_id,
+                    result_data=result_data,
+                    trigger_type='enhanced',
+                    trigger_mode=trigger_mode
+                )
+                
+        except Exception as e:
+            self.logger.error(f"检查增强告警配置失败: {e}")
+            
+        return None
+        
+    def _is_result_abnormal(self, result_data: Dict, config: Dict, alert_type: str) -> bool:
+        """
+        判断结果数据是否异常
+        """
+        try:
+            if alert_type == 'status':
+                status = result_data.get('status')
+                expected_statuses = config.get('expected_statuses', ['success'])
+                return status not in expected_statuses
+                
+            elif alert_type == 'response_time':
+                response_time = result_data.get('response_time', 0)
+                threshold = config.get('threshold', 5000)
+                return response_time > threshold
+                
+            elif alert_type == 'status_code':
+                status_code = result_data.get('status_code')
+                expected_codes = config.get('expected_codes', [200])
+                return status_code not in expected_codes
+                
+            # 其他告警类型的判断逻辑
+            return False
+            
+        except Exception as e:
+            self.logger.error(f"判断结果异常状态失败: {e}")
+            return False
+    
     def _check_task_status_alert(self, result_data: Dict, task: Task, 
                                 status_alert_config: List[str]) -> Optional[Alert]:
         """
@@ -1432,7 +1553,8 @@ class AlertMatcher:
     def _create_alert(self, task: Task, alert_type: str, alert_level: str, 
                      title: str, content: str, trigger_value: str = None, 
                      threshold_value: str = None, step_id: str = None, 
-                     result_data: Dict = None) -> Alert:
+                     result_data: Dict = None, trigger_type: str = None,
+                     trigger_mode: str = None) -> Alert:
         """
         创建告警对象
         
@@ -1466,6 +1588,8 @@ class AlertMatcher:
                 threshold_value=threshold_value,
                 agent_id=result_data.get('agent_id') if result_data else None,
                 agent_area=result_data.get('agent_area') if result_data else None,
+                trigger_type=trigger_type,
+                trigger_mode=trigger_mode,
                 tenant_id=result_data.get('tenant_id') if result_data else task.tenant_id  # 从结果数据或任务中获取tenant_id
             )
             

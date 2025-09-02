@@ -403,7 +403,13 @@ const loadAlerts = async () => {
       const alerts = response.data.alerts || []
       console.log('原始告警数据:', alerts)
       
-      alarmList.value = alerts.map(alert => ({
+      // 过滤掉任务类型为'api'的告警，只保留拨测类告警
+      const filteredAlerts = alerts.filter(alert => {
+        const taskType = alert.task_type || 'unknown'
+        return taskType !== 'api'
+      })
+      
+      alarmList.value = filteredAlerts.map(alert => ({
         id: alert.id,
         task_name: alert.task_name || alert.taskName,
         task_type: alert.task_type || 'unknown',
@@ -416,7 +422,7 @@ const loadAlerts = async () => {
         snapshot: alert.snapshot_data || alert.snapshot
       }))
       
-      console.log('处理后的告警数据:', alarmList.value)
+      console.log('过滤后的告警数据:', alarmList.value)
       pagination.total = response.data.pagination?.total || 0
       
       if (alerts.length === 0) {
@@ -495,7 +501,7 @@ const handleAction = async (action, record) => {
 const updateStatus = async (id, status) => {
   try {
     const response = await updateAlertStatus(id, { status })
-    if (response.data.code === 0) {
+    if (response.code === 0) {
       message.success('操作成功')
       loadAlerts()
     } else {
@@ -509,8 +515,8 @@ const updateStatus = async (id, status) => {
 // 删除告警
 const deleteAlert = async (id) => {
   try {
-    const response = await deleteAlerts([id])
-    if (response.data.code === 0) {
+    const response = await deleteAlerts([id], '/v2/alerts')
+    if (response.code === 0) {
       message.success('删除成功')
       loadAlerts()
     } else {
@@ -525,7 +531,7 @@ const deleteAlert = async (id) => {
 const batchMarkResolved = async () => {
   try {
     const response = await updateAlertStatus(selectedRowKeys.value, { status: 'resolved' })
-    if (response.data.code === 0) {
+    if (response.code === 0) {
       message.success('批量操作成功')
       selectedRowKeys.value = []
       loadAlerts()
@@ -541,7 +547,7 @@ const batchMarkResolved = async () => {
 const batchIgnore = async () => {
   try {
     const response = await updateAlertStatus(selectedRowKeys.value, { status: 'ignored' })
-    if (response.data.code === 0) {
+    if (response.code === 0) {
       message.success('批量操作成功')
       selectedRowKeys.value = []
       loadAlerts()
@@ -556,8 +562,8 @@ const batchIgnore = async () => {
 // 批量删除
 const batchDelete = async () => {
   try {
-    const response = await deleteAlerts(selectedRowKeys.value)
-    if (response.data.code === 0) {
+    const response = await deleteAlerts(selectedRowKeys.value, '/v2/alerts')
+    if (response.code === 0) {
       message.success('批量删除成功')
       selectedRowKeys.value = []
       loadAlerts()
@@ -578,7 +584,7 @@ const handleAssign = async () => {
       note: assignForm.note
     })
     
-    if (response.data.code === 0) {
+    if (response.code === 0) {
       message.success('转派成功')
       assignModalVisible.value = false
       Object.assign(assignForm, { assignee: '', note: '' })

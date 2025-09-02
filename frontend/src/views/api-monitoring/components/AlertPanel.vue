@@ -97,6 +97,11 @@ const alertColumns = [
   { title: '触发时间', dataIndex: 'triggerTime', key: 'triggerTime' },
   { title: '告警级别', dataIndex: 'alertLevel', key: 'alertLevel' },
   { title: '告警内容', dataIndex: 'alertContent', key: 'alertContent' },
+  { title: '触发原因', dataIndex: 'triggerReason', key: 'triggerReason',
+    customRender: ({ record }) => {
+      return formatTriggerReason(record.triggerType, record.triggerValue, record.triggerMode)
+    }
+  },
   { title: '操作', dataIndex: 'action', key: 'action' }
 ]
 
@@ -120,13 +125,39 @@ const getAlertLevelText = (level) => {
   return textMap[level] || level
 }
 
+// 格式化触发原因
+const formatTriggerReason = (triggerType, triggerValue, triggerMode) => {
+  if (!triggerType || !triggerValue) {
+    return '单次异常' // 默认显示
+  }
+  
+  switch (triggerType) {
+    case 'consecutive':
+      return `连续 ${triggerValue} 次异常`
+    case 'point_count':
+      return `${triggerValue} 个监测点同时异常`
+    case 'both':
+      return '满足数量和连续条件'
+    case 'enhanced':
+      if (triggerMode === 'OR') {
+        return '满足任一增强条件'
+      } else if (triggerMode === 'AND') {
+        return '满足所有增强条件'
+      }
+      return '增强告警触发'
+    default:
+      return triggerValue || '单次异常'
+  }
+}
+
 // 获取告警数据
 const fetchAlerts = async (startTime = null, endTime = null) => {
   alertLoading.value = true
   try {
     const params = {
       page: alertPagination.current,
-      per_page: alertPagination.pageSize
+      per_page: alertPagination.pageSize,
+      task_id: props.taskId
     }
     
     // 如果有时间筛选条件，添加到参数中
@@ -135,25 +166,28 @@ const fetchAlerts = async (startTime = null, endTime = null) => {
       params.end_time = endTime
     }
     
-    const response = await getAlerts(params)
+    const response = await getAlerts(params, '/api-alerts')
     console.log('API告警API响应:', response)
     if (response.code === 0) {
-      // 过滤当前任务的告警
-      const allAlerts = response.data.alerts || []
-      const taskAlerts = allAlerts.filter(alert => alert.task_id == props.taskId)
+      // 后端已按task_id过滤，直接使用返回的数据
+      const alertsData = response.data.alerts || response.data.list || []
+      console.log('获取到的告警数据:', alertsData)
       
-      alertList.value = taskAlerts.map(alert => ({
+      alertList.value = alertsData.map(alert => ({
         id: alert.id,
         taskName: alert.taskName || alert.task_name,
         probeName: alert.agent_area || alert.agent_id || '未知拨测点',
         triggerTime: alert.triggerTime || alert.created_at,
         alertLevel: alert.alert_level,
         alertContent: alert.content,
-        snapshot: alert.snapshot_data
+        snapshot: alert.snapshot_data,
+        triggerType: alert.trigger_type,
+        triggerValue: alert.trigger_value,
+        triggerMode: alert.trigger_mode
       }))
       
       // 更新分页信息
-      alertPagination.total = taskAlerts.length
+      alertPagination.total = response.data.total || 0
     } else {
       message.error(response.message || '获取告警数据失败')
       alertList.value = []

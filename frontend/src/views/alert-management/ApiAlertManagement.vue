@@ -299,6 +299,14 @@ const columns = [
     ellipsis: true
   },
   {
+    title: '触发原因',
+    dataIndex: 'triggerReason',
+    width: 120,
+    customRender: ({ record }) => {
+      return formatTriggerReason(record.triggerType, record.triggerValue, record.triggerMode)
+    }
+  },
+  {
     title: '操作',
     dataIndex: 'actions',
     width: 150,
@@ -360,6 +368,31 @@ const getStatusText = (status) => {
 const formatTime = (time) => {
   if (!time) return '-'
   return new Date(time).toLocaleString('zh-CN')
+}
+
+// 格式化触发原因
+const formatTriggerReason = (triggerType, triggerValue, triggerMode) => {
+  if (!triggerType || !triggerValue) {
+    return '单次异常' // 默认显示
+  }
+  
+  switch (triggerType) {
+    case 'consecutive':
+      return `连续 ${triggerValue} 次异常`
+    case 'point_count':
+      return `${triggerValue} 个监测点同时异常`
+    case 'both':
+      return '满足数量和连续条件'
+    case 'enhanced':
+      if (triggerMode === 'OR') {
+        return '满足任一增强条件'
+      } else if (triggerMode === 'AND') {
+        return '满足所有增强条件'
+      }
+      return '增强告警触发'
+    default:
+      return triggerValue || '单次异常'
+  }
 }
 
 // 加载告警数据
@@ -429,7 +462,10 @@ const loadAlerts = async () => {
       content: alert.content || alert.title || '-',
       agent_area: alert.agent_area,
       alert_type: alert.alert_type,
-      snapshot: alert.snapshot_data
+      snapshot: alert.snapshot_data,
+      triggerType: alert.trigger_type,
+      triggerValue: alert.trigger_value,
+      triggerMode: alert.trigger_mode
     }))
     
     pagination.total = total
@@ -508,11 +544,11 @@ const handleAction = async (action, record) => {
 const updateStatus = async (id, status) => {
   try {
     const response = await updateAlertStatus(id, { status })
-    if (response.data.code === 0) {
+    if (response.code === 0) {
       message.success('操作成功')
       loadAlerts()
     } else {
-      message.error(response.data.message || '操作失败')
+      message.error(response.message || '操作失败')
     }
   } catch (error) {
     message.error('操作失败: ' + error.message)
@@ -522,12 +558,12 @@ const updateStatus = async (id, status) => {
 // 删除告警
 const deleteAlert = async (id) => {
   try {
-    const response = await deleteAlerts([id])
-    if (response.data.code === 0) {
+    const response = await deleteAlerts([id], '/api-alerts')
+    if (response.code === 0) {
       message.success('删除成功')
       loadAlerts()
     } else {
-      message.error(response.data.message || '删除失败')
+      message.error(response.message || '删除失败')
     }
   } catch (error) {
     message.error('删除失败: ' + error.message)
@@ -538,12 +574,12 @@ const deleteAlert = async (id) => {
 const batchMarkResolved = async () => {
   try {
     const response = await updateAlertStatus(selectedRowKeys.value, { status: 'resolved' })
-    if (response.data.code === 0) {
+    if (response.code === 0) {
       message.success('批量操作成功')
       selectedRowKeys.value = []
       loadAlerts()
     } else {
-      message.error(response.data.message || '批量操作失败')
+      message.error(response.message || '批量操作失败')
     }
   } catch (error) {
     message.error('批量操作失败: ' + error.message)
@@ -554,12 +590,12 @@ const batchMarkResolved = async () => {
 const batchIgnore = async () => {
   try {
     const response = await updateAlertStatus(selectedRowKeys.value, { status: 'ignored' })
-    if (response.data.code === 0) {
+    if (response.code === 0) {
       message.success('批量操作成功')
       selectedRowKeys.value = []
       loadAlerts()
     } else {
-      message.error(response.data.message || '批量操作失败')
+      message.error(response.message || '批量操作失败')
     }
   } catch (error) {
     message.error('批量操作失败: ' + error.message)
@@ -569,13 +605,13 @@ const batchIgnore = async () => {
 // 批量删除
 const batchDelete = async () => {
   try {
-    const response = await deleteAlerts(selectedRowKeys.value)
-    if (response.data.code === 0) {
+    const response = await deleteAlerts(selectedRowKeys.value, '/api-alerts')
+    if (response.code === 0) {
       message.success('批量删除成功')
       selectedRowKeys.value = []
       loadAlerts()
     } else {
-      message.error(response.data.message || '批量删除失败')
+      message.error(response.message || '批量删除失败')
     }
   } catch (error) {
     message.error('批量删除失败: ' + error.message)
@@ -591,13 +627,13 @@ const handleAssign = async () => {
       note: assignForm.note
     })
     
-    if (response.data.code === 0) {
+    if (response.code === 0) {
       message.success('转派成功')
       assignModalVisible.value = false
       Object.assign(assignForm, { assignee: '', note: '' })
       loadAlerts()
     } else {
-      message.error(response.data.message || '转派失败')
+      message.error(response.message || '转派失败')
     }
   } catch (error) {
     message.error('转派失败: ' + error.message)

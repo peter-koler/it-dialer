@@ -25,16 +25,19 @@ def get_api_alerts_v2():
         alert_level = request.args.get('alert_level', '')
         status = request.args.get('status', '')
         api_endpoint = request.args.get('api_endpoint', '')
+        task_id = request.args.get('task_id', type=int)
+        start_time = request.args.get('start_time', '')
+        end_time = request.args.get('end_time', '')
         
         # 基础查询 - 强制按租户过滤
         tenant_id = TenantContext.get_current_tenant_id()
         if not tenant_id:
             return jsonify({'code': 403, 'message': '缺少租户上下文'}), 403
             
-        # 只查询API类型任务的告警
+        # 查询所有类型任务的告警，排除已删除的记录
         query = Alert.query.join(Task).filter(
             Alert.tenant_id == tenant_id,
-            Task.type == 'api'
+            Alert.is_deleted == False
         )
         
         # 添加其他过滤条件
@@ -51,6 +54,25 @@ def get_api_alerts_v2():
         
         if status:
             query = query.filter(Alert.status == status)
+        
+        # 添加task_id过滤
+        if task_id:
+            query = query.filter(Alert.task_id == task_id)
+        
+        # 添加时间范围过滤
+        if start_time:
+            try:
+                start_dt = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+                query = query.filter(Alert.created_at >= start_dt)
+            except ValueError:
+                pass  # 忽略无效的时间格式
+        
+        if end_time:
+            try:
+                end_dt = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
+                query = query.filter(Alert.created_at <= end_dt)
+            except ValueError:
+                pass  # 忽略无效的时间格式
         
         # API端点过滤已移除，因为Alert模型中没有api_endpoint字段
         
@@ -141,3 +163,55 @@ def resolve_api_alert_v2(api_alert_id):
         from app import db
         db.session.rollback()
         return jsonify({'code': 500, 'message': f'解决API告警失败: {str(e)}'}), 500
+
+
+@v2_bp.route('/api-alerts/batch', methods=['DELETE'])
+@token_required
+@tenant_required
+def delete_api_alerts_batch_v2():
+    """批量硬删除API告警 - v2版本（强制租户隔离）"""
+    try:
+        from app import db
+        
+        data = request.get_json()
+        
+        if 'alert_ids' not in data or not data['alert_ids']:
+            return jsonify({
+                'code': 400,
+                'message': '缺少alert_ids字段或为空'
+            }), 400
+        
+        alert_ids = data['alert_ids']
+        
+        # 强制按租户过滤，硬删除API告警
+        tenant_id = TenantContext.get_current_tenant_id()
+        if not tenant_id:
+            return jsonify({'code': 403, 'message': '缺少租户上下文'}), 403
+            
+        # 只删除API类型任务的告警
+        alerts = Alert.query.join(Task).filter(
+            Alert.tenant_id == tenant_id,
+            Task.type == 'api',
+            Alert.id.in_(alert_ids),
+            Alert.is_deleted == False
+        ).all()
+        
+        deleted_count = len(alerts)
+        
+        # 硬删除：直接从数据库中删除记录
+        for alert in alerts:
+            db.session.delete(alert)
+        
+        db.session.commit()
+        
+        return jsonify({
+            'code': 0,
+            'message': f'成功删除 {deleted_count} 条API告警'
+        })
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'code': 500,
+            'message': f'批量删除API告警失败: {str(e)}'
+        }), 500

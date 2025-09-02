@@ -164,3 +164,53 @@ def resolve_alert_v2(alert_id):
         from app import db
         db.session.rollback()
         return jsonify({'code': 500, 'message': f'解决告警失败: {str(e)}'}), 500
+
+
+@v2_bp.route('/alerts/batch', methods=['DELETE'])
+@token_required
+@tenant_required
+def delete_alerts_batch_v2():
+    """批量硬删除告警 - v2版本（强制租户隔离）"""
+    try:
+        from app import db
+        
+        data = request.get_json()
+        
+        if 'alert_ids' not in data or not data['alert_ids']:
+            return jsonify({
+                'code': 400,
+                'message': '缺少alert_ids字段或为空'
+            }), 400
+        
+        alert_ids = data['alert_ids']
+        
+        # 强制按租户过滤，硬删除告警
+        tenant_id = TenantContext.get_current_tenant_id()
+        if not tenant_id:
+            return jsonify({'code': 403, 'message': '缺少租户上下文'}), 403
+            
+        alerts = Alert.query.filter(
+            Alert.tenant_id == tenant_id,
+            Alert.id.in_(alert_ids),
+            Alert.is_deleted == False
+        ).all()
+        
+        deleted_count = len(alerts)
+        
+        # 硬删除：直接从数据库中删除记录
+        for alert in alerts:
+            db.session.delete(alert)
+        
+        db.session.commit()
+        
+        return jsonify({
+            'code': 0,
+            'message': f'成功删除 {deleted_count} 条告警'
+        })
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'code': 500,
+            'message': f'批量删除告警失败: {str(e)}'
+        }), 500

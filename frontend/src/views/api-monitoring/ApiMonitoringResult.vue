@@ -357,10 +357,10 @@ const fetchAlerts = async (startTime = null, endTime = null) => {
     
     // 使用真实的告警API接口调用
      const { getAlerts } = await import('@/api/alerts')
-     const response = await getAlerts(params)
+     const response = await getAlerts(params, '/api-alerts')
     if (response && response.code === 0) {
       // 过滤当前任务的告警
-      const allAlerts = response.alerts || response.list || []
+      const allAlerts = response.data?.alerts || response.data?.list || []
       const taskAlerts = allAlerts.filter(alert => alert.task_id == taskId)
       
       alertData.value = taskAlerts.map(alert => ({

@@ -238,7 +238,7 @@ def delete_alerts_batch():
         alert_ids = data['alert_ids']
         
         # 添加租户过滤，软删除告警
-        alerts = filter_by_tenant(Alert.query).filter(
+        alerts = filter_by_tenant(Alert.query, Alert).filter(
             Alert.id.in_(alert_ids),
             Alert.is_deleted == False
         ).all()
