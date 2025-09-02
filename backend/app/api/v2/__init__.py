@@ -10,3 +10,5 @@ from . import nodes
 from . import results
 from . import tenants
 from . import reports
+from . import audit_logs
+from . import system_variables

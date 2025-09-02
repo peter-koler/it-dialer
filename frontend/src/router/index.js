@@ -170,6 +170,18 @@ const routes = [
         name: 'UserTenantManagement',
         component: () => import('../views/system/UserTenantManagement.vue'),
         meta: { title: '用户租户关联管理', requiresSuperAdmin: true }
+      },
+      {
+        path: '/tenant/user-management',
+        name: 'TenantUserManagement',
+        component: () => import('../views/tenant-management/TenantUserManagement.vue'),
+        meta: { title: '租户用户管理', requiresTenantAdmin: true }
+      },
+      {
+        path: '/system/audit-logs',
+        name: 'AuditLogs',
+        component: () => import('../views/system/AuditLogs.vue'),
+        meta: { title: '审计日志查询', requiresTenantAdmin: true }
       }
     ]
   }
@@ -204,6 +216,31 @@ router.beforeEach((to, from, next) => {
             }
           } catch (error) {
             console.error('Failed to parse user info:', error)
+            next('/login')
+            return
+          }
+        } else {
+          next('/login')
+          return
+        }
+      }
+      
+      // 检查租户管理员权限
+      if (to.meta?.requiresTenantAdmin) {
+        const userInfo = localStorage.getItem('user_info')
+        const currentTenant = localStorage.getItem('current_tenant')
+        if (userInfo && currentTenant) {
+          try {
+            const user = JSON.parse(userInfo)
+            const tenant = JSON.parse(currentTenant)
+            // 检查用户是否为租户管理员或超级管理员
+            if (tenant.role !== 'tenant_admin' && user.tenant_role !== 'super_admin') {
+              // 非租户管理员，跳转到首页
+              next('/')
+              return
+            }
+          } catch (error) {
+            console.error('Failed to parse user or tenant info:', error)
             next('/login')
             return
           }

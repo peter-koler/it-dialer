@@ -3,7 +3,9 @@ from . import bp
 from functools import wraps
 from app import db
 from app.models.user import User
+from app.models.audit_log import AuditLog, AuditAction, ResourceType
 from app.utils.auth_decorators import token_required
+import json
 
 
 @bp.route('/users/profile', methods=['GET'])
@@ -139,6 +141,34 @@ def create_user():
         db.session.add(user)
         db.session.commit()
         
+        # 记录审计日志
+        try:
+            from flask import g
+            current_user = getattr(g, 'current_user', None)
+            if current_user:
+                details = {
+                    'created_user': {
+                        'username': user.username,
+                        'email': user.email,
+                        'role': user.role,
+                        'status': 'active' if user.status == 1 else 'inactive'
+                    },
+                    'operation_type': 'create_user'
+                }
+                
+                AuditLog.log_action(
+                    tenant_id=getattr(current_user, 'tenant_id', 1),
+                    action=AuditAction.CREATE_USER,
+                    resource_type=ResourceType.USER,
+                    user_id=current_user.id,
+                    target_user_id=user.id,
+                    details=json.dumps(details, ensure_ascii=False),
+                    ip_address=request.remote_addr
+                )
+        except Exception as audit_e:
+            # 审计日志记录失败不应影响主要业务逻辑
+            print(f"审计日志记录失败: {audit_e}")
+        
         return jsonify({
             'code': 0,
             'data': user.to_dict(),
@@ -211,6 +241,53 @@ def update_user(user_id):
         # 保存到数据库
         db.session.commit()
         
+        # 记录审计日志
+        try:
+            from flask import g
+            current_user = getattr(g, 'current_user', None)
+            if current_user:
+                # 构建变更详情
+                updated_fields = []
+                changes = {}
+                
+                if 'username' in data:
+                    updated_fields.append('username')
+                    changes['username'] = data['username']
+                if 'email' in data:
+                    updated_fields.append('email')
+                    changes['email'] = data['email']
+                if 'role' in data:
+                    updated_fields.append('role')
+                    changes['role'] = data['role']
+                if 'status' in data:
+                    updated_fields.append('status')
+                    changes['status'] = 'active' if data['status'] == 1 else 'inactive'
+                
+                details = {
+                    'updated_user': {
+                        'username': user.username,
+                        'email': user.email,
+                        'role': user.role,
+                        'status': 'active' if user.status == 1 else 'inactive'
+                    },
+                    'updated_fields': updated_fields,
+                    'changes': changes,
+                    'operation_type': 'update_user'
+                }
+                
+                AuditLog.log_action(
+                    tenant_id=getattr(current_user, 'tenant_id', 1),
+                    action=AuditAction.UPDATE_USER,
+                    resource_type=ResourceType.USER,
+                    user_id=current_user.id,
+                    target_user_id=user.id,
+                    details=json.dumps(details, ensure_ascii=False),
+                    ip_address=request.remote_addr
+                )
+        except Exception as audit_e:
+            # 审计日志记录失败不应影响主要业务逻辑
+            print(f"审计日志记录失败: {audit_e}")
+        
         return jsonify({
             'code': 0,
             'data': user.to_dict(),
@@ -259,6 +336,33 @@ def reset_user_password(user_id):
         # 保存到数据库
         db.session.commit()
         
+        # 记录审计日志
+        try:
+            from flask import g
+            current_user = getattr(g, 'current_user', None)
+            if current_user:
+                details = {
+                    'target_user': {
+                        'username': user.username,
+                        'email': user.email,
+                        'role': user.role
+                    },
+                    'operation_type': 'reset_password'
+                }
+                
+                AuditLog.log_action(
+                    tenant_id=getattr(current_user, 'tenant_id', 1),
+                    action=AuditAction.RESET_PASSWORD,
+                    resource_type=ResourceType.USER,
+                    user_id=current_user.id,
+                    target_user_id=user.id,
+                    details=json.dumps(details, ensure_ascii=False),
+                    ip_address=request.remote_addr
+                )
+        except Exception as audit_e:
+            # 审计日志记录失败不应影响主要业务逻辑
+            print(f"审计日志记录失败: {audit_e}")
+        
         return jsonify({
             'code': 0,
             'data': {},
@@ -294,6 +398,34 @@ def delete_user(user_id):
                 'data': {},
                 'message': '不能删除默认用户'
             }), 400
+        
+        # 记录审计日志（在删除前记录用户信息）
+        try:
+            from flask import g
+            current_user = getattr(g, 'current_user', None)
+            if current_user:
+                details = {
+                    'deleted_user': {
+                        'username': user.username,
+                        'email': user.email,
+                        'role': user.role,
+                        'status': 'active' if user.status == 1 else 'inactive'
+                    },
+                    'operation_type': 'delete_user'
+                }
+                
+                AuditLog.log_action(
+                    tenant_id=getattr(current_user, 'tenant_id', 1),
+                    action=AuditAction.DELETE_USER,
+                    resource_type=ResourceType.USER,
+                    user_id=current_user.id,
+                    target_user_id=user.id,
+                    details=json.dumps(details, ensure_ascii=False),
+                    ip_address=request.remote_addr
+                )
+        except Exception as audit_e:
+            # 审计日志记录失败不应影响主要业务逻辑
+            print(f"审计日志记录失败: {audit_e}")
         
         # 从数据库删除
         db.session.delete(user)

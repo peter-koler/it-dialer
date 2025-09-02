@@ -7,6 +7,8 @@ from ...config import Config
 from app import db
 from app.models.user import User
 from app.models.tenant import UserTenant
+from app.models.audit_log import AuditLog, AuditAction, ResourceType
+import json
 
 
 @bp.route('/auth/login', methods=['POST'])
@@ -21,7 +23,7 @@ def login():
         user = User.query.filter_by(username=username).first()
         
         # 验证用户和密码
-        if user and user.check_password(password) and user.status == 1:
+        if user and user.check_password(password) and (user.status == 1 or user.status == 'active'):
             # 获取用户的租户信息
             user_tenant_objects = UserTenant.get_user_tenants(user.id)
             
@@ -80,7 +82,50 @@ def login():
             }))
             
             response.set_cookie('refresh_token', refresh_token, httponly=True)
+            
+            # 记录登录成功的审计日志
+            try:
+                details = {
+                    'username': user.username,
+                    'tenant_id': default_tenant['tenant_id'],
+                    'tenant_name': default_tenant['tenant_name'],
+                    'tenant_role': default_tenant['role'],
+                    'operation_type': 'login_success'
+                }
+                
+                AuditLog.log_action(
+                    tenant_id=default_tenant['tenant_id'],
+                    action=AuditAction.LOGIN_SUCCESS,
+                    resource_type=ResourceType.USER,
+                    user_id=user.id,
+                    details=json.dumps(details, ensure_ascii=False),
+                    ip_address=request.remote_addr
+                )
+            except Exception as audit_e:
+                # 审计日志记录失败不应影响主要业务逻辑
+                print(f"审计日志记录失败: {audit_e}")
+            
             return response
+        
+        # 记录登录失败的审计日志
+        try:
+            details = {
+                'username': username,
+                'reason': 'invalid_credentials',
+                'operation_type': 'login_failed'
+            }
+            
+            AuditLog.log_action(
+                tenant_id=1,  # 使用默认租户ID，因为登录失败时没有租户上下文
+                action=AuditAction.LOGIN_FAILED,
+                resource_type=ResourceType.USER,
+                user_id=None,
+                details=json.dumps(details, ensure_ascii=False),
+                ip_address=request.remote_addr
+            )
+        except Exception as audit_e:
+            # 审计日志记录失败不应影响主要业务逻辑
+            print(f"审计日志记录失败: {audit_e}")
         
         return jsonify({
             'code': 401,

@@ -58,7 +58,7 @@
                 :value-style="{ color: '#722ed1' }"
               >
                 <template #prefix>
-                  <TeamOutlined />
+                  <UserOutlined />
                 </template>
               </a-statistic>
             </a-card>
@@ -109,6 +109,22 @@
         />
         
         <a-row :gutter="[16, 16]" v-if="quotaData && quotaData.usage_stats">
+          <!-- 用户统计卡片 -->
+          <a-col :xs="24" :sm="12" :lg="6" v-if="quotaData.tenant_info">
+            <a-card size="small" class="summary-card">
+              <a-statistic
+                title="租户用户数"
+                :value="quotaData.tenant_info.user_count || 0"
+                :value-style="{ color: '#722ed1' }"
+              >
+                <template #prefix>
+                  <UserOutlined />
+                </template>
+              </a-statistic>
+            </a-card>
+          </a-col>
+          
+          <!-- 资源限额卡片 -->
           <a-col :xs="24" :sm="12" :lg="6" v-for="(quota, key) in quotaData.usage_stats" :key="key">
             <a-card size="small" :class="getCardClass(quota)">
               <a-statistic
@@ -329,6 +345,16 @@
                   style="margin-left: 8px; width: 60px;"
                 />
               </div>
+              <div class="quota-item" v-if="record.usage?.users || record.max_users">
+                <span>用户: {{ record.usage?.users?.current || record.user_count || 0 }}/{{ record.usage?.users?.limit || record.max_users || '无限制' }}</span>
+                <a-progress 
+                  :percent="record.usage?.users?.usage_rate || (record.max_users ? Math.round((record.user_count || 0) / record.max_users * 100) : 0)" 
+                  :status="getProgressStatus(record.usage?.users || { usage_rate: record.max_users ? Math.round((record.user_count || 0) / record.max_users * 100) : 0 })"
+                  :stroke-color="getProgressColor(record.usage?.users || { usage_rate: record.max_users ? Math.round((record.user_count || 0) / record.max_users * 100) : 0 })"
+                  size="small" 
+                  style="margin-left: 8px; width: 60px;"
+                />
+              </div>
             </div>
           </template>
         </template>
@@ -347,6 +373,7 @@ import {
   SettingOutlined,
   BellOutlined,
   TeamOutlined,
+  UserOutlined,
   ApiOutlined,
   CloudServerOutlined,
   AlertOutlined
@@ -509,16 +536,17 @@ const fetchQuotaData = async () => {
         }
       }
       
-      // 使用确定的租户ID获取数据
-      const response = await request.get(`/tenants/${tenantId}/usage`)
+      // 使用v2版本的API获取数据
+      const response = await request.get(`/v2/tenants/${tenantId}/usage`)
       // v2 API返回格式：{code: 0, data: {...}, message: 'ok'}
       const responseData = response.data?.data || response.data || response
       quotaData.value = {
         type: 'tenant',
         usage_stats: responseData.usage_stats || responseData,
-        tenant_info: {
+        tenant_info: responseData.tenant_info || {
           tenant_id: tenantId,
-          tenant_name: responseData.tenant_name || userStore.user?.tenant_name || '当前租户'
+          tenant_name: responseData.tenant_name || userStore.user?.tenant_name || '当前租户',
+          user_count: 0
         }
       }
     }
@@ -607,7 +635,8 @@ const getResourceTitle = (key) => {
     tasks: '拨测任务',
     nodes: '拨测节点',
     variables: '系统变量',
-    alerts: '告警规则'
+    alerts: '告警规则',
+    users: '租户用户'
   }
   return titles[key] || key
 }
@@ -618,7 +647,8 @@ const getResourceIcon = (key) => {
     tasks: ApiOutlined,
     nodes: CloudServerOutlined,
     variables: SettingOutlined,
-    alerts: AlertOutlined
+    alerts: AlertOutlined,
+    users: UserOutlined
   }
   return icons[key] || ApiOutlined
 }

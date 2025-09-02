@@ -115,16 +115,9 @@ def migrate_results_to_tenant(default_tenant):
 
 
 def migrate_nodes_to_tenant(default_tenant):
-    """将所有节点关联到默认租户"""
-    print("正在迁移节点到默认租户...")
-    
-    nodes = Node.query.filter(Node.tenant_id.is_(None)).all()
-    
-    for node in nodes:
-        node.tenant_id = default_tenant.id
-    
-    db.session.commit()
-    print(f"节点迁移完成，共迁移 {len(nodes)} 个节点")
+    """跳过节点迁移，因为节点现在是全局共享的"""
+    print("正在跳过节点迁移...")
+    print("节点迁移跳过，节点现在是全局共享的，无需关联到特定租户")
 
 
 def migrate_system_variables_to_tenant(default_tenant):

@@ -197,6 +197,18 @@ const menuItems = [
         label: 'menu.system.userTenantManagement',
         icon: TeamOutlined,
         permission: 'sys:tenant'
+      },
+      {
+        key: '/tenant/user-management',
+        label: 'menu.system.tenantUserManagement',
+        icon: UserOutlined,
+        permission: 'tenant:user'
+      },
+      {
+        key: '/system/audit-logs',
+        label: 'menu.system.auditLogs',
+        icon: AlertOutlined,
+        permission: 'sys:audit'
       }
     ]
   }
@@ -218,6 +230,14 @@ const filteredMenuItems = computed(() => {
         // 租户管理权限检查（仅超级管理员可见）
         if (child.permission === 'sys:tenant') {
           return isSuperAdmin
+        }
+        // 租户用户管理权限检查（租户管理员可见）
+        if (child.permission === 'tenant:user') {
+          return userRole === 'tenant_admin' || isSuperAdmin
+        }
+        // 审计日志权限检查（超级管理员和租户管理员可见）
+        if (child.permission === 'sys:audit') {
+          return userRole === 'tenant_admin' || isSuperAdmin
         }
         // 其他菜单项的权限检查
         if (userRole === 'viewer') {

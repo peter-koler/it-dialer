@@ -45,40 +45,60 @@ def token_required(f):
             
             # 验证租户信息
             tenant_id = data.get('tenant_id')
-            if not tenant_id:
-                return jsonify({
-                    'code': 401,
-                    'data': {},
-                    'message': 'Token中缺少租户信息'
-                }), 401
+            tenant_role = data.get('tenant_role', 'user')
             
-            # 验证用户是否有权限访问该租户
-            user_tenant = UserTenant.query.filter_by(
-                user_id=current_user.id,
-                tenant_id=tenant_id
-            ).first()
-            
-            if not user_tenant:
-                return jsonify({
-                    'code': 403,
-                    'data': {},
-                    'message': '用户无权限访问该租户'
-                }), 403
-            
-            # 获取租户信息
-            current_tenant = Tenant.query.filter_by(id=tenant_id).first()
-            if not current_tenant or current_tenant.status != 'active':
-                return jsonify({
-                    'code': 403,
-                    'data': {},
-                    'message': '租户不存在或已被禁用'
-                }), 403
+            # 超级管理员不需要租户ID和UserTenant记录
+            if tenant_role == 'super_admin':
+                # 超级管理员可以不指定租户ID，或者指定任意租户ID
+                if tenant_id:
+                    current_tenant = Tenant.query.filter_by(id=tenant_id).first()
+                    if not current_tenant or current_tenant.status != 'active':
+                        return jsonify({
+                            'code': 403,
+                            'data': {},
+                            'message': '租户不存在或已被禁用'
+                        }), 403
+                else:
+                    current_tenant = None
+            else:
+                # 普通用户必须有租户ID
+                if not tenant_id:
+                    return jsonify({
+                        'code': 401,
+                        'data': {},
+                        'message': 'Token中缺少租户信息'
+                    }), 401
+                
+                # 验证用户是否有权限访问该租户
+                user_tenant = UserTenant.query.filter_by(
+                    user_id=current_user.id,
+                    tenant_id=tenant_id
+                ).first()
+                
+                if not user_tenant:
+                    return jsonify({
+                        'code': 403,
+                        'data': {},
+                        'message': '用户无权限访问该租户'
+                    }), 403
+                
+                # 从UserTenant表中获取实际的租户角色
+                tenant_role = user_tenant.role
+                
+                # 获取租户信息
+                current_tenant = Tenant.query.filter_by(id=tenant_id).first()
+                if not current_tenant or current_tenant.status != 'active':
+                    return jsonify({
+                        'code': 403,
+                        'data': {},
+                        'message': '租户不存在或已被禁用'
+                    }), 403
             
             # 将当前用户和租户信息存储到g对象中
             g.current_user = current_user
             g.current_tenant = current_tenant
-            g.tenant_role = data.get('tenant_role', 'user')
             g.tenant_id = tenant_id
+            g.tenant_role = tenant_role
             
         except jwt.ExpiredSignatureError:
             return jsonify({

@@ -6,7 +6,9 @@ const V2_API_PATHS = [
   '/tenants',          // 租户相关API
   '/reports',          // 报表相关API（总览、专项报表）
   '/results',          // 结果数据API（支持租户隔离）
-  '/api-alerts'        // API告警管理（支持租户隔离）
+  '/api-alerts',       // API告警管理（支持租户隔离）
+  '/system-variables', // 系统变量管理（支持租户隔离）
+  '/audit-logs'        // 审计日志查询（支持租户隔离）
 ]
 
 // API版本选择函数

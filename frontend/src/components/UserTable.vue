@@ -19,7 +19,7 @@
         </template>
         <template v-else-if="column.dataIndex === 'status'">
           <a-switch
-            v-model:checked="record.status"
+            :checked="record.status === 1"
             checked-children="启用"
             un-checked-children="禁用"
             @change="onStatusChange(record, $event)"
@@ -45,6 +45,7 @@
 <script setup>
 import { ref } from 'vue'
 import { message } from 'ant-design-vue'
+import request from '@/utils/request'
 
 const props = defineProps({
   users: {
@@ -121,8 +122,16 @@ const onDelete = (record) => {
   emit('delete', record)
 }
 
-const onStatusChange = (record, checked) => {
-  // 这里应该调用API更新用户状态
-  message.success(`用户 ${record.username} 状态已更新`)
+const onStatusChange = async (record, checked) => {
+  try {
+    const newStatus = checked ? 1 : 0
+    // 调用API更新用户状态
+    await request.patch(`/users/${record.id}`, { status: newStatus })
+    // 更新本地数据
+    record.status = newStatus
+    message.success(`用户 ${record.username} 状态已更新`)
+  } catch (error) {
+    message.error('状态更新失败: ' + error.message)
+  }
 }
 </script>

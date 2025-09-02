@@ -8,6 +8,22 @@
       </a-button>
     </div>
 
+    <!-- 搜索区域 -->
+    <div class="search-area">
+      <a-row :gutter="16">
+        <a-col :span="8">
+          <a-input-search
+            v-model:value="searchKeyword"
+            placeholder="请输入租户名称搜索"
+            enter-button="搜索"
+            @search="handleSearch"
+            @change="handleSearchChange"
+            allowClear
+          />
+        </a-col>
+      </a-row>
+    </div>
+
     <!-- 租户列表 -->
     <a-table 
       :columns="columns" 
@@ -128,6 +144,50 @@
               </a-form-item>
             </a-col>
           </a-row>
+          <a-row :gutter="16">
+            <a-col :span="12">
+              <a-form-item label="最大用户数" name="max_users">
+                <a-input-number 
+                  v-model:value="formData.max_users" 
+                  :min="1" 
+                  :max="1000"
+                  style="width: 100%"
+                  placeholder="默认15"
+                />
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form-item>
+        <a-form-item label="默认租户管理员（可选）">
+          <a-checkbox v-model:checked="formData.create_admin" @change="handleCreateAdminChange">
+            创建默认管理员
+          </a-checkbox>
+          <div v-if="formData.create_admin" style="margin-top: 16px; padding: 16px; background: #fafafa; border-radius: 6px;">
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="管理员用户名" name="admin_username">
+                  <a-input 
+                    v-model:value="formData.admin_username" 
+                    placeholder="请输入管理员用户名"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="管理员邮箱" name="admin_email">
+                  <a-input 
+                    v-model:value="formData.admin_email" 
+                    placeholder="请输入管理员邮箱"
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-form-item label="管理员密码" name="admin_password">
+              <a-input-password 
+                v-model:value="formData.admin_password" 
+                placeholder="请输入管理员密码"
+              />
+            </a-form-item>
+          </div>
         </a-form-item>
         <a-form-item label="描述" name="description">
           <a-textarea 
@@ -218,6 +278,7 @@ const submitLoading = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
 const currentTenantUsage = ref(null)
+const searchKeyword = ref('')
 
 // 分页配置
 const pagination = reactive({
@@ -237,7 +298,12 @@ const formData = reactive({
   max_nodes: 5,
   max_alerts: 10,
   max_variables: 20,
-  description: ''
+  max_users: 15,
+  description: '',
+  create_admin: false,
+  admin_username: '',
+  admin_email: '',
+  admin_password: ''
 })
 
 // 表单验证规则
@@ -254,6 +320,51 @@ const formRules = {
   ],
   max_nodes: [
     { required: true, message: '请输入最大节点数', trigger: 'blur' }
+  ],
+  max_users: [
+    { required: true, message: '请输入最大用户数', trigger: 'blur' }
+  ],
+  admin_username: [
+    { 
+      validator: (rule, value) => {
+        if (formData.create_admin && !value) {
+          return Promise.reject('请输入管理员用户名')
+        }
+        if (value && (value.length < 3 || value.length > 20)) {
+          return Promise.reject('用户名长度在 3 到 20 个字符')
+        }
+        return Promise.resolve()
+      },
+      trigger: 'blur'
+    }
+  ],
+  admin_email: [
+    { 
+      validator: (rule, value) => {
+        if (formData.create_admin && !value) {
+          return Promise.reject('请输入管理员邮箱')
+        }
+        if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          return Promise.reject('请输入有效的邮箱地址')
+        }
+        return Promise.resolve()
+      },
+      trigger: 'blur'
+    }
+  ],
+  admin_password: [
+    { 
+      validator: (rule, value) => {
+        if (formData.create_admin && !value) {
+          return Promise.reject('请输入管理员密码')
+        }
+        if (value && value.length < 6) {
+          return Promise.reject('密码长度至少6个字符')
+        }
+        return Promise.resolve()
+      },
+      trigger: 'blur'
+    }
   ]
 }
 
@@ -284,6 +395,18 @@ const columns = [
     width: 120
   },
   {
+    title: '最大用户数',
+    dataIndex: 'max_users',
+    key: 'max_users',
+    width: 100
+  },
+  {
+    title: '当前用户数',
+    dataIndex: 'user_count',
+    key: 'user_count',
+    width: 100
+  },
+  {
     title: '状态',
     dataIndex: 'status',
     key: 'status',
@@ -311,12 +434,17 @@ onMounted(() => {
 const fetchTenants = async () => {
   loading.value = true
   try {
-    const response = await request.get('/v1/tenants', {
-      params: {
-        page: pagination.current,
-        size: pagination.pageSize
-      }
-    })
+    const params = {
+      page: pagination.current,
+      size: pagination.pageSize
+    }
+    
+    // 添加搜索参数
+    if (searchKeyword.value.trim()) {
+      params.keyword = searchKeyword.value.trim()
+    }
+    
+    const response = await request.get('/v1/tenants', { params })
     tenants.value = response.tenants || []
     pagination.total = response.total || 0
   } catch (error) {
@@ -331,6 +459,20 @@ const handleTableChange = (pag) => {
   pagination.current = pag.current
   pagination.pageSize = pag.pageSize
   fetchTenants()
+}
+
+// 搜索处理
+const handleSearch = () => {
+  pagination.current = 1
+  fetchTenants()
+}
+
+// 搜索输入变化处理
+const handleSearchChange = (e) => {
+  if (!e.target.value.trim()) {
+    pagination.current = 1
+    fetchTenants()
+  }
 }
 
 // 显示创建模态框
@@ -364,11 +506,32 @@ const handleSubmit = async () => {
     await formRef.value.validate()
     submitLoading.value = true
     
+    // 准备提交数据
+    const submitData = {
+      name: formData.name,
+      description: formData.description,
+      subscription_level: formData.subscription_level,
+      max_tasks: formData.max_tasks,
+      max_nodes: formData.max_nodes,
+      max_alerts: formData.max_alerts,
+      max_variables: formData.max_variables,
+      max_users: formData.max_users
+    }
+    
+    // 如果选择创建管理员，添加管理员信息
+    if (formData.create_admin) {
+      submitData.admin = {
+        username: formData.admin_username,
+        email: formData.admin_email,
+        password: formData.admin_password
+      }
+    }
+    
     if (isEdit.value) {
-      await request.put(`/tenants/${formData.id}`, formData)
+      await request.put(`/tenants/${formData.id}`, submitData)
       message.success('租户更新成功')
     } else {
-      await request.post('/tenants', formData)
+      await request.post('/tenants', submitData)
       message.success('租户创建成功')
     }
     
@@ -400,7 +563,12 @@ const resetForm = () => {
     max_nodes: 5,
     max_alerts: 10,
     max_variables: 20,
-    description: ''
+    max_users: 15,
+    description: '',
+    create_admin: false,
+    admin_username: '',
+    admin_email: '',
+    admin_password: ''
   })
   formRef.value?.resetFields()
 }
@@ -408,13 +576,25 @@ const resetForm = () => {
 // 订阅级别变化时自动调整默认限额
 const handleSubscriptionLevelChange = (level) => {
   const quotaMap = {
-    'free': { max_tasks: 10, max_nodes: 5, max_alerts: 10, max_variables: 20 },
-    'pro': { max_tasks: 50, max_nodes: 20, max_alerts: 50, max_variables: 100 },
-    'enterprise': { max_tasks: 200, max_nodes: 100, max_alerts: 200, max_variables: 500 }
+    'free': { max_tasks: 10, max_nodes: 5, max_alerts: 10, max_variables: 20, max_users: 15 },
+    'pro': { max_tasks: 50, max_nodes: 20, max_alerts: 50, max_variables: 100, max_users: 50 },
+    'enterprise': { max_tasks: 200, max_nodes: 100, max_alerts: 200, max_variables: 500, max_users: 200 }
   }
   
   const quota = quotaMap[level] || quotaMap['free']
   Object.assign(formData, quota)
+}
+
+// 处理创建管理员复选框变化
+const handleCreateAdminChange = (checked) => {
+  if (!checked) {
+    // 清空管理员信息
+    formData.admin_username = ''
+    formData.admin_email = ''
+    formData.admin_password = ''
+    // 清除验证错误
+    formRef.value?.clearValidate(['admin_username', 'admin_email', 'admin_password'])
+  }
 }
 
 // 切换租户状态
@@ -500,6 +680,13 @@ const getUsageStats = () => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+}
+
+.search-area {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 6px;
 }
 
 .page-header h2 {

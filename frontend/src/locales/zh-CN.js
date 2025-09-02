@@ -28,6 +28,8 @@ export default {
   'menu.system.variables': '系统变量',
   'menu.system.tenant': '租户管理',
   'menu.system.userTenantManagement': '用户租户关联管理',
+  'menu.system.tenantUserManagement': '租户用户管理',
+  'menu.system.auditLogs': '审计日志查询',
   
   // 节点管理
   'node.nodeManagement': '节点管理',

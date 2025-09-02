@@ -6,7 +6,7 @@ import request from '@/utils/request'
  * @returns {Promise}
  */
 export const getSystemVariables = (params) => {
-  return request.get('/system/variables', { params })
+  return request.get('/system-variables', { params })
 }
 
 /**
@@ -15,7 +15,7 @@ export const getSystemVariables = (params) => {
  * @returns {Promise}
  */
 export const createSystemVariable = (data) => {
-  return request.post('/system/variables', data)
+  return request.post('/system-variables', data)
 }
 
 /**
@@ -25,7 +25,7 @@ export const createSystemVariable = (data) => {
  * @returns {Promise}
  */
 export const updateSystemVariable = (id, data) => {
-  return request.put(`/system/variables/${id}`, data)
+  return request.put(`/system-variables/${id}`, data)
 }
 
 /**
@@ -34,7 +34,7 @@ export const updateSystemVariable = (id, data) => {
  * @returns {Promise}
  */
 export const deleteSystemVariable = (id) => {
-  return request.delete(`/system/variables/${id}`)
+  return request.delete(`/system-variables/${id}`)
 }
 <template>
   <div class="system-variable-manager">
@@ -271,8 +271,8 @@ const fetchVariables = async (params = {}) => {
 
     const response = await getSystemVariables(queryParams)
     
-    variables.value = response.list
-    pagination.total = response.total
+    variables.value = response.data.list
+    pagination.total = response.data.total
     pagination.current = queryParams.page
     pagination.pageSize = queryParams.size
     

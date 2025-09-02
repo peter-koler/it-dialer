@@ -16,6 +16,7 @@ class Tenant(db.Model):
     max_nodes = db.Column(db.Integer, nullable=False, default=5, comment='节点数量上限')
     max_variables = db.Column(db.Integer, nullable=False, default=20, comment='变量数量上限')
     max_alerts = db.Column(db.Integer, nullable=False, default=10, comment='告警规则上限')
+    max_users = db.Column(db.Integer, nullable=False, default=15, comment='用户数量上限')
     status = db.Column(db.Enum('active', 'inactive', 'suspended', name='tenant_status_enum'), 
                       nullable=False, default='active', comment='租户状态')
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now, comment='创建时间')
@@ -41,19 +42,22 @@ class Tenant(db.Model):
                 'max_tasks': 10,
                 'max_nodes': 5,
                 'max_variables': 20,
-                'max_alerts': 10
+                'max_alerts': 10,
+                'max_users': 15
             },
             'pro': {
                 'max_tasks': 50,
                 'max_nodes': 20,
                 'max_variables': 100,
-                'max_alerts': 50
+                'max_alerts': 50,
+                'max_users': 100
             },
             'enterprise': {
                 'max_tasks': 200,
                 'max_nodes': 100,
                 'max_variables': 500,
-                'max_alerts': 200
+                'max_alerts': 200,
+                'max_users': 500
             }
         }
         return limits.get(subscription_level, limits['free'])
@@ -83,11 +87,16 @@ class Tenant(db.Model):
             AlertConfig.tenant_id == self.id
         ).count()
         
+        users_count = UserTenant.query.filter(
+            UserTenant.tenant_id == self.id
+        ).count()
+        
         return {
             'tasks': {'current': tasks_count, 'limit': self.max_tasks},
             'nodes': {'current': nodes_count, 'limit': self.max_nodes},
             'variables': {'current': variables_count, 'limit': self.max_variables},
-            'alerts': {'current': alerts_count, 'limit': self.max_alerts}
+            'alerts': {'current': alerts_count, 'limit': self.max_alerts},
+            'users': {'current': users_count, 'limit': self.max_users}
         }
     
     def check_resource_limit(self, resource_type):
@@ -110,6 +119,7 @@ class Tenant(db.Model):
             'max_nodes': self.max_nodes,
             'max_variables': self.max_variables,
             'max_alerts': self.max_alerts,
+            'max_users': self.max_users,
             'status': self.status,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,

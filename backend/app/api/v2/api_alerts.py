@@ -1,10 +1,11 @@
 from flask import request, jsonify, g
+import json
 from app.api.v2 import v2_bp
 from app.models.alert import Alert
 from app.models.task import Task
+from app.models.audit_log import AuditLog, AuditAction, ResourceType
 from app.utils.auth_decorators import token_required
 from app.utils.tenant_context import TenantContext, tenant_required
-# 使用Flask的jsonify替代响应工具函数
 from sqlalchemy import or_, and_
 from datetime import datetime
 
@@ -150,12 +151,36 @@ def resolve_api_alert_v2(api_alert_id):
         if api_alert.status == 'resolved':
             return jsonify({'code': 400, 'message': 'API告警已经被解决'}), 400
         
+        # 记录原始信息用于审计日志
+        original_status = api_alert.status
+        
         # 更新告警状态
         api_alert.status = 'resolved'
         api_alert.resolved_at = datetime.utcnow()
         
         from app import db
         db.session.commit()
+        
+        # 记录审计日志
+        try:
+            current_user = getattr(g, 'current_user', None)
+            details = {
+                'alert_id': api_alert.id,
+                'alert_title': api_alert.title,
+                'task_id': api_alert.task_id,
+                'original_status': original_status,
+                'new_status': 'resolved',
+                'operation_type': 'resolve_alert'
+            }
+            AuditLog.log_action(
+                user_id=current_user.id if current_user else None,
+                action=AuditAction.UPDATE_SYSTEM_CONFIG,
+                resource_type=ResourceType.SYSTEM,
+                resource_id=str(api_alert.id),
+                details=json.dumps(details, ensure_ascii=False)
+            )
+        except Exception as audit_error:
+            print(f"审计日志记录失败: {audit_error}")
         
         return jsonify({'code': 0, 'data': {'message': 'API告警已解决'}})
         
@@ -198,11 +223,40 @@ def delete_api_alerts_batch_v2():
         
         deleted_count = len(alerts)
         
+        # 记录删除前的信息用于审计日志
+        deleted_alerts_info = []
+        for alert in alerts:
+            deleted_alerts_info.append({
+                'id': alert.id,
+                'title': alert.title,
+                'task_id': alert.task_id,
+                'status': alert.status,
+                'level': alert.level
+            })
+        
         # 硬删除：直接从数据库中删除记录
         for alert in alerts:
             db.session.delete(alert)
         
         db.session.commit()
+        
+        # 记录审计日志
+        try:
+            current_user = getattr(g, 'current_user', None)
+            details = {
+                'deleted_alerts': deleted_alerts_info,
+                'deleted_count': deleted_count,
+                'operation_type': 'batch_delete_alerts'
+            }
+            AuditLog.log_action(
+                user_id=current_user.id if current_user else None,
+                action=AuditAction.DELETE_SYSTEM_CONFIG,
+                resource_type=ResourceType.SYSTEM,
+                resource_id=','.join([str(alert['id']) for alert in deleted_alerts_info]),
+                details=json.dumps(details, ensure_ascii=False)
+            )
+        except Exception as audit_error:
+            print(f"审计日志记录失败: {audit_error}")
         
         return jsonify({
             'code': 0,
