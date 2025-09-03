@@ -366,6 +366,8 @@ const handleTableChange = (pag) => {
 // 显示创建模态框
 const showCreateModal = () => {
   createModalVisible.value = true
+  resetCreateForm() // 确保表单重置
+  console.log('createForm after reset:', createForm) // 调试日志
 }
 
 // 创建用户

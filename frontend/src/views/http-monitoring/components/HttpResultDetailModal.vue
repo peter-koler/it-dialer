@@ -188,29 +188,41 @@ const emit = defineEmits(['update:open'])
 const contentTab = ref('preview')
 
 const resultData = computed(() => {
-  if (typeof props.probeData.details === 'string') {
+  // 首先尝试从probeData.details获取数据
+  let details = props.probeData.details || {}
+  
+  // 如果details是字符串，则尝试解析为JSON
+  if (typeof details === 'string') {
     try {
-      return JSON.parse(props.probeData.details)
+      details = JSON.parse(details)
     } catch (e) {
       console.error('Failed to parse details', e)
       return {}
     }
   }
-  return props.probeData.details || {}
+  
+  // 处理嵌套的details结构（API返回的数据中details.details包含实际数据）
+  const actualDetails = details.details || details
+  
+  // 合并details和probeData中的数据，优先使用actualDetails中的值
+  return {
+    ...props.probeData,
+    ...actualDetails
+  }
 })
 
 // 基本信息
 const responseTime = computed(() => {
-  return resultData.value.response_time || props.probeData.response_time || 0
+  return resultData.value.http_time || resultData.value.response_time || resultData.value.responseTime || props.probeData.response_time || 0
 })
 
 const httpStatusCode = computed(() => {
-  return resultData.value.webstatus || resultData.value.status_code || 
+  return resultData.value.status_code || resultData.value.webstatus || resultData.value.statusCode || 
          (props.probeData.status === 'success' ? 200 : 500)
 })
 
 const executionStatus = computed(() => {
-  const status = props.probeData.status || 'unknown'
+  const status = props.probeData.status || resultData.value.status || 'unknown'
   const statusMap = {
     'success': '成功',
     'failed': '失败',
@@ -223,75 +235,172 @@ const executionStatus = computed(() => {
 
 // 请求信息
 const requestUrl = computed(() => {
-  return resultData.value.url || props.probeData.task?.config?.url || '未知URL'
+  // 从多个可能的位置获取URL
+  return resultData.value.final_url || 
+         resultData.value.url || 
+         resultData.value.request?.url ||
+         props.probeData.task?.target ||
+         props.probeData.task?.config?.url || 
+         props.probeData.url ||
+         '未知URL'
 })
 
 const requestMethod = computed(() => {
-  return resultData.value.method || 'GET'
+  return resultData.value.method || 
+         resultData.value.request?.method ||
+         props.probeData.method ||
+         'GET'
 })
 
 const userAgent = computed(() => {
-  return resultData.value.user_agent || 'HTTP Monitor Agent/1.0'
+  return resultData.value.user_agent || 
+         resultData.value.userAgent ||
+         resultData.value.request?.headers?.['User-Agent'] ||
+         'HTTP Monitor Agent/1.0'
 })
 
 const timeout = computed(() => {
-  return resultData.value.timeout || 30
+  return resultData.value.timeout || 
+         resultData.value.request?.timeout ||
+         props.probeData.timeout ||
+         30
 })
 
 // 响应信息
 const responseHeaders = computed(() => {
-  return resultData.value.response_headers || resultData.value.headers || {}
+  // 尝试从多个位置获取响应头
+  return resultData.value.response_headers || 
+         resultData.value.responseHeaders ||
+         resultData.value.response?.headers ||
+         {}
 })
 
 const contentLength = computed(() => {
   return responseHeaders.value['content-length'] || 
          responseHeaders.value['Content-Length'] || 
-         resultData.value.content_length || 0
+         resultData.value.content_length || 
+         resultData.value.contentLength ||
+         resultData.value.response?.contentLength ||
+         0
 })
 
 const contentType = computed(() => {
   return responseHeaders.value['content-type'] || 
          responseHeaders.value['Content-Type'] || 
-         resultData.value.content_type
+         resultData.value.content_type ||
+         resultData.value.contentType ||
+         resultData.value.response?.contentType
 })
 
 const contentEncoding = computed(() => {
   return responseHeaders.value['content-encoding'] || 
-         responseHeaders.value['Content-Encoding']
+         responseHeaders.value['Content-Encoding'] ||
+         resultData.value.content_encoding ||
+         resultData.value.contentEncoding
 })
 
 const cacheControl = computed(() => {
   return responseHeaders.value['cache-control'] || 
-         responseHeaders.value['Cache-Control']
+         responseHeaders.value['Cache-Control'] ||
+         resultData.value.cache_control ||
+         resultData.value.cacheControl
 })
 
 const responseSize = computed(() => {
-  return resultData.value.response_size || contentLength.value
+  return resultData.value.response_size || 
+         resultData.value.responseSize ||
+         resultData.value.response?.size ||
+         contentLength.value
 })
 
 const responsePreview = computed(() => {
-  const content = resultData.value.response_body || resultData.value.content
-  if (!content) return ''
+  // 首先尝试获取响应体内容
+  const content = resultData.value.response_body || 
+                  resultData.value.responseBody ||
+                  resultData.value.response?.body ||
+                  resultData.value.content || ''
   
-  // 如果内容太长，只显示前1000个字符
-  if (content.length > 1000) {
-    return content.substring(0, 1000) + '\n\n... (内容已截断，查看原始数据获取完整内容)'
+  // 构建详细的响应信息预览
+  let preview = ''
+  
+  // 添加性能指标信息
+  if (resultData.value.dns_time !== undefined) {
+    preview += `DNS解析时间: ${resultData.value.dns_time.toFixed(2)}ms\n`
   }
-  return content
+  if (resultData.value.tcp_time !== undefined) {
+    preview += `TCP连接时间: ${resultData.value.tcp_time.toFixed(2)}ms\n`
+  }
+  if (resultData.value.ssl_time !== undefined && resultData.value.ssl_time > 0) {
+    preview += `SSL握手时间: ${resultData.value.ssl_time.toFixed(2)}ms\n`
+  }
+  if (resultData.value.first_byte_time !== undefined) {
+    preview += `首字节时间: ${resultData.value.first_byte_time.toFixed(2)}ms\n`
+  }
+  if (resultData.value.download_time !== undefined) {
+    preview += `下载时间: ${resultData.value.download_time.toFixed(2)}ms\n`
+  }
+  if (resultData.value.http_time !== undefined) {
+    preview += `总HTTP时间: ${resultData.value.http_time.toFixed(2)}ms\n`
+  }
+  
+  // 添加DNS解析IP信息
+  if (resultData.value.dns_ips && Array.isArray(resultData.value.dns_ips)) {
+    preview += `DNS解析IP: ${resultData.value.dns_ips.join(', ')}\n`
+  }
+  
+  // 添加最终URL信息
+  if (resultData.value.final_url) {
+    preview += `最终URL: ${resultData.value.final_url}\n`
+  }
+  
+  // 添加内容长度信息
+  if (resultData.value.content_length !== undefined) {
+    preview += `内容长度: ${formatBytes(resultData.value.content_length)}\n`
+  }
+  
+  // 如果有性能指标，添加分隔线
+  if (preview) {
+    preview += '\n--- 响应内容 ---\n\n'
+  }
+  
+  // 添加响应体内容
+  if (content) {
+    // 如果内容太长，只显示前1000个字符
+    if (typeof content === 'string' && content.length > 1000) {
+      preview += content.substring(0, 1000) + '\n\n... (内容已截断，查看原始数据获取完整内容)'
+    } else {
+      preview += content
+    }
+  } else if (!preview) {
+    return '暂无响应内容'
+  }
+  
+  return preview
 })
 
 const rawResponse = computed(() => {
-  return resultData.value.response_body || resultData.value.content || ''
+  return resultData.value.response_body || 
+         resultData.value.responseBody ||
+         resultData.value.response?.body ||
+         resultData.value.content || 
+         ''
 })
 
 // 错误信息
 const errorMessage = computed(() => {
   if (props.probeData.status === 'success') return ''
-  return resultData.value.error || resultData.value.message || '执行失败'
+  return resultData.value.error || 
+         resultData.value.message || 
+         resultData.value.errorMessage ||
+         '执行失败'
 })
 
 const errorDetails = computed(() => {
-  return resultData.value.error_details || resultData.value.error_message || ''
+  return resultData.value.error_details || 
+         resultData.value.errorDetails ||
+         resultData.value.error_message || 
+         resultData.value.errorMessage ||
+         ''
 })
 
 // 工具方法

@@ -415,9 +415,9 @@ def get_ping_report():
             
             results = base_query.all()
             for result in results:
-                if result.result_data:
+                if result.details:
                     try:
-                        data = json.loads(result.result_data) if isinstance(result.result_data, str) else result.result_data
+                        data = json.loads(result.details) if isinstance(result.details, str) else result.details
                         if 'avg_latency' in data:
                             latencies.append(data['avg_latency'])
                         if 'packet_loss' in data:
@@ -451,9 +451,9 @@ def get_ping_report():
             period_packet_losses = []
             
             for result in period_results:
-                if result.result_data:
+                if result.details:
                     try:
-                        data = json.loads(result.result_data) if isinstance(result.result_data, str) else result.result_data
+                        data = json.loads(result.details) if isinstance(result.details, str) else result.details
                         if 'avg_latency' in data:
                             period_latencies.append(data['avg_latency'])
                         if 'packet_loss' in data:

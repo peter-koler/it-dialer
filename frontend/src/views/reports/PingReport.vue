@@ -80,7 +80,7 @@
       
       <!-- 丢包率分布 -->
       <a-col :span="12">
-        <a-card title="丢包率分布" :bordered="false">
+        <a-card title="成功率分布" :bordered="false">
           <div ref="packetLossChart" style="height: 300px;"></div>
         </a-card>
       </a-col>
@@ -432,10 +432,17 @@ const fetchPingReportData = async () => {
        }))
        
        // 基于latency_trend数据计算丢包率分布
-       const packetLossData = (reportData.latency_trend || []).map(item => ({
-         time: item.time || item.timestamp,
-         packetLoss: (100 - (item.success_rate || 0))
-       }))
+       const packetLossData = (reportData.latency_trend || []).map(item => {
+         const successRate = item.success_rate || 0
+         // 判断success_rate是百分比(0-100)还是小数(0-1)
+         const packetLoss = successRate > 1 
+           ? (100 - successRate)  // 如果>1，说明是百分比格式
+           : ((1 - successRate) * 100)  // 如果<=1，说明是小数格式
+         return {
+           time: item.time || item.timestamp,
+           packetLoss: Math.max(0, packetLoss)  // 确保不为负数
+         }
+       })
        
        // 处理延迟分布数据和字段名转换
        const performanceMetrics = {
@@ -698,7 +705,7 @@ const initPacketLossChart = () => {
       },
       formatter: function(params) {
         const param = params[0]
-        return `时间: ${param.axisValue}<br/>丢包率: ${param.value}%`
+        return `时间: ${param.axisValue}<br/>成功率: ${param.value}%`
       }
     },
     legend: {
@@ -723,7 +730,7 @@ const initPacketLossChart = () => {
     },
     series: [
       {
-        name: '丢包率',
+        name: '成功率',
         type: 'bar',
         data: packetLossData
       }
