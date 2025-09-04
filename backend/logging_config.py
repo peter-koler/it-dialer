@@ -14,19 +14,21 @@ from datetime import datetime
 class LoggingConfig:
     """日志配置类"""
     
-    def __init__(self, log_file=None, log_level='INFO', max_bytes=10*1024*1024, backup_count=5):
+    def __init__(self, log_file=None, log_level='INFO', when='midnight', interval=1, backup_count=30):
         """
         初始化日志配置
         
         Args:
             log_file: 日志文件路径，如果为None则只输出到控制台
             log_level: 日志级别 (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-            max_bytes: 单个日志文件最大字节数 (默认10MB)
-            backup_count: 保留的日志文件备份数量 (默认5个)
+            when: 轮转时间单位 ('midnight' 表示每天午夜轮转)
+            interval: 轮转间隔 (默认1天)
+            backup_count: 保留的日志文件备份数量 (默认30天)
         """
         self.log_file = log_file
         self.log_level = log_level.upper()
-        self.max_bytes = max_bytes
+        self.when = when
+        self.interval = interval
         self.backup_count = backup_count
         self.logger_initialized = False
     
@@ -65,13 +67,22 @@ class LoggingConfig:
             if log_dir and not os.path.exists(log_dir):
                 os.makedirs(log_dir, exist_ok=True)
             
-            # 使用RotatingFileHandler实现日志轮转
-            file_handler = logging.handlers.RotatingFileHandler(
-                self.log_file,
-                maxBytes=self.max_bytes,
+            # 为当前日志文件添加日期后缀
+            current_date = datetime.now().strftime('%Y.%m.%d')
+            base_name, ext = os.path.splitext(self.log_file)
+            dated_log_file = f"{base_name}.{current_date}{ext}"
+            
+            # 使用TimedRotatingFileHandler实现按天轮转
+            file_handler = logging.handlers.TimedRotatingFileHandler(
+                dated_log_file,
+                when=self.when,
+                interval=self.interval,
                 backupCount=self.backup_count,
-                encoding='utf-8'
+                encoding='utf-8',
+                atTime=datetime.strptime('00:00:00', '%H:%M:%S').time()  # 每天午夜轮转
             )
+            # 设置日志文件名后缀格式为 yyyy.mm.dd
+            file_handler.suffix = '%Y.%m.%d'
             file_handler.setLevel(numeric_level)
             file_handler.setFormatter(formatter)
             root_logger.addHandler(file_handler)
@@ -94,20 +105,25 @@ class LoggingConfig:
         """
         log_file = getattr(config, 'LOG_FILE', None)
         log_level = getattr(config, 'LOG_LEVEL', 'INFO')
-        max_bytes = getattr(config, 'LOG_MAX_BYTES', 10*1024*1024)
-        backup_count = getattr(config, 'LOG_BACKUP_COUNT', 5)
+        when = getattr(config, 'LOG_WHEN', 'midnight')
+        interval = getattr(config, 'LOG_INTERVAL', 1)
+        backup_count = getattr(config, 'LOG_BACKUP_COUNT', 30)
         
         return cls(log_file=log_file, log_level=log_level, 
-                  max_bytes=max_bytes, backup_count=backup_count)
+                  when=when, interval=interval, backup_count=backup_count)
 
 
-def setup_logging(log_file=None, log_level='INFO'):
+def setup_logging(log_file=None, log_level='INFO', when='midnight', interval=1, backup_count=30):
     """便捷函数：设置日志配置
     
     Args:
         log_file: 日志文件路径
         log_level: 日志级别
+        when: 轮转时间单位
+        interval: 轮转间隔
+        backup_count: 保留的日志文件备份数量
     """
-    config = LoggingConfig(log_file=log_file, log_level=log_level)
+    config = LoggingConfig(log_file=log_file, log_level=log_level, 
+                          when=when, interval=interval, backup_count=backup_count)
     config.setup_logging()
     return config

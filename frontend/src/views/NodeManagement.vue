@@ -8,8 +8,59 @@
             <ReloadOutlined />
             刷新
           </a-button>
+          <a-button 
+            :type="autoRefresh ? 'default' : 'dashed'" 
+            @click="toggleAutoRefresh" 
+            style="margin-left: 8px;"
+          >
+            {{ autoRefresh ? '停止自动刷新' : '开启自动刷新' }}
+          </a-button>
         </div>
       </template>
+      
+      <!-- 搜索和过滤区域 -->
+      <div class="search-filter-section">
+        <a-row :gutter="16" style="margin-bottom: 16px;">
+          <a-col :span="8">
+            <a-input-search
+              v-model:value="searchKeyword"
+              placeholder="搜索 Agent ID 或 IP 地址"
+              allow-clear
+              @search="handleSearch"
+              @change="handleSearchChange"
+            />
+          </a-col>
+          <a-col :span="4">
+            <a-select
+              v-model:value="filterArea"
+              placeholder="选择区域"
+              allow-clear
+              style="width: 100%"
+              @change="handleAreaFilter"
+            >
+              <a-select-option v-for="area in areaOptions" :key="area" :value="area">
+                {{ area }}
+              </a-select-option>
+            </a-select>
+          </a-col>
+          <a-col :span="4">
+            <a-select
+              v-model:value="filterStatus"
+              placeholder="选择状态"
+              allow-clear
+              style="width: 100%"
+              @change="handleStatusFilter"
+            >
+              <a-select-option value="online">运行中</a-select-option>
+              <a-select-option value="offline">下线</a-select-option>
+              <a-select-option value="timeout">超时</a-select-option>
+            </a-select>
+          </a-col>
+          <a-col :span="4">
+            <a-button @click="resetFilters">重置筛选</a-button>
+          </a-col>
+        </a-row>
+      </div>
       
       <a-table 
         :dataSource="nodes" 
@@ -25,6 +76,22 @@
               {{ getStatusText(record.status) }}
             </a-tag>
           </template>
+          <template v-else-if="column.key === 'thread_pool'">
+             <div v-if="record.thread_pool && record.thread_pool.max_workers">
+               {{ record.thread_pool.active_threads || 0 }}/{{ record.thread_pool.max_workers || 0 }}
+             </div>
+             <div v-else>
+               暂无数据
+             </div>
+           </template>
+          <template v-else-if="column.key === 'task_status'">
+             <div v-if="record.task_status && record.task_status.total_tasks">
+               总计: {{ record.task_status.total_tasks || 0 }}
+             </div>
+             <div v-else>
+               暂无任务
+             </div>
+           </template>
           <template v-else-if="column.key === 'lastHeartbeat'">
             {{ formatDateTime(record.last_heartbeat) }}
           </template>
@@ -52,7 +119,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, computed } from 'vue'
+import { defineComponent, ref, onMounted, onUnmounted, computed } from 'vue'
 import { 
   getNodeList, 
   updateNodeStatus, 
@@ -81,6 +148,12 @@ export default defineComponent({
       showQuickJumper: true,
       showTotal: (total) => `共 ${total} 条记录`
     })
+    
+    // 搜索和过滤状态
+    const searchKeyword = ref('')
+    const filterArea = ref(undefined)
+    const filterStatus = ref(undefined)
+    const areaOptions = ref([])
     
     // 权限控制
     const canOperateNodes = computed(() => userStore.isSuperAdmin)
@@ -115,6 +188,16 @@ export default defineComponent({
           key: 'status'
         },
         {
+          title: '线程池状态',
+          key: 'thread_pool',
+          width: 200
+        },
+        {
+          title: '任务统计',
+          key: 'task_status',
+          width: 150
+        },
+        {
           title: '最后心跳',
           dataIndex: 'last_heartbeat',
           key: 'lastHeartbeat'
@@ -145,6 +228,10 @@ export default defineComponent({
         const query = {
           page: pagination.value.current,
           size: pagination.value.pageSize,
+          // 添加搜索和过滤参数
+          keyword: searchKeyword.value || undefined,
+          area: filterArea.value || undefined,
+          status: filterStatus.value || undefined,
           ...params
         }
         
@@ -153,6 +240,9 @@ export default defineComponent({
         if (res.code === 0) {
           nodes.value = res.data.list
           pagination.value.total = res.data.total
+          
+          // 更新区域选项
+          updateAreaOptions(res.data.list)
         } else {
           message.error(res.message || '获取节点列表失败')
         }
@@ -168,10 +258,82 @@ export default defineComponent({
       }
     }
     
+    // 更新区域选项
+    const updateAreaOptions = (nodeList) => {
+      const areas = [...new Set(nodeList.map(node => node.agent_area).filter(Boolean))]
+      areaOptions.value = areas.sort()
+    }
+    
+    // 自动刷新功能
+    const autoRefresh = ref(true)
+    const refreshInterval = ref(null)
+    
+    const startAutoRefresh = () => {
+      if (refreshInterval.value) {
+        clearInterval(refreshInterval.value)
+      }
+      if (autoRefresh.value) {
+        refreshInterval.value = setInterval(() => {
+          fetchNodes()
+        }, 30000) // 每30秒刷新一次
+      }
+    }
+    
+    const stopAutoRefresh = () => {
+      if (refreshInterval.value) {
+        clearInterval(refreshInterval.value)
+        refreshInterval.value = null
+      }
+    }
+    
+    const toggleAutoRefresh = () => {
+      autoRefresh.value = !autoRefresh.value
+      if (autoRefresh.value) {
+        startAutoRefresh()
+      } else {
+        stopAutoRefresh()
+      }
+    }
+    
     // 处理表格分页、排序等变化
     const handleTableChange = (pag) => {
       pagination.value.current = pag.current
       pagination.value.pageSize = pag.pageSize
+      fetchNodes()
+    }
+    
+    // 搜索处理
+    const handleSearch = () => {
+      pagination.value.current = 1 // 重置到第一页
+      fetchNodes()
+    }
+    
+    const handleSearchChange = (e) => {
+      if (!e.target.value) {
+        // 如果搜索框被清空，立即刷新
+        pagination.value.current = 1
+        fetchNodes()
+      }
+    }
+    
+    // 区域过滤处理
+    const handleAreaFilter = () => {
+      pagination.value.current = 1
+      fetchNodes()
+    }
+    
+    // 状态过滤处理
+    const handleStatusFilter = () => {
+      pagination.value.current = 1
+      fetchNodes()
+    }
+    
+    // 重置筛选
+    const resetFilters = () => {
+      searchKeyword.value = ''
+      filterArea.value = undefined
+      filterStatus.value = undefined
+      pagination.value.current = 1
       fetchNodes()
     }
     
@@ -258,9 +420,17 @@ export default defineComponent({
       return date.toLocaleString('zh-CN')
     }
     
+
+    
     // 初始化
     onMounted(() => {
       fetchNodes()
+      startAutoRefresh()
+    })
+    
+    // 组件卸载时清理定时器
+    onUnmounted(() => {
+      stopAutoRefresh()
     })
     
     return {
@@ -269,10 +439,23 @@ export default defineComponent({
       pagination,
       columns,
       canOperateNodes,
+      autoRefresh,
+      // 搜索和过滤相关
+      searchKeyword,
+      filterArea,
+      filterStatus,
+      areaOptions,
+      handleSearch,
+      handleSearchChange,
+      handleAreaFilter,
+      handleStatusFilter,
+      resetFilters,
+      // 原有方法
       fetchNodes,
       handleTableChange,
       toggleNodeStatus,
       deleteNode,
+      toggleAutoRefresh,
       getStatusText,
       getStatusColor,
       formatDateTime
@@ -290,5 +473,24 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.search-filter-section {
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.search-filter-section .ant-input-search {
+  border-radius: 6px;
+}
+
+.search-filter-section .ant-select {
+  border-radius: 6px;
+}
+
+.search-filter-section .ant-btn {
+  border-radius: 6px;
 }
 </style>

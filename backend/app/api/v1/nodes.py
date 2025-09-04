@@ -19,6 +19,7 @@ def get_nodes():
         size = request.args.get('size', 20, type=int)
         status = request.args.get('status', type=str)
         keyword = request.args.get('keyword', type=str)
+        area = request.args.get('area', type=str)
         
         # 构建查询（节点现在是全局共享的，不需要租户过滤）
         query = Node.query
@@ -32,13 +33,16 @@ def get_nodes():
         if status:
             query = query.filter_by(status=status)
             
+        if area:
+            query = query.filter_by(agent_area=area)
+            
         if keyword:
-            # 搜索节点名称或agent_id
+            # 搜索Agent ID和IP地址
             search = f"%{keyword}%"
             query = query.filter(
                 db.or_(
-                    Node.hostname.like(search),
-                    Node.agent_id.like(search)
+                    Node.agent_id.like(search),
+                    Node.ip_address.like(search)
                 )
             )
         
@@ -198,6 +202,21 @@ def heartbeat():
         node.status = 'online'
         node.last_heartbeat = datetime.now()
         node.updated_at = datetime.now()
+        
+        # 更新线程池状态信息
+        thread_pool = data.get('thread_pool', {})
+        if thread_pool:
+            node.max_workers = thread_pool.get('max_workers')
+            node.active_threads = thread_pool.get('active_threads')
+            node.completed_tasks = thread_pool.get('completed_tasks')
+            node.pending_tasks = thread_pool.get('pending_tasks')
+        
+        # 更新任务状态统计信息
+        task_status = data.get('task_status', {})
+        if task_status:
+            node.total_tasks = task_status.get('total_tasks')
+            node.running_tasks = task_status.get('running_tasks')
+            node.failed_tasks = task_status.get('failed_tasks')
         
         db.session.commit()
         

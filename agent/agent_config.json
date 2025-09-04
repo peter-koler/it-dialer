@@ -3,8 +3,20 @@
   "server_url": "http://localhost:5001",
   "plugins_dir": "plugins",
   "report_interval": 60,
+  "heartbeat_interval": 30,
   "log_level": "INFO",
   "agent_area": "guangzhou",
   "api_token": "agent-default-token-2024",
-  "auth_required": true
+  "auth_required": true,
+  "thread_pool": {
+    "max_workers": 10,
+    "task_timeout": 300,
+    "queue_size_limit": 100
+  },
+  "logging": {
+    "log_mode": "INFO",
+    "log_path": "logs",
+    "log_name": "agent",
+    "log_rotation": true
+  }
 }

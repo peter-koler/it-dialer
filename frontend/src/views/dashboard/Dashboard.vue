@@ -84,6 +84,184 @@
           <a-spin size="large" />
         </div>
       </a-card>
+      
+      <!-- Agent 监控可视化图表 -->
+      <a-card title="Agent 监控概览" class="agent-monitoring-card" style="margin-top: 16px;">
+        <template #extra>
+          <a-space>
+            <a-select
+              v-model:value="agentStatusFilter"
+              placeholder="筛选状态"
+              style="width: 120px"
+              size="small"
+              @change="handleAgentStatusFilter"
+              allowClear
+            >
+              <a-select-option value="online">在线</a-select-option>
+              <a-select-option value="offline">离线</a-select-option>
+              <a-select-option value="timeout">超时</a-select-option>
+            </a-select>
+            <a-button @click="refreshAgentData" :loading="agentLoading" size="small">
+              <template #icon>
+                <ReloadOutlined />
+              </template>
+              刷新
+            </a-button>
+          </a-space>
+        </template>
+        
+        <a-alert
+          v-if="agentError"
+          :message="agentError"
+          type="error"
+          show-icon
+          closable
+          @close="agentError = null"
+          style="margin-bottom: 16px"
+        />
+        
+        <!-- Agent 统计概览 -->
+        <a-row :gutter="[16, 16]" v-if="agentStats">
+          <a-col :xs="24" :sm="12" :lg="6">
+            <a-card size="small" class="agent-summary-card online">
+              <a-statistic
+                title="在线节点"
+                :value="agentStats.online_count || 0"
+                :value-style="{ color: '#52c41a' }"
+              >
+                <template #prefix>
+                  <div class="status-indicator online-pulse"></div>
+                </template>
+              </a-statistic>
+            </a-card>
+          </a-col>
+          <a-col :xs="24" :sm="12" :lg="6">
+            <a-card size="small" class="agent-summary-card offline">
+              <a-statistic
+                title="离线节点"
+                :value="agentStats.offline_count || 0"
+                :value-style="{ color: '#ff4d4f' }"
+              >
+                <template #prefix>
+                  <div class="status-indicator offline"></div>
+                </template>
+              </a-statistic>
+            </a-card>
+          </a-col>
+          <a-col :xs="24" :sm="12" :lg="6">
+            <a-card size="small" class="agent-summary-card timeout">
+              <a-statistic
+                title="超时节点"
+                :value="agentStats.timeout_count || 0"
+                :value-style="{ color: '#fa8c16' }"
+              >
+                <template #prefix>
+                  <div class="status-indicator timeout-pulse"></div>
+                </template>
+              </a-statistic>
+            </a-card>
+          </a-col>
+          <a-col :xs="24" :sm="12" :lg="6">
+            <a-card size="small" class="agent-summary-card total">
+              <a-statistic
+                title="总节点数"
+                :value="agentStats.total_count || 0"
+                :value-style="{ color: '#1890ff' }"
+              >
+                <template #prefix>
+                  <div class="status-indicator total"></div>
+                </template>
+              </a-statistic>
+            </a-card>
+          </a-col>
+        </a-row>
+        
+        <!-- Agent 详细监控 -->
+        <div class="agent-details" v-if="filteredAgentList.length > 0" style="margin-top: 24px;">
+          <a-row :gutter="[12, 12]">
+            <a-col :xs="24" :sm="12" :lg="8" :xl="6" v-for="agent in filteredAgentList" :key="agent.agent_id">
+              <div class="compact-agent-card" :class="`status-${agent.status}`">
+                <!-- Agent 基本信息头部 -->
+                <div class="agent-header">
+                  <div class="agent-info">
+                    <div class="agent-status-indicator" :class="`indicator-${agent.status}`"></div>
+                    <div class="agent-basic">
+                      <div class="agent-name">{{ agent.hostname || agent.agent_id }}</div>
+                      <div class="agent-meta">{{ agent.ip_address }} • {{ agent.agent_area }}</div>
+                    </div>
+                  </div>
+                  <div class="heartbeat-badge">{{ formatDateTime(agent.last_heartbeat) }}</div>
+                </div>
+                
+                <!-- 线程池状态可视化卡片 -->
+                <div class="thread-pool-card">
+                  <div class="card-header">
+                    <span class="card-title">线程池</span>
+                    <div class="thread-load-indicator" :class="getThreadPoolLoadClass(agent.thread_pool)"></div>
+                  </div>
+                  <div class="thread-stats">
+                    <div class="thread-usage">
+                      <span class="usage-text">{{ agent.thread_pool?.active_threads || 0 }}/{{ agent.thread_pool?.max_workers || 0 }}</span>
+                      <div class="enhanced-progress">
+                        <div class="progress-track">
+                          <div 
+                            class="progress-fill" 
+                            :class="getThreadPoolLoadClass(agent.thread_pool)"
+                            :style="{ width: getThreadPoolUsagePercent(agent.thread_pool) + '%' }"
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="thread-details">
+                      <span class="detail-item">完成: {{ agent.thread_pool?.completed_tasks || 0 }}</span>
+                      <span class="detail-item">待处理: {{ agent.thread_pool?.pending_tasks || 0 }}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- 任务状态总览卡片 -->
+                <div class="task-overview-card">
+                  <div class="task-total-display">
+                    <div class="total-number">{{ agent.task_status?.total_tasks || 0 }}</div>
+                    <div class="total-label">总任务</div>
+                  </div>
+                </div>
+                
+                <!-- 任务状态指示器 -->
+                <div class="task-indicators">
+                  <div class="indicator-item running" v-if="agent.task_status?.running_tasks > 0">
+                    <div class="indicator-dot running-pulse"></div>
+                    <span class="indicator-count">{{ agent.task_status?.running_tasks }}</span>
+                  </div>
+                  <div class="indicator-item failed" v-if="agent.task_status?.failed_tasks > 0">
+                    <div class="indicator-dot failed-dot"></div>
+                    <span class="indicator-count">{{ agent.task_status?.failed_tasks }}</span>
+                  </div>
+                </div>
+                
+                <!-- 环形成功率 -->
+                <div class="success-rate-ring" v-if="agent.task_status?.total_tasks > 0">
+                  <div 
+                    class="ring-progress" 
+                    :style="{ background: getConicGradient(getTaskSuccessRate(agent.task_status)) }"
+                  >
+                    <div class="ring-inner">
+                      <div class="success-percentage">{{ getTaskSuccessRate(agent.task_status) }}%</div>
+                      <div class="success-label">成功率</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </a-col>
+          </a-row>
+        </div>
+        
+        <a-empty v-else-if="!agentLoading" description="暂无Agent数据" />
+        
+        <div v-if="agentLoading" class="loading-container">
+          <a-spin size="large" />
+        </div>
+      </a-card>
     </template>
     
     <!-- 普通租户视图 -->
@@ -402,9 +580,24 @@ const taskPagination = ref({
 const tenantList = ref([])
 const tenantListLoading = ref(false)
 
+// Agent监控相关数据
+const agentList = ref([])
+const agentStats = ref(null)
+const agentLoading = ref(false)
+const agentError = ref(null)
+const agentStatusFilter = ref(null)
+
 // 计算属性
 const isSuperAdmin = computed(() => userStore.isSuperAdmin)
 const currentTenantId = computed(() => userStore.tenantId)
+
+// 过滤后的Agent列表
+const filteredAgentList = computed(() => {
+  if (!agentStatusFilter.value) {
+    return agentList.value
+  }
+  return agentList.value.filter(agent => agent.status === agentStatusFilter.value)
+})
 
 // 租户列表表格列定义（超级管理员）
 const tenantColumns = [
@@ -629,6 +822,47 @@ const refreshTaskList = () => {
   fetchTaskList()
 }
 
+// 获取Agent数据
+const fetchAgentData = async () => {
+  if (!isSuperAdmin.value) return
+  
+  agentLoading.value = true
+  agentError.value = null
+  try {
+    const response = await request.get('/nodes')
+    const responseData = response.data?.data || response.data || response
+    const agents = responseData.list || responseData.nodes || responseData || []
+    
+    agentList.value = agents
+    
+    // 计算统计数据
+    const stats = {
+      total_count: agents.length,
+      online_count: agents.filter(agent => agent.status === 'online').length,
+      offline_count: agents.filter(agent => agent.status === 'offline').length,
+      timeout_count: agents.filter(agent => agent.status === 'timeout').length
+    }
+    
+    agentStats.value = stats
+  } catch (error) {
+    console.error('获取Agent数据失败:', error)
+    agentError.value = error.response?.data?.message || error.message || '获取Agent数据失败'
+  } finally {
+    agentLoading.value = false
+  }
+}
+
+// 刷新Agent数据
+const refreshAgentData = () => {
+  fetchAgentData()
+}
+
+// 处理Agent状态筛选
+const handleAgentStatusFilter = () => {
+  // 筛选逻辑已通过计算属性filteredAgentList实现
+  // 这里可以添加额外的处理逻辑，如统计更新等
+}
+
 // 获取资源标题
 const getResourceTitle = (key) => {
   const titles = {
@@ -785,6 +1019,99 @@ const getQuotaStatusText = (quota) => {
   return '正常'
 }
 
+// Agent相关辅助方法
+const getAgentStatusColor = (status) => {
+  const colorMap = {
+    'online': 'green',
+    'offline': 'red',
+    'timeout': 'orange'
+  }
+  return colorMap[status] || 'default'
+}
+
+const getAgentStatusText = (status) => {
+  const textMap = {
+    'online': '在线',
+    'offline': '离线',
+    'timeout': '超时'
+  }
+  return textMap[status] || status
+}
+
+// 线程池负载分类
+const getThreadPoolLoadClass = (threadPool) => {
+  if (!threadPool || !threadPool.max_workers) return 'idle'
+  const usage = (threadPool.active_threads || 0) / threadPool.max_workers * 100
+  if (usage >= 80) return 'high-load'  // 红色-高负载
+  if (usage >= 60) return 'medium-load' // 橙色-中负载
+  if (usage >= 20) return 'normal-load' // 蓝色-正常
+  return 'idle' // 绿色-空闲
+}
+
+// 环形成功率渐变
+const getConicGradient = (percentage) => {
+  const angle = (percentage / 100) * 360
+  if (percentage >= 95) {
+    return `conic-gradient(from 0deg, #52c41a 0deg, #52c41a ${angle}deg, #f0f0f0 ${angle}deg)`
+  } else if (percentage >= 80) {
+    return `conic-gradient(from 0deg, #1890ff 0deg, #1890ff ${angle}deg, #f0f0f0 ${angle}deg)`
+  } else if (percentage >= 60) {
+    return `conic-gradient(from 0deg, #fa8c16 0deg, #fa8c16 ${angle}deg, #f0f0f0 ${angle}deg)`
+  } else {
+    return `conic-gradient(from 0deg, #ff4d4f 0deg, #ff4d4f ${angle}deg, #f0f0f0 ${angle}deg)`
+  }
+}
+
+// 线程池相关方法
+const getThreadPoolUsagePercent = (threadPool) => {
+  if (!threadPool || !threadPool.max_workers || threadPool.max_workers === 0) return 0
+  return Math.round((threadPool.active_threads || 0) / threadPool.max_workers * 100)
+}
+
+const getThreadPoolStatus = (threadPool) => {
+  const percent = getThreadPoolUsagePercent(threadPool)
+  if (percent >= 90) return 'exception'
+  if (percent >= 70) return 'active'
+  return 'normal'
+}
+
+const getThreadPoolColor = (threadPool) => {
+  const percent = getThreadPoolUsagePercent(threadPool)
+  if (percent >= 90) return '#ff4d4f'
+  if (percent >= 70) return '#fa8c16'
+  if (percent >= 50) return '#fadb14'
+  return '#52c41a'
+}
+
+// 任务统计相关方法
+const getTaskSuccessRate = (taskStatus) => {
+  if (!taskStatus || !taskStatus.total_tasks || taskStatus.total_tasks === 0) return 0
+  const completedTasks = (taskStatus.total_tasks || 0) - (taskStatus.running_tasks || 0) - (taskStatus.failed_tasks || 0)
+  return Math.round((completedTasks / taskStatus.total_tasks) * 100)
+}
+
+const getSuccessRateClass = (taskStatus) => {
+  const rate = getTaskSuccessRate(taskStatus)
+  if (rate >= 95) return 'success-rate-excellent'
+  if (rate >= 80) return 'success-rate-good'
+  if (rate >= 60) return 'success-rate-warning'
+  return 'success-rate-danger'
+}
+
+// 格式化日期时间
+const formatDateTime = (dateString) => {
+  if (!dateString) return '-'
+  const date = new Date(dateString)
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
+}
+
 // 格式化日期
 const formatDate = (dateString) => {
   if (!dateString) return '-'
@@ -816,6 +1143,7 @@ onMounted(async () => {
   fetchQuotaData()
   fetchTaskList()
   fetchTenantList()
+  fetchAgentData()
 })
 </script>
 
@@ -1086,6 +1414,469 @@ onMounted(async () => {
   font-size: 16px;
 }
 
+/* Agent监控相关样式 */
+.agent-monitoring-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.agent-summary-card {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.agent-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.agent-summary-card.online {
+  border-left: 4px solid #52c41a;
+}
+
+.agent-summary-card.offline {
+  border-left: 4px solid #ff4d4f;
+}
+
+.agent-summary-card.timeout {
+  border-left: 4px solid #fa8c16;
+}
+
+.agent-summary-card.total {
+  border-left: 4px solid #1890ff;
+}
+
+/* 状态指示器 */
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.status-indicator.online-pulse {
+  background-color: #52c41a;
+  animation: pulse-green 2s infinite;
+}
+
+.status-indicator.offline {
+  background-color: #ff4d4f;
+}
+
+.status-indicator.timeout-pulse {
+  background-color: #fa8c16;
+  animation: pulse-orange 2s infinite;
+}
+
+.status-indicator.total {
+  background-color: #1890ff;
+}
+
+@keyframes pulse-green {
+  0% {
+    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(82, 196, 26, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0);
+  }
+}
+
+@keyframes pulse-orange {
+  0% {
+    box-shadow: 0 0 0 0 rgba(250, 140, 22, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(250, 140, 22, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(250, 140, 22, 0);
+  }
+}
+
+/* 紧凑型Agent卡片 */
+.compact-agent-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+  position: relative;
+  overflow: hidden;
+}
+
+.compact-agent-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.compact-agent-card.status-online {
+  border-left: 3px solid #52c41a;
+}
+
+.compact-agent-card.status-offline {
+  border-left: 3px solid #ff4d4f;
+}
+
+.compact-agent-card.status-timeout {
+  border-left: 3px solid #fa8c16;
+}
+
+/* Agent头部信息 */
+.agent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.agent-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agent-status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.agent-status-indicator.indicator-online {
+  background-color: #52c41a;
+  animation: pulse-green 2s infinite;
+}
+
+.agent-status-indicator.indicator-offline {
+  background-color: #ff4d4f;
+}
+
+.agent-status-indicator.indicator-timeout {
+  background-color: #fa8c16;
+  animation: pulse-orange 2s infinite;
+}
+
+.agent-basic {
+  flex: 1;
+}
+
+.agent-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #262626;
+  margin-bottom: 2px;
+}
+
+.agent-meta {
+  font-size: 11px;
+  color: #8c8c8c;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.heartbeat-badge {
+  font-size: 10px;
+  color: #8c8c8c;
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* 线程池状态卡片 */
+.thread-pool-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.thread-load-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.thread-load-indicator.high-load {
+  background-color: #ff4d4f;
+  box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.7);
+}
+
+.thread-load-indicator.medium-load {
+  background-color: #fa8c16;
+  box-shadow: 0 0 0 0 rgba(250, 140, 22, 0.7);
+}
+
+.thread-load-indicator.normal-load {
+  background-color: #1890ff;
+  box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.7);
+}
+
+.thread-load-indicator.idle {
+  background-color: #52c41a;
+  box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 4px rgba(255, 77, 79, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0);
+  }
+}
+
+.thread-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.thread-usage {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.usage-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #262626;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.enhanced-progress {
+  flex: 1;
+  margin-left: 8px;
+}
+
+.progress-track {
+  height: 6px;
+  background: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.progress-fill.high-load {
+  background: linear-gradient(90deg, #ff7875, #ff4d4f);
+}
+
+.progress-fill.medium-load {
+  background: linear-gradient(90deg, #ffa940, #fa8c16);
+}
+
+.progress-fill.normal-load {
+  background: linear-gradient(90deg, #40a9ff, #1890ff);
+}
+
+.progress-fill.idle {
+  background: linear-gradient(90deg, #73d13d, #52c41a);
+}
+
+.thread-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #8c8c8c;
+}
+
+.detail-item {
+  font-weight: 500;
+}
+
+/* 任务总览卡片 */
+.task-overview-card {
+  background: linear-gradient(135deg, #1890ff, #40a9ff);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  color: white;
+  text-align: center;
+}
+
+.task-total-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.total-number {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.total-label {
+  font-size: 11px;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+/* 任务状态指示器 */
+.task-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.indicator-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.indicator-dot.running-pulse {
+  background-color: #1890ff;
+  animation: pulse-blue 2s infinite;
+}
+
+.indicator-dot.failed-dot {
+  background-color: #ff4d4f;
+}
+
+@keyframes pulse-blue {
+  0% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 4px rgba(24, 144, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0);
+  }
+}
+
+.indicator-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #262626;
+}
+
+/* 环形成功率 */
+.success-rate-ring {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ring-progress {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.ring-inner {
+  width: 46px;
+  height: 46px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.success-percentage {
+  font-size: 12px;
+  font-weight: 700;
+  color: #262626;
+  line-height: 1;
+}
+
+.success-label {
+  font-size: 8px;
+  color: #8c8c8c;
+  margin-top: 1px;
+}
+
+/* 心跳信息 */
+.heartbeat-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.heartbeat-label {
+  color: #8c8c8c;
+}
+
+.heartbeat-time {
+  color: #262626;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
 @media (max-width: 768px) {
   .dashboard-container {
     padding: 16px;
@@ -1099,6 +1890,20 @@ onMounted(async () => {
   .status-item,
   .overview-item {
     padding: 6px 0;
+  }
+  
+  .agent-details .ant-col {
+    margin-bottom: 16px;
+  }
+  
+  .thread-details {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .task-breakdown {
+    flex-direction: column;
+    gap: 8px;
   }
 }
 </style>
