@@ -1,0 +1,822 @@
+2025-09-04 15:33:26 - agent - INFO - [MainThread] - 日志系统初始化完成 - 模式: INFO, 路径: logs, 滚动: True
+2025-09-04 15:33:26 - agent - INFO - [MainThread] - Agent初始化开始
+2025-09-04 15:33:26 - agent - INFO - [MainThread] - Agent信息: {'agent_id': 'book', 'agent_area': 'guangzhou', 'ip_address': '192.168.31.17', 'hostname': 'peterdeMBP'}
+2025-09-04 15:33:26 - agent - INFO - [MainThread] - 插件加载成功: tcp
+2025-09-04 15:33:26 - agent - INFO - [MainThread] - 插件加载成功: api
+2025-09-04 15:33:26 - agent - INFO - [MainThread] - 插件加载成功: http
+2025-09-04 15:33:26 - agent - INFO - [MainThread] - 插件加载成功: ping
+2025-09-04 15:33:26 - agent - INFO - [MainThread] - 插件加载完成，共加载 4 个插件
+2025-09-04 15:33:26 - agent - INFO - [MainThread] - 任务调度器初始化完成，最大线程数: 10
+2025-09-04 15:33:26 - agent - INFO - [MainThread] - Agent初始化完成 - 最大线程数: 10
+2025-09-04 15:33:26 - agent - ERROR - [MainThread] - Agent注册时发生异常: HTTPConnectionPool(host='localhost', port=5001): Max retries exceeded with url: /api/v1/nodes/register (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x102d04590>: Failed to establish a new connection: [Errno 61] Connection refused'))
+2025-09-04 15:33:26 - agent - ERROR - [MainThread] - Agent注册失败，退出
+2025-09-04 15:35:53 - agent - INFO - [MainThread] - 日志系统初始化完成 - 模式: INFO, 路径: logs, 滚动: True
+2025-09-04 15:35:53 - agent - INFO - [MainThread] - Agent初始化开始
+2025-09-04 15:35:53 - agent - INFO - [MainThread] - Agent信息: {'agent_id': 'book', 'agent_area': 'guangzhou', 'ip_address': '192.168.31.17', 'hostname': 'peterdeMBP'}
+2025-09-04 15:35:53 - agent - INFO - [MainThread] - 插件加载成功: tcp
+2025-09-04 15:35:53 - agent - INFO - [MainThread] - 插件加载成功: api
+2025-09-04 15:35:53 - agent - INFO - [MainThread] - 插件加载成功: http
+2025-09-04 15:35:53 - agent - INFO - [MainThread] - 插件加载成功: ping
+2025-09-04 15:35:53 - agent - INFO - [MainThread] - 插件加载完成，共加载 4 个插件
+2025-09-04 15:35:53 - agent - INFO - [MainThread] - 任务调度器初始化完成，最大线程数: 10
+2025-09-04 15:35:53 - agent - INFO - [MainThread] - Agent初始化完成 - 最大线程数: 10
+2025-09-04 15:35:54 - agent - INFO - [MainThread] - Agent注册成功
+2025-09-04 15:35:54 - agent - INFO - [MainThread] - 心跳线程已启动
+2025-09-04 15:35:54 - agent - ERROR - [HeartbeatWorker] - 发送心跳信息时发生异常: Object of type set is not JSON serializable
+2025-09-04 15:35:54 - agent - INFO - [TaskScheduler] - 任务调度器开始运行
+2025-09-04 15:35:54 - agent - INFO - [MainThread] - 任务调度器已启动
+2025-09-04 15:35:54 - agent - INFO - [MainThread] - 拨测Agent启动完成 - 混合模式
+2025-09-04 15:35:54 - agent - INFO - [MainThread] - 新增任务 task_id=1, interval=600s, tenant=b6e46dcb-7978-472f-868f-6bffc77a7887
+2025-09-04 15:35:54 - agent - INFO - [MainThread] - 新增任务 task_id=2, interval=600s, tenant=299f5926-8527-4805-8caf-1aa5d9e5200c
+2025-09-04 15:35:54 - agent - INFO - [MainThread] - 新增任务 task_id=3, interval=600s, tenant=299f5926-8527-4805-8caf-1aa5d9e5200c
+2025-09-04 15:35:54 - agent - INFO - [MainThread] - 任务同步完成: 新增3个, 更新0个, 删除0个
+2025-09-04 15:35:54 - agent - INFO - [MainThread] - 任务同步完成: 新增3个, 更新0个, 删除0个
+2025-09-04 15:36:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:36:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:36:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:36:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:36:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:36:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:36:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:36:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:36:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:36:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:37:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:37:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:37:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:37:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:37:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:37:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:37:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:37:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:37:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:37:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:38:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:38:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:38:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:38:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:38:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:38:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:38:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:38:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:38:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:38:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:39:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:39:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:39:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:39:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:39:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:39:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:39:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:39:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:39:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:39:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:40:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:40:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:40:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:40:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:40:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:40:54 - agent - ERROR - [HeartbeatWorker] - 发送心跳信息时发生异常: Object of type set is not JSON serializable
+2025-09-04 15:40:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:40:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:40:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:40:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:40:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:41:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:41:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:41:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:41:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:41:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:41:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:41:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:41:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:41:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:41:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:42:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:42:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:42:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:42:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:42:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:42:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:42:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:42:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:42:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:42:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:43:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:43:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:43:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:43:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:43:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:43:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:43:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:43:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:43:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:43:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:44:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:44:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:44:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:44:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:44:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:44:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:44:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:44:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:44:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:44:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:45:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:45:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:45:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:45:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:45:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:45:54 - agent - ERROR - [HeartbeatWorker] - 发送心跳信息时发生异常: Object of type set is not JSON serializable
+2025-09-04 15:45:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:45:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:45:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:45:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:45:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:46:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:46:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:46:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:46:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:46:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:46:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:46:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:46:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:46:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:46:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:47:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:47:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:47:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:47:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:47:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:47:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:47:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:47:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:47:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:47:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:48:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:48:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:48:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:48:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:48:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:48:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:48:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:48:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:48:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:48:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:49:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:49:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:49:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:49:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:49:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:49:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:49:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:49:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:49:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:49:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:50:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:50:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:50:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:50:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:50:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:50:54 - agent - ERROR - [HeartbeatWorker] - 发送心跳信息时发生异常: Object of type set is not JSON serializable
+2025-09-04 15:50:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:50:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:50:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:50:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:50:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:51:15 - agent - INFO - [MainThread] - 收到退出信号，正在停止Agent
+2025-09-04 15:51:15 - agent - INFO - [MainThread] - 正在停止Agent...
+2025-09-04 15:51:15 - agent - INFO - [MainThread] - 正在停止任务调度器...
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 日志系统初始化完成 - 模式: INFO, 路径: logs, 滚动: True
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - Agent初始化开始
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - Agent信息: {'agent_id': 'book', 'agent_area': 'guangzhou', 'ip_address': '192.168.31.17', 'hostname': 'peterdeMBP'}
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 插件加载成功: tcp
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 插件加载成功: api
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 插件加载成功: http
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 插件加载成功: ping
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 插件加载完成，共加载 4 个插件
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 任务调度器初始化完成，最大线程数: 10
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - Agent初始化完成 - 最大线程数: 10
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - Agent注册成功
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 心跳线程已启动
+2025-09-04 15:51:21 - agent - ERROR - [HeartbeatWorker] - 发送心跳信息时发生异常: Object of type set is not JSON serializable
+2025-09-04 15:51:21 - agent - INFO - [TaskScheduler] - 任务调度器开始运行
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 任务调度器已启动
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 拨测Agent启动完成 - 混合模式
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 新增任务 task_id=1, interval=600s, tenant=b6e46dcb-7978-472f-868f-6bffc77a7887
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 当前任务总数: 1/10
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 新增任务 task_id=2, interval=600s, tenant=299f5926-8527-4805-8caf-1aa5d9e5200c
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 当前任务总数: 2/10
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 新增任务 task_id=3, interval=600s, tenant=299f5926-8527-4805-8caf-1aa5d9e5200c
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 当前任务总数: 3/10
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 任务同步完成: 新增3个, 更新0个, 删除0个
+2025-09-04 15:51:21 - agent - INFO - [MainThread] - 任务同步完成: 新增3个, 更新0个, 删除0个
+2025-09-04 15:51:51 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:51:51 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:51:51 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:51:51 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:51:51 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:52:21 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:52:21 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:52:21 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:52:21 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:52:21 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:52:51 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:52:51 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:52:51 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:52:51 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:52:51 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:53:21 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:53:21 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:53:21 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:53:21 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:53:21 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:53:51 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:53:51 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:53:51 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:53:51 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:53:51 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:54:21 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:54:21 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:54:21 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:54:21 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:54:21 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:54:36 - agent - INFO - [MainThread] - 收到退出信号，正在停止Agent
+2025-09-04 15:54:36 - agent - INFO - [MainThread] - 正在停止Agent...
+2025-09-04 15:54:36 - agent - INFO - [MainThread] - 正在停止任务调度器...
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 日志系统初始化完成 - 模式: INFO, 路径: logs, 滚动: True
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - Agent初始化开始
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - Agent信息: {'agent_id': 'book', 'agent_area': 'guangzhou', 'ip_address': '192.168.31.17', 'hostname': 'peterdeMBP'}
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 插件加载成功: tcp
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 插件加载成功: api
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 插件加载成功: http
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 插件加载成功: ping
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 插件加载完成，共加载 4 个插件
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 任务调度器初始化完成，最大线程数: 10
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - Agent初始化完成 - 最大线程数: 10
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - Agent注册成功
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 心跳线程已启动
+2025-09-04 15:54:38 - agent - INFO - [TaskScheduler] - 任务调度器开始运行
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 任务调度器已启动
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 拨测Agent启动完成 - 混合模式
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 新增任务 task_id=1, interval=600s, tenant=b6e46dcb-7978-472f-868f-6bffc77a7887
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 当前任务总数: 1/10
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 新增任务 task_id=2, interval=600s, tenant=299f5926-8527-4805-8caf-1aa5d9e5200c
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 当前任务总数: 2/10
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 新增任务 task_id=3, interval=600s, tenant=299f5926-8527-4805-8caf-1aa5d9e5200c
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 当前任务总数: 3/10
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 任务同步完成: 新增3个, 更新0个, 删除0个
+2025-09-04 15:54:38 - agent - INFO - [MainThread] - 任务同步完成: 新增3个, 更新0个, 删除0个
+2025-09-04 15:55:08 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:55:08 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:55:08 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:55:08 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:55:08 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 日志系统初始化完成 - 模式: INFO, 路径: logs, 滚动: True
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - Agent初始化开始
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - Agent信息: {'agent_id': 'book', 'agent_area': 'guangzhou', 'ip_address': '192.168.31.17', 'hostname': 'peterdeMBP'}
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 插件加载成功: tcp
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 插件加载成功: api
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 插件加载成功: http
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 插件加载成功: ping
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 插件加载完成，共加载 4 个插件
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 任务调度器初始化完成，最大线程数: 10
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - Agent初始化完成 - 最大线程数: 10
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - Agent注册成功
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 心跳线程已启动
+2025-09-04 15:55:34 - agent - INFO - [TaskScheduler] - 任务调度器开始运行
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 任务调度器已启动
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 拨测Agent启动完成 - 混合模式
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 新增任务 task_id=1, interval=600s, tenant=b6e46dcb-7978-472f-868f-6bffc77a7887
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 当前任务总数: 1/10
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 新增任务 task_id=2, interval=600s, tenant=299f5926-8527-4805-8caf-1aa5d9e5200c
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 当前任务总数: 2/10
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 新增任务 task_id=3, interval=600s, tenant=299f5926-8527-4805-8caf-1aa5d9e5200c
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 当前任务总数: 3/10
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 任务同步完成: 新增3个, 更新0个, 删除0个
+2025-09-04 15:55:34 - agent - INFO - [MainThread] - 任务同步完成: 新增3个, 更新0个, 删除0个
+2025-09-04 15:56:04 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:56:04 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:56:04 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:56:04 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:56:04 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 日志系统初始化完成 - 模式: INFO, 路径: logs, 滚动: True
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - Agent初始化开始
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - Agent信息: {'agent_id': 'book', 'agent_area': 'guangzhou', 'ip_address': '192.168.31.17', 'hostname': 'peterdeMBP'}
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 插件加载成功: tcp
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 插件加载成功: api
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 插件加载成功: http
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 插件加载成功: ping
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 插件加载完成，共加载 4 个插件
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 任务调度器初始化完成，最大线程数: 10
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - Agent初始化完成 - 最大线程数: 10
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - Agent注册成功
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 心跳线程已启动
+2025-09-04 15:56:40 - agent - INFO - [TaskScheduler] - 任务调度器开始运行
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 任务调度器已启动
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 拨测Agent启动完成 - 混合模式
+2025-09-04 15:56:40 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 新增任务 task_id=1, interval=600s, tenant=b6e46dcb-7978-472f-868f-6bffc77a7887
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 当前任务总数: 1/10
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 新增任务 task_id=2, interval=600s, tenant=299f5926-8527-4805-8caf-1aa5d9e5200c
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 当前任务总数: 2/10
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 新增任务 task_id=3, interval=600s, tenant=299f5926-8527-4805-8caf-1aa5d9e5200c
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 当前任务总数: 3/10
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 任务同步完成: 新增3个, 更新0个, 删除0个
+2025-09-04 15:56:40 - agent - INFO - [MainThread] - 任务同步完成: 新增3个, 更新0个, 删除0个
+2025-09-04 15:57:10 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 15:57:10 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:57:10 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:57:10 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:57:10 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:57:10 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:57:40 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 15:57:40 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:57:40 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:57:40 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:57:40 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:57:40 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:58:10 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 15:58:10 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:58:10 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:58:10 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:58:10 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:58:10 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:58:40 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 15:58:40 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:58:40 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:58:40 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:58:40 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:58:40 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:59:10 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 15:59:10 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:59:10 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:59:10 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:59:10 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:59:10 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:59:40 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 15:59:40 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 15:59:40 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 15:59:40 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 15:59:40 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 15:59:40 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:00:09 - agent - INFO - [MainThread] - 收到退出信号，正在停止Agent
+2025-09-04 16:00:09 - agent - INFO - [MainThread] - 正在停止Agent...
+2025-09-04 16:00:09 - agent - INFO - [MainThread] - 正在停止任务调度器...
+2025-09-04 16:00:10 - agent - INFO - [TaskScheduler] - 任务调度器已停止
+2025-09-04 16:00:10 - agent - INFO - [MainThread] - 任务调度器已停止
+2025-09-04 16:00:10 - agent - INFO - [MainThread] - 心跳线程已停止
+2025-09-04 16:00:10 - agent - INFO - [MainThread] - Agent已停止
+2025-09-04 16:00:53 - agent - INFO - [MainThread] - 日志系统初始化完成 - 模式: INFO, 路径: logs, 滚动: True
+2025-09-04 16:00:53 - agent - INFO - [MainThread] - Agent初始化开始
+2025-09-04 16:00:53 - agent - INFO - [MainThread] - Agent信息: {'agent_id': 'book', 'agent_area': 'guangzhou', 'ip_address': '192.168.31.17', 'hostname': 'peterdeMBP'}
+2025-09-04 16:00:53 - agent - INFO - [MainThread] - 插件加载成功: tcp
+2025-09-04 16:00:53 - agent - INFO - [MainThread] - 插件加载成功: api
+2025-09-04 16:00:53 - agent - INFO - [MainThread] - 插件加载成功: http
+2025-09-04 16:00:53 - agent - INFO - [MainThread] - 插件加载成功: ping
+2025-09-04 16:00:53 - agent - INFO - [MainThread] - 插件加载完成，共加载 4 个插件
+2025-09-04 16:00:53 - agent - INFO - [MainThread] - 任务调度器初始化完成，最大线程数: 10
+2025-09-04 16:00:53 - agent - INFO - [MainThread] - Agent初始化完成 - 最大线程数: 10
+2025-09-04 16:00:54 - agent - INFO - [MainThread] - Agent注册成功
+2025-09-04 16:00:54 - agent - INFO - [MainThread] - 心跳线程已启动
+2025-09-04 16:00:54 - agent - INFO - [TaskScheduler] - 任务调度器开始运行
+2025-09-04 16:00:54 - agent - INFO - [MainThread] - 任务调度器已启动
+2025-09-04 16:00:54 - agent - INFO - [MainThread] - 拨测Agent启动完成 - 混合模式
+2025-09-04 16:00:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:00:54 - agent - INFO - [MainThread] - 新增任务 task_id=1, interval=600s, tenant=b6e46dcb-7978-472f-868f-6bffc77a7887
+2025-09-04 16:00:54 - agent - INFO - [MainThread] - 当前任务总数: 1/10
+2025-09-04 16:00:54 - agent - INFO - [MainThread] - 新增任务 task_id=2, interval=600s, tenant=299f5926-8527-4805-8caf-1aa5d9e5200c
+2025-09-04 16:00:54 - agent - INFO - [MainThread] - 当前任务总数: 2/10
+2025-09-04 16:00:54 - agent - INFO - [MainThread] - 新增任务 task_id=3, interval=600s, tenant=299f5926-8527-4805-8caf-1aa5d9e5200c
+2025-09-04 16:00:54 - agent - INFO - [MainThread] - 当前任务总数: 3/10
+2025-09-04 16:00:54 - agent - INFO - [MainThread] - 任务同步完成: 新增3个, 更新0个, 删除0个
+2025-09-04 16:00:54 - agent - INFO - [MainThread] - 任务同步完成: 新增3个, 更新0个, 删除0个
+2025-09-04 16:01:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:01:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:01:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 16:01:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 16:01:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:01:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:01:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:01:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:01:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 16:01:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 16:01:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:01:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:02:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:02:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:02:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 16:02:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 16:02:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:02:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:02:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:02:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:02:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 16:02:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 16:02:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:02:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:03:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:03:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:03:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 16:03:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 16:03:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:03:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:03:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:03:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:03:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 16:03:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 16:03:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:03:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:04:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:04:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:04:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=600s
+2025-09-04 16:04:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=600s
+2025-09-04 16:04:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:04:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:04:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:04:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:04:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:04:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:04:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:04:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:05:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:05:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:05:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:05:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:05:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:05:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:05:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:05:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:05:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:05:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:05:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:05:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:06:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:06:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:06:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:06:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:06:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:06:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:06:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:06:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:06:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:06:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:06:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:06:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:07:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:07:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:07:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:07:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:07:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:07:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:07:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:07:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:07:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:07:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:07:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:07:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:08:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:08:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:08:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:08:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:08:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:08:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:08:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:08:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:08:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:08:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:08:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:08:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:09:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:09:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:09:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:09:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:09:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:09:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:09:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:09:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:09:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:09:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:09:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:09:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:10:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:10:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:10:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:10:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:10:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:10:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:10:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:10:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:10:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:10:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:10:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:10:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:11:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:11:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:11:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:11:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:11:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:11:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:11:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:11:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:11:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:11:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:11:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:11:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:12:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:12:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:12:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:12:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:12:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:12:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:12:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:12:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:12:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:12:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:12:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:12:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:13:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:13:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:13:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:13:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:13:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:13:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:13:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:13:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:13:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:13:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:13:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:13:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:14:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:14:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:14:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:14:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:14:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:14:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:14:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:14:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:14:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:14:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:14:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:14:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:15:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:15:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:15:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:15:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:15:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:15:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:15:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:15:54 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:15:54 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:15:54 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:15:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:15:54 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:16:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:16:24 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:16:24 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:16:24 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:16:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:16:24 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:16:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:16:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:16:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:16:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:16:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:16:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:17:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:17:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:17:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:17:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:17:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:17:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:17:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:17:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:17:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:17:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:17:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:17:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:18:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:18:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:18:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:18:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:18:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:18:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:18:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:18:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:18:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:18:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:18:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:18:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:19:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:19:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:19:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:19:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:19:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:19:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:19:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:19:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:19:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:19:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:19:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:19:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:20:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:20:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:20:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:20:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:20:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:20:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:20:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:20:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:20:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:20:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:20:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:20:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:21:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:21:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:21:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:21:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:21:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:21:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:21:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:21:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:21:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:21:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:21:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:21:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:22:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:22:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:22:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:22:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:22:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:22:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:22:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:22:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:22:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:22:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:22:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:22:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:23:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:23:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:23:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:23:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:23:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:23:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:23:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:23:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:23:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:23:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:23:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:23:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:24:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:24:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:24:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:24:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:24:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:24:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:24:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:24:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:24:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:24:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:24:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:24:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:25:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:25:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:25:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:25:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:25:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:25:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:25:54 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:25:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:25:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:25:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:25:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:25:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:26:24 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:26:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:26:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:26:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:26:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:26:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:26:55 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:26:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:26:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:26:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:26:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:26:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:27:25 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:27:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:27:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:27:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:27:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:27:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:27:55 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:27:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:27:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:27:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:27:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:27:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:28:25 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:28:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:28:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:28:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:28:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:28:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:28:55 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:28:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:28:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:28:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:28:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:28:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:29:25 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:29:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:29:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:29:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:29:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:29:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:29:55 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:29:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:29:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:29:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:29:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:29:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:30:25 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:30:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:30:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:30:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:30:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:30:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:30:55 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:30:55 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:30:55 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:30:55 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:30:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:30:55 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:31:25 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:31:25 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:31:25 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:31:25 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:31:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:31:25 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:31:55 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:31:56 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:31:56 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:31:56 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:31:56 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:31:56 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:32:25 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:32:26 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:32:26 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:32:26 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:32:26 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:32:26 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:32:55 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:32:56 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:32:56 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:32:56 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:32:56 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:32:56 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:33:25 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:33:27 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:33:27 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:33:27 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:33:27 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:33:27 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:33:55 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:33:57 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:33:57 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:33:57 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:33:57 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:33:57 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:34:25 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:34:27 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:34:27 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:34:27 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:34:27 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:34:27 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:34:55 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:34:57 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:34:57 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:34:57 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:34:57 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:34:57 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:35:25 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:35:27 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:35:27 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:35:27 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:35:27 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:35:27 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:35:55 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:35:57 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:35:57 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:35:57 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:35:57 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:35:57 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:36:25 - agent - INFO - [HeartbeatWorker] - 心跳信息发送成功
+2025-09-04 16:36:27 - agent - INFO - [MainThread] - 修改任务 task_id=1, 新间隔=600s
+2025-09-04 16:36:27 - agent - INFO - [MainThread] - 修改任务 task_id=2, 新间隔=60s
+2025-09-04 16:36:27 - agent - INFO - [MainThread] - 修改任务 task_id=3, 新间隔=60s
+2025-09-04 16:36:27 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:36:27 - agent - INFO - [MainThread] - 任务同步完成: 新增0个, 更新3个, 删除0个
+2025-09-04 16:36:34 - agent - INFO - [MainThread] - 收到退出信号，正在停止Agent
+2025-09-04 16:36:34 - agent - INFO - [MainThread] - 正在停止Agent...
+2025-09-04 16:36:34 - agent - INFO - [MainThread] - 正在停止任务调度器...

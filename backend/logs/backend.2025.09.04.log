@@ -1,0 +1,145 @@
+2025-09-04 16:34:51 - tzlocal - DEBUG - unix.py:120 - /etc/localtime found
+2025-09-04 16:34:51 - tzlocal - DEBUG - unix.py:136 - 1 found:
+ {'/etc/localtime is a symlink to': 'Asia/Shanghai'}
+2025-09-04 16:34:51 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-09-04 16:34:51 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-09-04 16:34:51 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-09-04 16:34:51 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-09-04 16:34:51 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-09-04 16:34:51 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-09-04 16:34:51 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-09-04 16:34:51 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-09-04 16:34:51 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-09-04 16:34:51 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-09-04 16:34:51 - app.scheduler - INFO - scheduler.py:101 - 定时任务调度器已启动
+2025-09-04 16:34:51 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-09-04 16:39:51.331632+08:00 (in 299.997595 seconds)
+2025-09-04 16:34:51 - werkzeug - WARNING - _internal.py:187 -  * Debugger is active!
+2025-09-04 16:34:51 - werkzeug - INFO - _internal.py:187 -  * Debugger PIN: 620-872-712
+2025-09-04 16:34:55 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [04/Sep/2025 16:34:55] "POST /api/v1/nodes/heartbeat HTTP/1.1" 200 -
+2025-09-04 16:34:57 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [04/Sep/2025 16:34:57] "GET /api/v1/tasks/agent?enabled=true&agent_id=book HTTP/1.1" 200 -
+2025-09-04 16:35:03 - tzlocal - DEBUG - unix.py:120 - /etc/localtime found
+2025-09-04 16:35:03 - tzlocal - DEBUG - unix.py:136 - 1 found:
+ {'/etc/localtime is a symlink to': 'Asia/Shanghai'}
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-09-04 16:35:03 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-09-04 16:35:03 - app.scheduler - INFO - scheduler.py:101 - 定时任务调度器已启动
+2025-09-04 16:35:03 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-09-04 16:40:03.269705+08:00 (in 299.997515 seconds)
+2025-09-04 16:35:03 - werkzeug - INFO - _internal.py:187 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.31.17:5001
+2025-09-04 16:35:03 - werkzeug - INFO - _internal.py:187 - [33mPress CTRL+C to quit[0m
+2025-09-04 16:35:03 - werkzeug - INFO - _internal.py:187 -  * Restarting with stat
+2025-09-04 16:35:03 - tzlocal - DEBUG - unix.py:120 - /etc/localtime found
+2025-09-04 16:35:03 - tzlocal - DEBUG - unix.py:136 - 1 found:
+ {'/etc/localtime is a symlink to': 'Asia/Shanghai'}
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:454 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:895 - Added job "start_scheduler.<locals>.<lambda>" to job store "default"
+2025-09-04 16:35:03 - apscheduler.scheduler - INFO - base.py:181 - Scheduler started
+2025-09-04 16:35:03 - apscheduler.scheduler - DEBUG - base.py:954 - Looking for jobs to run
+2025-09-04 16:35:03 - apscheduler.scheduler - DEBUG - base.py:1034 - Next wakeup is due at 2025-09-04 16:40:03.762004+08:00 (in 299.997185 seconds)
+2025-09-04 16:35:03 - app.scheduler - INFO - scheduler.py:101 - 定时任务调度器已启动
+2025-09-04 16:35:03 - werkzeug - WARNING - _internal.py:187 -  * Debugger is active!
+2025-09-04 16:35:03 - werkzeug - INFO - _internal.py:187 -  * Debugger PIN: 620-872-712
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:39 - 开始处理任务告警匹配 - 任务ID: 2, 任务名称: http
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:40 - Agent上报数据: {'task_id': '2', 'status': 'success', 'response_time': None, 'message': 'HTTP请求成功，状态码: 200', 'details': {'status': 'success', 'response_time': 409.5900058746338, 'message': 'HTTP请求成功，状态码: 200', 'webstatus': '正常', 'details': {'dns_time': 9.084939956665039, 'tcp_time': 14.27912712097168, 'ssl_time': 0, 'first_byte_time': 290.36688804626465, 'download_time': 95.6118106842041, 'http_time': 386.22212409973145, 'status_code': 200, 'response_headers': {'Connection': 'close', 'Transfer-Encoding': 'chunked', 'Bdpagetype': '1', 'Bdqid': '0x9c216c47005cd4c1', 'Content-Encoding': 'gzip', 'Content-Type': 'text/html; charset=utf-8', 'Date': 'Thu, 04 Sep 2025 08:35:16 GMT', 'P3p': 'CP=" OTI DSP COR IVA OUR IND COM ", CP=" OTI DSP COR IVA OUR IND COM "', 'Server': 'BWS/1.1', 'Set-Cookie': 'BAIDUID=EBB16DA6ED0BFF087F413DBAAC38FDD3:FG=1; expires=Thu, 31-Dec-37 23:55:55 GMT; max-age=2147483647; path=/; domain=.baidu.com, BIDUPSID=EBB16DA6ED0BFF087F413DBAAC38FDD3; expires=Thu, 31-Dec-37 23:55:55 GMT; max-age=2147483647; path=/; domain=.baidu.com, PSTM=1756974916; expires=Thu, 31-Dec-37 23:55:55 GMT; max-age=2147483647; path=/; domain=.baidu.com, BAIDUID=EBB16DA6ED0BFF08EE8C65F43DEC12E0:FG=1; max-age=31536000; expires=Fri, 04-Sep-26 08:35:16 GMT; domain=.baidu.com; path=/; version=1; comment=bd, BDSVRTM=3; path=/, BD_HOME=1; path=/', 'Tr_id': 'super_0x9c216c47005cd4c1', 'Traceid': '1756974916378635674611250392396352771265', 'X-Ua-Compatible': 'IE=Edge,chrome=1', 'X-Xss-Protection': '1;mode=block'}, 'content_length': 626126, 'dns_ips': ['183.240.99.169', '183.240.99.58'], 'final_url': 'http://www.baidu.com/'}}, 'created_at': '2025-09-04T16:35:16.238701', 'agent_id': 'book', 'agent_area': 'guangzhou', 'tenant_id': '299f5926-8527-4805-8caf-1aa5d9e5200c'}
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:44 - 任务配置: {}
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:52 - 找到 0 个启用的告警配置
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:75 - 任务类型: http
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:76 - details结构: <class 'dict'>
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:77 - details中是否包含steps: False
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:98 - 全局告警检查结果: 0 个告警
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:377 - 开始检查任务配置告警 - 任务ID: 2
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:381 - 任务配置内容: {}
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:384 - 任务配置为空，跳过任务配置告警检查
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:106 - 任务配置告警检查结果: 0 个告警
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:442 - 开始检查HTTP任务告警配置 - 任务ID: 2
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:446 - HTTP告警配置内容: {'enabled': False, 'enhanced': {'enabled': False, 'min_occurrences': 1, 'min_points': 1, 'trigger_mode': 'OR'}, 'rules': {'dns_ip': {'enabled': False, 'expected_ips': [], 'level': 'warning'}, 'execution_time': {'condition': 'gt', 'enabled': False, 'level': 'warning', 'value': 5000}, 'packet_loss': {'condition': 'gt', 'enabled': False, 'level': 'warning', 'value': 10}, 'response_code': {'condition': 'eq', 'enabled': False, 'level': 'warning', 'value': 404}, 'response_time': {'condition': 'gt', 'enabled': False, 'level': 'warning', 'value': 1000}, 'status': {'condition': '异常', 'enabled': False, 'level': 'warning'}}}
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:449 - HTTP告警配置未启用或为空，跳过检查
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:115 - HTTP告警配置检查结果: 0 个告警
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:151 - 增强告警配置检查结果: 0 个告警
+2025-09-04 16:35:16 - app.services.alert_matcher - INFO - alert_matcher.py:154 - 总共生成 0 个告警
+2025-09-04 16:35:16 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [04/Sep/2025 16:35:16] "[35m[1mPOST /api/v1/results HTTP/1.1[0m" 201 -
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:39 - 开始处理任务告警匹配 - 任务ID: 3, 任务名称: 百度
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:40 - Agent上报数据: {'task_id': '3', 'status': 'success', 'response_time': 3.036167860031128, 'message': '', 'details': {'status': 'success', 'packet_sent': 4, 'packet_received': 4, 'packet_loss': 0.0, 'rtt_min': 17.171, 'rtt_avg': 18.384, 'rtt_max': 19.617, 'execution_time': 3.036167860031128, 'target': 'www.baidu.com'}, 'created_at': '2025-09-04T16:35:18.865519', 'agent_id': 'book', 'agent_area': 'guangzhou', 'tenant_id': '299f5926-8527-4805-8caf-1aa5d9e5200c'}
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:44 - 任务配置: {'count': 4}
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:52 - 找到 0 个启用的告警配置
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:75 - 任务类型: ping
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:76 - details结构: <class 'dict'>
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:77 - details中是否包含steps: False
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:98 - 全局告警检查结果: 0 个告警
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:377 - 开始检查任务配置告警 - 任务ID: 3
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:381 - 任务配置内容: {'count': 4}
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:389 - 状态告警配置: []
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:402 - 未配置任务状态告警
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:406 - 超时告警启用状态: False
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:419 - 未启用任务超时告警
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:106 - 任务配置告警检查结果: 0 个告警
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:755 - 开始检查Ping任务告警配置 - 任务ID: 3
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:759 - Ping告警配置内容: {'enabled': False, 'enhanced': {'enabled': False, 'min_occurrences': 1, 'min_points': 1, 'trigger_mode': 'OR'}, 'rules': {'execution_time': {'condition': 'gt', 'enabled': False, 'level': 'warning', 'value': 5000}, 'packet_loss': {'condition': 'gt', 'enabled': False, 'level': 'warning', 'value': 10}, 'status': {'condition': '异常', 'enabled': False, 'level': 'warning'}}}
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:762 - Ping告警配置未启用或为空，跳过检查
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:124 - Ping告警配置检查结果: 0 个告警
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:151 - 增强告警配置检查结果: 0 个告警
+2025-09-04 16:35:18 - app.services.alert_matcher - INFO - alert_matcher.py:154 - 总共生成 0 个告警
+2025-09-04 16:35:18 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [04/Sep/2025 16:35:18] "[35m[1mPOST /api/v1/results HTTP/1.1[0m" 201 -
+2025-09-04 16:35:25 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [04/Sep/2025 16:35:25] "POST /api/v1/nodes/heartbeat HTTP/1.1" 200 -
+2025-09-04 16:35:27 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [04/Sep/2025 16:35:27] "GET /api/v1/tasks/agent?enabled=true&agent_id=book HTTP/1.1" 200 -
+2025-09-04 16:35:55 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [04/Sep/2025 16:35:55] "POST /api/v1/nodes/heartbeat HTTP/1.1" 200 -
+2025-09-04 16:35:57 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [04/Sep/2025 16:35:57] "GET /api/v1/tasks/agent?enabled=true&agent_id=book HTTP/1.1" 200 -
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:39 - 开始处理任务告警匹配 - 任务ID: 2, 任务名称: http
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:40 - Agent上报数据: {'task_id': '2', 'status': 'success', 'response_time': None, 'message': 'HTTP请求成功，状态码: 200', 'details': {'status': 'success', 'response_time': 613.0819320678711, 'message': 'HTTP请求成功，状态码: 200', 'webstatus': '正常', 'details': {'dns_time': 11.651754379272461, 'tcp_time': 13.478994369506836, 'ssl_time': 0, 'first_byte_time': 473.73485565185547, 'download_time': 113.68489265441895, 'http_time': 587.9428386688232, 'status_code': 200, 'response_headers': {'Connection': 'close', 'Transfer-Encoding': 'chunked', 'Bdpagetype': '1', 'Bdqid': '0xed842f4d005f145b', 'Content-Encoding': 'gzip', 'Content-Type': 'text/html; charset=utf-8', 'Date': 'Thu, 04 Sep 2025 08:36:21 GMT', 'P3p': 'CP=" OTI DSP COR IVA OUR IND COM ", CP=" OTI DSP COR IVA OUR IND COM "', 'Server': 'BWS/1.1', 'Set-Cookie': 'BAIDUID=682B12433C43C11930BD4FA0A1FDF640:FG=1; expires=Thu, 31-Dec-37 23:55:55 GMT; max-age=2147483647; path=/; domain=.baidu.com, BIDUPSID=682B12433C43C11930BD4FA0A1FDF640; expires=Thu, 31-Dec-37 23:55:55 GMT; max-age=2147483647; path=/; domain=.baidu.com, PSTM=1756974981; expires=Thu, 31-Dec-37 23:55:55 GMT; max-age=2147483647; path=/; domain=.baidu.com, BAIDUID=682B12433C43C1190FDC865D3A7076C5:FG=1; max-age=31536000; expires=Fri, 04-Sep-26 08:36:21 GMT; domain=.baidu.com; path=/; version=1; comment=bd, BDSVRTM=2; path=/, BD_HOME=1; path=/', 'Tr_id': 'super_0xed842f4d005f145b', 'Traceid': '1756974981027998413817114856491679945819', 'X-Ua-Compatible': 'IE=Edge,chrome=1', 'X-Xss-Protection': '1;mode=block'}, 'content_length': 626060, 'dns_ips': ['183.240.99.58', '183.240.99.169'], 'final_url': 'http://www.baidu.com/'}}, 'created_at': '2025-09-04T16:36:21.514954', 'agent_id': 'book', 'agent_area': 'guangzhou', 'tenant_id': '299f5926-8527-4805-8caf-1aa5d9e5200c'}
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:44 - 任务配置: {}
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:52 - 找到 0 个启用的告警配置
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:75 - 任务类型: http
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:76 - details结构: <class 'dict'>
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:77 - details中是否包含steps: False
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:98 - 全局告警检查结果: 0 个告警
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:377 - 开始检查任务配置告警 - 任务ID: 2
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:381 - 任务配置内容: {}
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:384 - 任务配置为空，跳过任务配置告警检查
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:106 - 任务配置告警检查结果: 0 个告警
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:442 - 开始检查HTTP任务告警配置 - 任务ID: 2
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:446 - HTTP告警配置内容: {'enabled': False, 'enhanced': {'enabled': False, 'min_occurrences': 1, 'min_points': 1, 'trigger_mode': 'OR'}, 'rules': {'dns_ip': {'enabled': False, 'expected_ips': [], 'level': 'warning'}, 'execution_time': {'condition': 'gt', 'enabled': False, 'level': 'warning', 'value': 5000}, 'packet_loss': {'condition': 'gt', 'enabled': False, 'level': 'warning', 'value': 10}, 'response_code': {'condition': 'eq', 'enabled': False, 'level': 'warning', 'value': 404}, 'response_time': {'condition': 'gt', 'enabled': False, 'level': 'warning', 'value': 1000}, 'status': {'condition': '异常', 'enabled': False, 'level': 'warning'}}}
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:449 - HTTP告警配置未启用或为空，跳过检查
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:115 - HTTP告警配置检查结果: 0 个告警
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:151 - 增强告警配置检查结果: 0 个告警
+2025-09-04 16:36:21 - app.services.alert_matcher - INFO - alert_matcher.py:154 - 总共生成 0 个告警
+2025-09-04 16:36:21 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [04/Sep/2025 16:36:21] "[35m[1mPOST /api/v1/results HTTP/1.1[0m" 201 -
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:39 - 开始处理任务告警匹配 - 任务ID: 3, 任务名称: 百度
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:40 - Agent上报数据: {'task_id': '3', 'status': 'success', 'response_time': 3.047593832015991, 'message': '', 'details': {'status': 'success', 'packet_sent': 4, 'packet_received': 4, 'packet_loss': 0.0, 'rtt_min': 17.028, 'rtt_avg': 17.565, 'rtt_max': 19.052, 'execution_time': 3.047593832015991, 'target': 'www.baidu.com'}, 'created_at': '2025-09-04T16:36:23.949582', 'agent_id': 'book', 'agent_area': 'guangzhou', 'tenant_id': '299f5926-8527-4805-8caf-1aa5d9e5200c'}
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:44 - 任务配置: {'count': 4}
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:52 - 找到 0 个启用的告警配置
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:75 - 任务类型: ping
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:76 - details结构: <class 'dict'>
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:77 - details中是否包含steps: False
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:98 - 全局告警检查结果: 0 个告警
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:377 - 开始检查任务配置告警 - 任务ID: 3
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:381 - 任务配置内容: {'count': 4}
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:389 - 状态告警配置: []
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:402 - 未配置任务状态告警
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:406 - 超时告警启用状态: False
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:419 - 未启用任务超时告警
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:106 - 任务配置告警检查结果: 0 个告警
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:755 - 开始检查Ping任务告警配置 - 任务ID: 3
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:759 - Ping告警配置内容: {'enabled': False, 'enhanced': {'enabled': False, 'min_occurrences': 1, 'min_points': 1, 'trigger_mode': 'OR'}, 'rules': {'execution_time': {'condition': 'gt', 'enabled': False, 'level': 'warning', 'value': 5000}, 'packet_loss': {'condition': 'gt', 'enabled': False, 'level': 'warning', 'value': 10}, 'status': {'condition': '异常', 'enabled': False, 'level': 'warning'}}}
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:762 - Ping告警配置未启用或为空，跳过检查
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:124 - Ping告警配置检查结果: 0 个告警
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:151 - 增强告警配置检查结果: 0 个告警
+2025-09-04 16:36:23 - app.services.alert_matcher - INFO - alert_matcher.py:154 - 总共生成 0 个告警
+2025-09-04 16:36:23 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [04/Sep/2025 16:36:23] "[35m[1mPOST /api/v1/results HTTP/1.1[0m" 201 -
+2025-09-04 16:36:25 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [04/Sep/2025 16:36:25] "POST /api/v1/nodes/heartbeat HTTP/1.1" 200 -
+2025-09-04 16:36:27 - werkzeug - INFO - _internal.py:187 - 127.0.0.1 - - [04/Sep/2025 16:36:27] "GET /api/v1/tasks/agent?enabled=true&agent_id=book HTTP/1.1" 200 -

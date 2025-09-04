@@ -1,0 +1,30 @@
+2025-09-04 15:34:09 - agent - INFO - [MainThread] - 日志系统初始化完成 - 模式: INFO, 路径: test_logs, 滚动: True
+2025-09-04 15:34:09 - agent - INFO - [MainThread] - 测试信息日志
+2025-09-04 15:34:09 - agent - WARNING - [MainThread] - 测试警告日志
+2025-09-04 15:34:09 - agent - ERROR - [MainThread] - 测试错误日志
+2025-09-04 15:34:25 - agent - INFO - [MainThread] - 日志系统初始化完成 - 模式: INFO, 路径: test_logs, 滚动: True
+2025-09-04 15:34:25 - agent - INFO - [MainThread] - 测试信息日志
+2025-09-04 15:34:25 - agent - WARNING - [MainThread] - 测试警告日志
+2025-09-04 15:34:25 - agent - ERROR - [MainThread] - 测试错误日志
+2025-09-04 15:34:25 - agent - INFO - [MainThread] - 任务调度器初始化完成，最大线程数: 3
+2025-09-04 15:34:25 - agent - INFO - [TaskScheduler] - 任务调度器开始运行
+2025-09-04 15:34:25 - agent - INFO - [MainThread] - 任务调度器已启动
+2025-09-04 15:34:25 - agent - INFO - [MainThread] - 新增任务 task_id=test_ping_1, interval=30s, tenant=
+2025-09-04 15:34:25 - agent - INFO - [MainThread] - 新增任务 task_id=test_http_1, interval=60s, tenant=
+2025-09-04 15:34:25 - agent - INFO - [MainThread] - 新增任务 task_id=test_tcp_1, interval=45s, tenant=
+2025-09-04 15:34:25 - agent - INFO - [MainThread] - 任务同步完成: 新增3个, 更新0个, 删除0个
+2025-09-04 15:34:25 - agent - INFO - [MainThread] - 任务同步结果: {'added': 3, 'updated': 0, 'removed': 0}
+2025-09-04 15:34:31 - agent - INFO - [TaskWorker_0] - 上报结果: 任务test_ping_1 - success - 模拟ping任务执行成功
+2025-09-04 15:34:31 - agent - INFO - [TaskWorker_2] - 上报结果: 任务test_tcp_1 - success - 模拟tcp任务执行成功
+2025-09-04 15:34:31 - agent - INFO - [TaskWorker_1] - 上报结果: 任务test_http_1 - success - 模拟http任务执行成功
+2025-09-04 15:34:33 - agent - INFO - [MainThread] - 修改任务 task_id=test_ping_1, 新间隔=20s
+2025-09-04 15:34:33 - agent - INFO - [MainThread] - 修改任务 task_id=test_http_1, 新间隔=60s
+2025-09-04 15:34:33 - agent - INFO - [MainThread] - 修改任务 task_id=test_tcp_1, 新间隔=45s
+2025-09-04 15:34:33 - agent - INFO - [MainThread] - 新增任务 task_id=test_ping_2, interval=25s, tenant=
+2025-09-04 15:34:33 - agent - INFO - [MainThread] - 任务同步完成: 新增1个, 更新3个, 删除0个
+2025-09-04 15:34:33 - agent - INFO - [MainThread] - 任务更新结果: {'added': 1, 'updated': 3, 'removed': 0}
+2025-09-04 15:34:36 - agent - INFO - [TaskWorker_0] - 上报结果: 任务test_ping_2 - success - 模拟ping任务执行成功
+2025-09-04 15:34:38 - agent - INFO - [MainThread] - 正在停止任务调度器...
+2025-09-04 15:34:40 - agent - INFO - [TaskScheduler] - 任务调度器已停止
+2025-09-04 15:34:40 - agent - INFO - [MainThread] - 任务调度器已停止
+2025-09-04 15:34:40 - agent - INFO - [MainThread] - Agent功能测试全部通过
